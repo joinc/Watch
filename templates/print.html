@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static from staticfiles %}
+{% block html_title %}Печать карточки учета работодателя{% endblock %}
+{% block html_body_menu %}{% endblock %}
+{% block html_body %}
+    <body onload="printit()">
+    <script Language="Javascript">
+        function printit(){
+            if (window.print) {
+                window.print();
+                window.close();
+            } else {
+                var WebBrowser = '<OBJECT ID="WebBrowser1" WIDTH=0 HEIGHT=0 CLASSID="CLSID:8856F961-340A-11D0-A96B-00C04FD705A2"></OBJECT>';
+                document.body.insertAdjacentHTML('beforeEnd', WebBrowser);
+                WebBrowser1.ExecWB(6, 2);//Use a 1 vs. a 2 for a prompting dialog box WebBrowser1.outerHTML = "";
+            }
+        }
+    </script>
+    <div class="container-fluid">
+        <div class="alert alert-info" role="alert">
+            <h5>Сведения о работодателе, не предоставившем (предоставившем с нарушением срока) информации о наличии свободных рабочих мест и вакантных должностей в службу занятости населения Омской области</h5>
+        </div>
+
+        <div class="card bg-light">
+            <div class="card-header {% ifequal emp.Status 8 %}bg-danger{% endifequal %}{% ifequal emp.Status 9 %}bg-success{% endifequal %}">
+                <h4 class="card-title">{{ emp.Title }}</h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <dl class="row">
+                        <dt class="col-sm-4">Юридический адрес:</dt>
+                        <dd class="col-sm-8">{{ emp.JurAddress }}</dd>
+                        <dt class="col-sm-4">Фактический адрес:</dt>
+                        <dd class="col-sm-8">{{ emp.FactAddress }}</dd>
+                    </dl>
+                    <hr class="my-4">
+                    <dl class="row">
+                        <dt class="col-sm-4">ИНН:</dt>
+                        <dd class="col-sm-8">{{ emp.INN }}</dd>
+                        <dt class="col-sm-4">ОГРН:</dt>
+                        <dd class="col-sm-8">{{ emp.OGRN }}</dd>
+                    </dl>
+                    <hr class="my-4">
+                    {% if not emp.Archive %}
+                        <dl class="row">
+                            <dt class="col-sm-4" title='Указывается для работодателей, разместивших сведения о вакансиях в информационно-телекоммуникационой сети "Интернет", включая информационно-аналитическую систему Общероссийская база вакансий "Работа в России", а также на сйтах организаций, предоставляющих услуги по подбору работников, в средствах массовой информации Омской области, в том числе периодических печатных изданиях'>Дата размещения вакансии*:</dt>
+                            <dd class="col-sm-8">{% if emp.VacancyDate %}{{ emp.VacancyDate }} {% endif %}{% if emp.VacancyComment != '' %}{{ emp.VacancyComment }}{% endif %}</dd>
+                        </dl>
+                        <hr class="my-4">
+                        <dl class="row">
+                            <dt class="col-sm-4">Дата последнего взаимодействия работодателя и центра занятости:</dt>
+                            <dd class="col-sm-8">{% if emp.EventDate %}{{ emp.EventDate }} {% endif %}{% if emp.EventComment != '' %}{{ emp.EventComment }}{% endif %}</dd>
+                        </dl>
+                        <hr class="my-4">
+                        <dl class="row">
+                            <dt class="col-sm-4">Наименование непредставленной, представленной с нарушением сроков или не в полном объеме информации в центре занятости в соответствии с законодательством о занятости:</dt>
+                            <dd class="col-sm-8">
+                                <ul class="list-group list-group-flush">
+                                    {% for inf in infolist %}
+                                        <li class="list-group-item bg-light">
+                                            {{ inf.get_Name_display }} {% ifnotequal inf.Comment '' %}({{ inf.Comment }}){% endifnotequal %}{% if inf.Attache %} <a href="{{ inf.Attache.url }}">Скачать приложение</a> {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </dd>
+                        </dl>
+                        <hr class="my-4">
+                        <dl class="row">
+                            <dt class="col-sm-4">Дата информирования работодателя центром занятости о необходимости предоставления информации о наличии свободных рабочих мест и вакантных должностей:</dt>
+                            <dd class="col-sm-8">
+                                <ul class="list-group list-group-flush">
+                                    {% for notify in notifylist %}
+                                        <li class="list-group-item bg-light">
+                                            {{ notify.NotifyDate }} {{ notify.get_Method_display }} {% ifnotequal notify.Comment '' %}(Комментарий: {{ notify.Comment }}){% endifnotequal %}{% if notify.Attache %} <a href="{{ notify.Attache.url }}">Скачать приложение</a> {% endif %} - {{ notify.CreateDate }}, {% firstof notify.Owner.user.get_full_name notify.Owner.user %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </dd>
+                        </dl>
+                        <hr class="my-4">
+                        <dl class="row">
+                            <dt class="col-sm-4">Дата направления информации в отдел трудоустройства и специальных программ Главного управления государственной службы занятости населения Омской области:</dt>
+                            <dd class="col-sm-8">{% if emp.SendDate %}{{ emp.SendDate }}{% endif %}</dd>
+                        </dl>
+                        <hr class="my-4">
+                    {% endif %}
+                    <dl class="row">
+                        <dt class="col-sm-4">Контакт:</dt>
+                        <dd class="col-sm-8">{{ emp.Contact }}</dd>
+                    </dl>
+                    <hr class="my-4">
+                    <dl class="row">
+                        <dt class="col-sm-4">Зарегистрирован в ПК Катарсис:</dt>
+                        <dd class="col-sm-8">{% if emp.RegKatharsis == True %}ДА{% else %}НЕТ{% endif %}</dd>
+                    </dl>
+                </p>
+            </div>
+        </div>
+        <br />
+        {% for event in eventlist %}
+            <div class="alert alert-dark small" role="alert">
+                {{ event.Comment }} {% if event.Attache %}- <a href="{{ event.Attache.url }}">Скачать</a> {% endif %}({{ event.CreateDate }}, {% firstof event.Owner.user.get_full_name event.Owner.user %})
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

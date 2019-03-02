@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load i18n %}{% load static from staticfiles %}
+
+{% block html_title %}Профиль пользователя{% endblock %}
+{% block html_body %}
+    {% if request.user.is_authenticated %}
+        <div class="container">
+        </div>
+    {% else %}
+        <meta http-equiv="REFRESH" content="0;url={% url 'login' %}">
+    {% endif %}
+{% endblock %}

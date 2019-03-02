@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static from staticfiles %}
+
+
+{% block html_title %}Карточка учета работодателя{% endblock %}
+{% block html_body %}
+    <br />
+    <div class="container-fluid">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+            <li class="breadcrumb-item active">Создание карточки предприятия</li>
+        </ol>
+        <form method='post' action='{% url 'new' %}' enctype="multipart/form-data">
+            {% csrf_token %}
+            <table class="table table-borderless table-hover table-sm table-condensed">
+                <tbody>
+                    <tr >
+                        <th scope="row" class="w-25">{{ form.oTitle.label }}:</th>
+                        <td>{{ form.oTitle }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ form.oJurAddress.label }}:</th>
+                        <td>{{ form.oJurAddress }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ form.oFactAddress.label }}:</th>
+                        <td>{{ form.oFactAddress }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ form.oInn.label }}:</th>
+                        <td>{{ form.oInn }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ form.oOgrn.label }}:</th>
+                        <td>{{ form.oOgrn }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ form.oVacancyDate.label }}:</th>
+                        <td>{{ form.oVacancyDate }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ form.oEventDate.label }}:</th>
+                        <td>{{ form.oEventDate }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ form.oInfoDate.label }}:</th>
+                        <td>{{ form.oInfoDate }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ form.oSendDate.label }}:</th>
+                        <td>{{ form.oSendDate }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ form.oContact.label }}:</th>
+                        <td>{{ form.oContact }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br /><button type="submit" class="btn btn-primary">Создать карточку предприятия и отправить на проверку</button>
+        </form>
+    </div>
+{% endblock %}

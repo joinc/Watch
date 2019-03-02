@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static from staticfiles %}
+
+
+{% block html_title %}Карточка учета работодателя{% endblock %}
+{% block html_body %}
+    <br />
+    <div class="container-fluid">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'emp' emp.id %}">Карточка учета работодателя</a></li>
+            <li class="breadcrumb-item active">Редактирование карточки предприятия</li>
+        </ol>
+        <form method='post' action='{% url 'archsave' emp.id %}' enctype="multipart/form-data">
+            {% csrf_token %}
+            <table class="table table-borderless table-sm table-condensed table-striped">
+                <tbody>
+                    <tr>
+                        <th class="w-25">{{ form.oTitle.label }}:</th>
+                        <td>{{ form.oTitle }}</td>
+                    </tr>
+                    <tr>
+                         <th scope="row">{{ form.oJurAddress.label }}:</th>
+                        <td>{{ form.oJurAddress }}</td>
+                    </tr>
+                    <tr>
+                         <th scope="row">{{ form.oFactAddress.label }}:</th>
+                        <td>{{ form.oFactAddress }}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">{{ form.oInn.label }}:</th>
+                        <td>{{ form.oInn }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ form.oOgrn.label }}:</td>
+                        <td>{{ form.oOgrn }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ form.oContact.label }}:</td>
+                        <td>{{ form.oContact }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    {{ result_form }}
+                    &nbsp;
+                </div>
+                <div class="custom-file">
+                    {{ notice_form }}
+                </div>
+            </div>
+            <input type="hidden" name="comment" value="Сохранена архивная карточка предприятия">
+            <input type="hidden" name="status" value=9>
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <button type="submit" class="btn btn-success">Сохранить архивную карточку предприятия</button>
+                </div>
+                <div class="input-group-append">
+                    <a class="btn btn-danger mb-0" href="{% url 'delete' emp.id %}" role="button">Удалить черновик</a>
+                </div>
+            </div>
+        </form>
+        {% for i in pemp %}
+            {% ifnotequal i.id emp.id %}
+                <div class="alert {% ifequal i.Status 9 %}alert-success{% else %}alert-danger{% endifequal %} small" role="alert">Карточка предприятия с таким же ИНН существует. <a href="{% url 'emp' i.id %}" class="alert-link">{{ i.Title }}</a> {{ i.get_Status_display }}</div>
+            {% endifnotequal %}
+        {% endfor %}
+        {% for event in eventlist %}
+            <div class="alert alert-dark small" role="alert">
+                {{ event.Comment }} ({{ event.CreateDate }}, {% firstof event.Owner.user.get_full_name event.Owner.user %})
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

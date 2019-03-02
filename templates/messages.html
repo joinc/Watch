@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}{% load static from staticfiles %}
+
+{% block html_title %}Страница с данными{% endblock %}
+{% block html_body %}
+    <br />
+    <div class="container-fluid">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+            <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
+        </ol>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            Всего уведомлений - {{ mall }}, из них новых - {{ mnew }}.
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% for i in mlist %}
+        <div class="card border-info mb-3">
+            <div class="card-body">
+                <p class="card-text">{{ i.Text }} <a href=""></a></p>
+            </div>
+            <div class="card-footer text-muted">
+                <div class="btn-group mr-2" role="group">
+                    <a href="{% url 'emp' i.EmpMessageID.id %}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">Перейти</a>
+                </div>
+                <div class="btn-group" role="group">
+                    {% if not i.Reading %}<a href="{% url 'messageread' i.id %}" class="btn btn-primary btn-sm">Прочитано</a>{% endif %}
+                </div>
+                <div class="float-sm-right">{{ i.Sender.user.get_full_name }} {{ i.CreateDate }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}
