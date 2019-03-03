@@ -100,7 +100,7 @@
         <br />
         {% for event in eventlist %}
             <div class="alert alert-dark small" role="alert">
-                {{ event.Comment }} {% if event.Attache %}- <a href="{{ event.Attache.url }}">Скачать</a> {% endif %}({{ event.CreateDate }}, {% firstof event.Owner.user.get_full_name event.Owner.user %})
+                {{ event.Comment }} {% if event.Attache %}- <a href="{{ event.Attache.url }}">Скачать</a> {% endif %}- ({{ event.CreateDate }}, {% firstof event.Owner.user.get_full_name event.Owner.user %})
             </div>
         {% endfor %}
     </div>

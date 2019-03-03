@@ -21,7 +21,8 @@ class FormRole(forms.Form):
 
 
 class FormReturn(forms.Form):
-    result = forms.ChoiceField(
+
+    return_result = forms.ChoiceField(
         choices=RETURN_CHOICES,
         label='',
         initial=0,
@@ -29,10 +30,28 @@ class FormReturn(forms.Form):
         required=True
     )
 
+    return_comment = forms.CharField(
+        label='',
+        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Оставить комментарий', }),
+        required=False,
+    )
+
+######################################################################################################################
+
+
+class FormClose(forms.Form):
+
+    close_comment = forms.CharField(
+        label='',
+        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Укажите причину', }),
+        required=True,
+    )
+
 ######################################################################################################################
 
 
 class FormResult(forms.Form):
+
     resultat = forms.ChoiceField(
         choices=RESULT_CHOICES,
         label='',
@@ -247,7 +266,7 @@ class FormRespons(forms.Form):
     respons = forms.ChoiceField(
         choices=RESPONS_CHOICES,
         label='',
-        widget=forms.Select(attrs={'class': 'custom-select mb-0 mr-sm-2 mb-sm-0'}),
+        widget=forms.Select(attrs={'class': 'custom-select'}),
         required=True
     )
 

@@ -20,12 +20,12 @@ def event_create(empid, profile, comment, attache):
 ######################################################################################################################
 
 
-def e_date(empDate):
-    returnDate = None
-    if empDate != None:
-        returnDate = empDate.__format__('%Y-%m-%d')
+def e_date(emp_date):
+    return_date = None
+    if emp_date != None:
+        return_date = emp_date.__format__('%Y-%m-%d')
 
-    return returnDate
+    return return_date
 
 ######################################################################################################################
 

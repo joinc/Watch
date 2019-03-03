@@ -24,14 +24,12 @@
                     <td class="w-25">{{ i.Owner.user.get_full_name }}</td>
                     <td class="w-25">
                         <form class="form-inline mb-0" method="post" action="{% url 'responsset' %}">
-                            <div class="form-row align-items-center" >
-                                <div class="col-auto">
-                                    {% csrf_token %}
-                                    {{ respons_form.respons }}
-                                    <input type="hidden" name="emp" value="{{ i.id }}">
-                                </div>
-                                <div class="col-auto">
-                                    <button type="submit" class="btn btn-success">Назначить ответственным</button>
+                            {% csrf_token %}
+                            <input type="hidden" name="emp" value="{{ i.id }}">
+                            <div class="input-group">
+                                {{ respons_form.respons }}
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-success">Назначить</button>
                                 </div>
                             </div>
                         </form>

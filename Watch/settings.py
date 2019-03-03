@@ -133,3 +133,6 @@ DEFAULT_FROM_EMAIL = 'info@webmail.omskzan.ru'
 
 UPLOAD_FILE = 'upload/file_'
 SUCCESS_URL = '/'
+START_LIST = 0
+STOP_LIST = 50
+

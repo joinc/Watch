@@ -34,12 +34,16 @@ def index(request):
         oEmp = Employer.objects.all()
         oAllMe = 0
         oEdit = 0
+    oDraft = oEmp.filter(Status=0).count() + oEmp.filter(Status=1).count()
     oCheck = oEmp.filter(Status=2).count()
+    oClosed = oEmp.filter(Status=12).count()
     oWork = 0
-    for i in [1, 3, 4, 5, 6, 7]:
+    for i in [3, 4, 5, 6, 7, 11]:
         oWork = oWork + oEmp.filter(Status=i).count()
     oReady = oEmp.filter(Status=9).count()
-    return render(request, 'index.html', {'profile': profile, 'oAll': oAll, 'oCheck': oCheck, 'oWork': oWork, 'oReady': oReady, 'oEdit': oEdit, 'oAllMe': oAllMe, })
+    return render(request, 'index.html',
+                  {'profile': profile, 'oAll': oAll, 'oDraft': oDraft, 'oCheck': oCheck, 'oWork': oWork,
+                   'oReady': oReady, 'oEdit': oEdit, 'oClosed': oClosed, 'oAllMe': oAllMe, })
 
 ######################################################################################################################
 
@@ -49,7 +53,7 @@ def emp_list(request, profile, status, breadcrumb):
     oEmp = []
     search_form = FormSearch()
     for i in status:
-        if profile.role == 1:
+        if profile.role == 1 and not request.user.is_superuser:
             for emp in employer.employer_filter('', profile.user.id, i):
                 oEmp.append(emp)
             filter_czn_form = FormFilterCzn({'czn': profile.user.id})
@@ -62,9 +66,19 @@ def emp_list(request, profile, status, breadcrumb):
     else:
         filter_status_form = FormFilterStatus()
     acnt = oEmp.__len__()
-    oEmp = oEmp[0:20]
+    oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
     vcnt = oEmp.__len__()
     return render(request, 'list.html', {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form, 'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile, 'breadcrumb': breadcrumb})
+
+######################################################################################################################
+
+
+def emp_draft_list(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    profile = get_object_or_404(UserProfile, user=request.user)
+    return emp_list(request, profile, ['0', '1'], 'Черновики')
 
 ######################################################################################################################
 
@@ -79,6 +93,16 @@ def emp_check_list(request):
 ######################################################################################################################
 
 
+def emp_work_list(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    profile = get_object_or_404(UserProfile, user=request.user)
+    return emp_list(request, profile, ['3', '4', '5', '6', '7', '11'], 'Карточки в работе')
+
+######################################################################################################################
+
+
 def emp_ready_list(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
@@ -89,12 +113,12 @@ def emp_ready_list(request):
 ######################################################################################################################
 
 
-def emp_work_list(request):
+def emp_closed_list(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
-    return emp_list(request, profile, ['1', '3', '4', '5', '6', '7'], 'Карточки в работе')
+    return emp_list(request, profile, ['12'], 'Закрытые карточки')
 
 ######################################################################################################################
 
@@ -215,13 +239,13 @@ def TempEmpList(request):
         if search_form.is_valid():
             oFind = request.POST['find']
             scnt = TempEmployer.objects.filter(INN__istartswith=oFind).count()
-            aEmp = TempEmployer.objects.filter(INN__istartswith=oFind)[0:20]
+            aEmp = TempEmployer.objects.filter(INN__istartswith=oFind)[settings.START_LIST:settings.STOP_LIST]
         else:
             return HttpResponseRedirect(reverse('emps'))
     else:
         search_form = FormSearch
         scnt = TempEmployer.objects.all().count()
-        aEmp = TempEmployer.objects.all()[0:20]
+        aEmp = TempEmployer.objects.all()[settings.START_LIST:settings.STOP_LIST]
     vcnt = aEmp.count()
     pemp = []
     for emp in aEmp:
@@ -259,12 +283,12 @@ def Logout(request):
 ######################################################################################################################
 
 
-def EmployerArchEdit(request, Employer_id):
+def EmployerArchEdit(request, employer_id):
 
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
-    emp = get_object_or_404(Employer, id=Employer_id)
+    emp = get_object_or_404(Employer, id=employer_id)
     profile = get_object_or_404(UserProfile, user=request.user)
     if emp.Owner != profile or (emp.Status != 0 and emp.Status != 1):
         return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
@@ -290,7 +314,7 @@ def EmployerArchEdit(request, Employer_id):
 ######################################################################################################################
 
 
-def EmployerArchSave(request, Employer_id):
+def EmployerArchSave(request, employer_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
@@ -300,7 +324,7 @@ def EmployerArchSave(request, Employer_id):
         status = request.POST['status']
         myfile = None
 
-        emp = get_object_or_404(Employer, id=Employer_id)
+        emp = get_object_or_404(Employer, id=employer_id)
         emp.Title = request.POST['oTitle']
         emp.JurAddress = request.POST['oJurAddress']
         emp.FactAddress = request.POST['oFactAddress']
@@ -325,12 +349,12 @@ def EmployerArchSave(request, Employer_id):
 ######################################################################################################################
 
 
-def NotifyAdd(request, Employer_id):
+def NotifyAdd(request, employer_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
-    emp = get_object_or_404(Employer, id=Employer_id)
+    emp = get_object_or_404(Employer, id=employer_id)
     if request.POST:
         noti = Notify()
         noti.EmpNotifyID = emp
@@ -363,12 +387,12 @@ def NotifyDelete(request, Notify_id):
 ######################################################################################################################
 
 
-def EventAdd(request, Employer_id):
+def EventAdd(request, employer_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
-    emp = get_object_or_404(Employer, id=Employer_id)
+    emp = get_object_or_404(Employer, id=employer_id)
     if request.POST:
         comment = request.POST['comment']
         status = request.POST['status']
@@ -385,19 +409,19 @@ def EventAdd(request, Employer_id):
                 if protocol_form == '2':
                     comment = 'Работодатель (юридическое лицо) получил уведомление, не явился на составление протокола. Отделом правовой работы, государственной службы и кадров Главного управления (в отсутствие работодателя) составляется протокол об административном правонарушении.'
                 if protocol_form == '3':
-                    comment = 'Работодатель (юридическое лицо) не получил уведомление, не явился на составление протокола. Информация направляется в Центр занятости населения для уточненений сведений  о работодателе.'
+                    comment = 'Работодатель (юридическое лицо) не получил уведомление, не явился на составление протокола. Карточка закрыта.'
                     status = 12
             if employer_form == '2':
                 if protocol_form == '1':
                     comment = 'Работодатель (индивидуальный предприниматель) получил уведомление, явился на составление протокола. Отделом правовой работы, государственной службы и кадров Главного управления составляется протокол об административном правонарушении.'
                 if protocol_form == '2':
-                    comment = 'Работодатель (индивидуальный предприниматель) получил уведомление, не явился на составление протокола. Информация направляется в Центр занятости населения для уточненений сведений  о работодателе.'
+                    comment = 'Работодатель (индивидуальный предприниматель) получил уведомление, не явился на составление протокола. Карточка закрыта'
                     status = 12
                 if protocol_form == '3':
-                    comment = 'Работодатель (индивидуальный предприниматель) не получил уведомление, не явился на составление протокола. Информация направляется в Центр занятости населения для уточненений сведений  о работодателе.'
+                    comment = 'Работодатель (индивидуальный предприниматель) не получил уведомление, не явился на составление протокола. Карточка закрыта.'
                     status = 12
         if status == '10':
-            eventlist = Event.objects.filter(EmpEventID=Employer_id)
+            eventlist = Event.objects.filter(EmpEventID=employer_id)
             for event in eventlist:
                 if event.Comment == 'Работодатель (юридическое лицо) получил уведомление, явился на составление протокола. Отделом правовой работы, государственной службы и кадров Главного управления составляется протокол об административном правонарушении.':
                     status = 6
@@ -427,7 +451,7 @@ def ResponsList(request):
     profile = get_object_or_404(UserProfile, user=request.user)
     breadcrumb = 'Назначение ответственных лиц'
     respons_form = FormRespons
-    elist = Employer.objects.filter(Respons__isnull=True)[0:20]
+    elist = Employer.objects.filter(Respons__isnull=True)[settings.START_LIST:settings.STOP_LIST]
 
     return render(request, 'respons.html', {'elist': elist, 'profile': profile, 'breadcrumb': breadcrumb, 'respons_form': respons_form, })
 

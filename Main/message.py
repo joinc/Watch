@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from Main.models import UserProfile, Employer, Message
+from django.conf import settings
 
 ######################################################################################################################
 
@@ -47,7 +48,7 @@ def message_list(request):
 
     breadcrumb = 'Уведомления'
     profile = get_object_or_404(UserProfile, user=request.user)
-    mlist = Message.objects.filter(Recipient=profile)[0:20]
+    mlist = Message.objects.filter(Recipient=profile)[settings.START_LIST:settings.STOP_LIST]
     mall = Message.objects.filter(Recipient=profile).count()
     mnew = Message.objects.filter(Recipient=profile).exclude(Reading=True).count()
     return render(request, 'messages.html', {'mlist': mlist, 'profile': profile, 'mall': mall, 'mnew': mnew, 'breadcrumb': breadcrumb, })

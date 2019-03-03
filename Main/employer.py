@@ -6,8 +6,10 @@ from django.urls import reverse
 from Main.models import UserProfile, Employer, Event, Info, Notify
 from Main import tools, message
 from datetime import datetime
-from .forms import FormReturn, FormResult, FormSearch, FormEmp, FormNotice, FormProtocol, FormFilterCzn, FormFilterStatus
+from .forms import FormReturn, FormResult, FormSearch, FormEmp, FormNotice, FormProtocol, FormFilterCzn, \
+    FormFilterStatus, FormClose
 from .choices import RETURN_CHOICES
+from django.conf import settings
 
 
 ######################################################################################################################
@@ -28,37 +30,52 @@ def employer_new(request):
 ######################################################################################################################
 
 
-def employer_view(request, Employer_id):
+def employer_view(request, employer_id):
 
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
-    emp = get_object_or_404(Employer, id=Employer_id)
+    emp = get_object_or_404(Employer, id=employer_id)
     if emp.Owner == profile and (emp.Status == 0 or emp.Status == 1):
         return HttpResponseRedirect(reverse('edit', args=(emp.id,)))
 
     return_form = FormReturn()
     result_form = FormResult()
     notice_form = FormNotice()
+    close_form = FormClose()
     protocol_form = FormProtocol()
     eventlist = Event.objects.filter(EmpEventID=emp)
     infolist = Info.objects.filter(EmpInfoID=emp)
     notifylist = Notify.objects.filter(EmpNotifyID=emp)
     form = FormEmp()
 
-    return render(request, 'emp.html', {'emp': emp, 'form': form, 'profile': profile, 'return_form': return_form, 'result_form': result_form, 'eventlist': eventlist, 'infolist': infolist, 'notifylist': notifylist, 'pemp': tools.p_emp_list(emp.INN), 'notice_form': notice_form, 'protocol_form': protocol_form})
+    if profile.role == 4:
+        return render(request, 'emp.html',
+                      {'emp': emp, 'form': form, 'profile': profile, 'eventlist': eventlist, 'infolist': infolist,
+                       'notifylist': notifylist, 'pemp': tools.p_emp_list(emp.INN)})
+    elif profile.role == 3:
+        return render(request, 'emp.html',
+               {'emp': emp, 'form': form, 'profile': profile, 'close_form': close_form, 'result_form': result_form,
+                'eventlist': eventlist, 'infolist': infolist, 'notifylist': notifylist,
+                'pemp': tools.p_emp_list(emp.INN), 'notice_form': notice_form, 'protocol_form': protocol_form})
+    else:
+        return render(request, 'emp.html',
+                      {'emp': emp, 'form': form, 'profile': profile, 'return_form': return_form,
+                       'close_form': close_form, 'result_form': result_form, 'eventlist': eventlist,
+                       'infolist': infolist, 'notifylist': notifylist, 'pemp': tools.p_emp_list(emp.INN),
+                       'notice_form': notice_form, 'protocol_form': protocol_form})
 
 ######################################################################################################################
 
 
-def employer_save(request, Employer_id):
+def employer_save(request, employer_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
     if request.POST:
-        emp = get_object_or_404(Employer, id=Employer_id)
+        emp = get_object_or_404(Employer, id=employer_id)
         emp.Title = request.POST['oTitle']
         emp.JurAddress = request.POST['oJurAddress']
         emp.FactAddress = request.POST['oFactAddress']
@@ -100,7 +117,8 @@ def employer_save(request, Employer_id):
             emp.SendDate = datetime.now()
             emp.Status = 2
         emp.save()
-        tools.event_create(emp, profile, 'Сохранена карточка предприятия, направлена на проверку в отдел трудоустройства и специальных программ Главного управления', None)
+        tools.event_create(emp, profile, 'Сохранена карточка предприятия, направлена на проверку в отдел '
+                                         'трудоустройства и специальных программ Главного управления', None)
         return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
 
     return HttpResponseRedirect(reverse('index'))
@@ -108,12 +126,12 @@ def employer_save(request, Employer_id):
 ######################################################################################################################
 
 
-def employer_edit(request, Employer_id):
+def employer_edit(request, employer_id):
 
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
-    emp = get_object_or_404(Employer, id=Employer_id)
+    emp = get_object_or_404(Employer, id=employer_id)
     profile = get_object_or_404(UserProfile, user=request.user)
     if emp.Owner != profile or (emp.Status != 0 and emp.Status != 1):
         return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
@@ -163,7 +181,7 @@ def employer_list(request):
         oEmp = Employer.objects.all()
 
     acnt = oEmp.count()
-    oEmp = oEmp[0:20]
+    oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
     vcnt = oEmp.count()
     return render(request, 'list.html', {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form, 'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile, 'breadcrumb': breadcrumb})
 
@@ -185,12 +203,12 @@ def employer_filter(oFind, oCzn, oStatus):
 ######################################################################################################################
 
 
-def employer_print(request, Employer_id):
+def employer_print(request, employer_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
-    emp = get_object_or_404(Employer, id=Employer_id)
+    emp = get_object_or_404(Employer, id=employer_id)
     eventlist = Event.objects.filter(EmpEventID=emp)
     infolist = Info.objects.filter(EmpInfoID=emp)
     notifylist = Notify.objects.filter(EmpNotifyID=emp)
@@ -200,12 +218,12 @@ def employer_print(request, Employer_id):
 ######################################################################################################################
 
 
-def employer_delete(request, Employer_id):
+def employer_delete(request, employer_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
-    emp = get_object_or_404(Employer, id=Employer_id)
+    emp = get_object_or_404(Employer, id=employer_id)
     if (emp.Status == 0 and emp.Owner == profile) or profile.role == 3:
         emp.delete()
     return HttpResponseRedirect(reverse('index'))
@@ -213,34 +231,53 @@ def employer_delete(request, Employer_id):
 ######################################################################################################################
 
 
-def employer_audit(request, Employer_id):
+def employer_audit(request, employer_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
     if request.POST:
         profile = get_object_or_404(UserProfile, user=request.user)
-        emp = get_object_or_404(Employer, id=Employer_id)
+        emp = get_object_or_404(Employer, id=employer_id)
         if 'accept' in request.POST:
             emp.Status = 3
             emp.save()
-            tools.event_create(emp, profile, 'Карточка предприятия согласована, направлена для составления протокола об административном правонарушении', None)
-            message.message_create(emp.id, 0, 'Карточка предприятия согласована, направлена для составления протокола об административном правонарушении', profile)
+            accept_message = 'Карточка предприятия согласована, направлена для составления протокола об административном правонарушении'
+            tools.event_create(emp, profile, accept_message, None)
+            message.message_create(emp.id, 0, accept_message, profile)
         elif 'return' in request.POST:
             emp.Status = 1
             emp.save()
             try:
-                oReturn = int(request.POST['result'])
+                oReturn = int(request.POST['return_result'])
             except ValueError:
                 oReturn = 1
-            tools.event_create(emp, profile, 'Карточка предприятия возвращена по причине ' + dict(RETURN_CHOICES).get(oReturn), None)
-            message.message_create(emp.id, 0, 'Карточка предприятия возвращена по причине ' + dict(RETURN_CHOICES).get(oReturn), profile)
-        elif 'cancel' in request.POST:
-            emp.Status = 8
-            emp.save()
-            tools.event_create(emp, profile, 'Карточка предприятия закрыта с отказом', None)
-            message.message_create(emp.id, 0, 'Карточка предприятия закрыта с отказом', profile)
+            oComment = request.POST['return_comment']
+            return_message = 'Карточка предприятия возвращена по причине: ' + dict(RETURN_CHOICES).get(oReturn)
+            if oComment != '':
+                return_message = return_message + ' (' + oComment + ')'
+            tools.event_create(emp, profile, return_message, None)
+            message.message_create(emp.id, 0, return_message, profile)
 
         return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
 
     return HttpResponseRedirect(reverse('index'))
 
+######################################################################################################################
+
+
+def employer_close(request, employer_id):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    if request.POST:
+        profile = get_object_or_404(UserProfile, user=request.user)
+        emp = get_object_or_404(Employer, id=employer_id)
+        if profile.role == 3:
+            emp.Status = 12
+            emp.save()
+            oComment = request.POST['close_comment']
+            close_message = 'Карточка предприятия закрыта по причине: ' + oComment
+            tools.event_create(emp, profile, close_message, None)
+            message.message_create(emp.id, 0, close_message, profile)
+        return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
+    return HttpResponseRedirect(reverse('index'))
