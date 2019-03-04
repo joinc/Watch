@@ -56,11 +56,11 @@ def message_list(request):
 ######################################################################################################################
 
 
-def message_read(request, Message_id):
+def message_read(request, message_id):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
-    oMessage = get_object_or_404(Message, id=Message_id)
+    oMessage = get_object_or_404(Message, id=message_id)
     oMessage.Reading = True
     oMessage.save()
     return HttpResponseRedirect(reverse('messagelist'))
