@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}{% load static from staticfiles %}
+
+{% block html_title %}{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}{% endblock %}
+{% block html_body %}
+    <br />
+    <div class="container-fluid">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'reportlist' %}">Список отчетов</a></li>
+            <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
+        </ol>
+        <div class="card">
+            <div class="card-header">
+                <form class="form-inline mb-0" method="post" action="{% url 'reportview' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="emp" value="{{ i.id }}">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-transparent">Выберите отчетный период: </span>
+                        </div>
+                        {{ month_form.month }}
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-success">Назначить</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Special title treatment</h5>
+                <ul class="list-group list-group-flush">
+                    {% for u, c in elist %}
+                        <li class="list-group-item">{{ u.user.get_full_name }} - {{ c }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

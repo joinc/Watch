@@ -472,9 +472,39 @@ def report_list(request):
 
     profile = get_object_or_404(UserProfile, user=request.user)
     breadcrumb = 'Список отчетов'
-    month_form = FormMonth
+    month_form = FormMonth()
     return render(request, 'reports.html',
                   {'profile': profile, 'breadcrumb': breadcrumb, 'month_form': month_form, })
+
+######################################################################################################################
+
+
+def report_view(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    profile = get_object_or_404(UserProfile, user=request.user)
+    breadcrumb = 'Отчет на выбранную дату'
+    if request.POST:
+        month = int(request.POST['month'])
+        month_form = FormMonth({'month': month})
+    else:
+        return HttpResponseRedirect(reverse('reportlist'))
+    curr_date = datetime(2018, 10, 1)
+    i = 0
+    while i < month:
+        days = calendar.monthrange(curr_date.year, curr_date.month)[1]
+        curr_date = curr_date + timedelta(days=days)
+        i += 1
+    plist = UserProfile.objects.filter(role=1)
+    elist = []
+    for u in plist:
+        emp_count = Employer.objects.filter(SendDate__month=curr_date.month).filter(Owner=u).count()
+        elist.append([u, emp_count])
+
+    return render(request, 'report_view.html',
+                  {'profile': profile, 'breadcrumb': breadcrumb, 'curr_date': curr_date, 'month_form': month_form,
+                   'plist': plist, 'elist': elist, })
 
 ######################################################################################################################
 
@@ -485,7 +515,7 @@ def respons_list(request):
 
     profile = get_object_or_404(UserProfile, user=request.user)
     breadcrumb = 'Назначение ответственных лиц'
-    respons_form = FormRespons
+    respons_form = FormRespons()
     elist = Employer.objects.filter(Respons__isnull=True)[settings.START_LIST:settings.STOP_LIST]
 
     return render(request, 'respons.html',
@@ -519,7 +549,7 @@ def user_list(request):
         return HttpResponseRedirect(reverse('index'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
-    role_form = FormRole
+    role_form = FormRole()
     userlist = User.objects.all()
     plist = UserProfile.objects.all()
     ulist = []

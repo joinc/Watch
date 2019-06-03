@@ -9,7 +9,7 @@
             <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
             <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
         </ol>
-        <form class="form-inline mb-0" method="post" action="{% url 'responsset' %}">
+        <form class="form-inline mb-0" method="post" action="{% url 'reportview' %}">
             {% csrf_token %}
             <input type="hidden" name="emp" value="{{ i.id }}">
             <div class="input-group">
