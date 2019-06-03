@@ -8,14 +8,16 @@ from django.contrib.auth import login, logout
 from django.views.generic.edit import FormView
 from Main.models import UserProfile, TempEmployer, Employer, Event, Notify
 from Main import employer, tools, message
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-from .forms import FormRole, FormResult, FormSearch, FormEmp, FormNotice, FormFilterCzn, FormFilterStatus, FormRespons
+from .forms import FormRole, FormResult, FormSearch, FormEmp, FormNotice, FormFilterCzn, FormFilterStatus, FormRespons, FormMonth
 from .choices import RESULT_CHOICES
 from django.conf import settings
 import xlrd
 import os
+import locale
+import calendar
 
 ######################################################################################################################
 
@@ -422,8 +424,9 @@ def event_add(request, employer_id):
                               'правонарушении.'
                 if protocol_form == '3':
                     comment = 'Работодатель (юридическое лицо) не получил уведомление, не явился на составление ' \
-                              'протокола. Карточка закрыта.'
-                    status = 12
+                              'протокола. Отделом правовой работы, государственной службы и кадров Главного ' \
+                              'управления (в отсутствие работодателя) составляется протокол об административном ' \
+                              'правонарушении.'
             if employer_form == '2':
                 if protocol_form == '1':
                     comment = 'Работодатель (индивидуальный предприниматель) получил уведомление, явился на ' \
@@ -459,6 +462,19 @@ def event_add(request, employer_id):
         return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
 
     return HttpResponseRedirect(reverse('index'))
+
+######################################################################################################################
+
+
+def report_list(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    profile = get_object_or_404(UserProfile, user=request.user)
+    breadcrumb = 'Список отчетов'
+    month_form = FormMonth
+    return render(request, 'reports.html',
+                  {'profile': profile, 'breadcrumb': breadcrumb, 'month_form': month_form, })
 
 ######################################################################################################################
 

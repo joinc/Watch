@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}{% load static from staticfiles %}
+
+{% block html_title %}{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}{% endblock %}
+{% block html_body %}
+    <br />
+    <div class="container-fluid">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+            <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
+        </ol>
+        <form class="form-inline mb-0" method="post" action="{% url 'responsset' %}">
+            {% csrf_token %}
+            <input type="hidden" name="emp" value="{{ i.id }}">
+            <div class="input-group">
+                {{ month_form.month }}
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-success">Назначить</button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

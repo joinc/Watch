@@ -5,10 +5,13 @@
 <title>{% block html_title %}Заголовок{% endblock %}</title>
     <link rel='stylesheet' href='{% static "css/bootstrap.min.css" %}' type='text/css' />
     <link rel='stylesheet' href='{% static "css/jumbotron.css" %}' type='text/css' />
+    <link rel='stylesheet' href='{% static "css/bootstrap-datetimepicker.min.css" %}' type='text/css' />
 {% block html_head %}{% endblock %}
     <script src='{% static "js/jquery.slim.min.js" %}'></script>
     <script src='{% static "js/popper.min.js" %}'></script>
     <script src='{% static "js/bootstrap.min.js" %}'></script>
+    <script src='{% static "js/bootstrap-datetimepicker.min.js" %}'></script>
+    <script src='{% static "fa/js/all.js" %}'></script> <!--load all styles -->
 </head>
 <body>
 {% block html_body_menu %}
@@ -24,6 +27,7 @@
                         <a href="{% url 'users' %}" class="dropdown-item bg-danger text-white">Список пользователей</a>
                         <a href="{% url 'load' %}" class="dropdown-item bg-danger text-white">Загрузка работодателей</a>
                         <a href="{% url 'send' %}" class="dropdown-item bg-danger text-white">Отправить почту</a>
+                        <a href="{% url 'reportlist' %}" class="dropdown-item bg-danger text-white">Отчеты</a>
                     {% endif %}
                     {% ifequal profile.role 1 %}
                         <div class="dropdown-divider"></div>

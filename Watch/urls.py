@@ -53,6 +53,7 @@ urlpatterns = [
     path('send/', views.send_email, name='send', ),
     path('message/', message.message_list, name='messagelist', ),
     path('message/<int:message_id>/read/', message.message_read, name='messageread', ),
+    path('report/list/', views.report_list, name='reportlist', ),
     path('respons/', views.respons_list, name='responslist', ),
     path('responsset/', views.respons_set, name='responsset', ),
 ]

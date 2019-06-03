@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
-from datetime import date
 from Main.models import UserProfile
 from .choices import ROLE_CHOICES, EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, INFO_CHOICES, STATUS_CHOICES, METHOD_CHOICES, RESULT_CHOICES
+from datetime import date, datetime, timedelta
+import locale
+import calendar
 
 ######################################################################################################################
 
@@ -279,6 +281,32 @@ class FormFilterStatus(forms.Form):
         choices=STATUS_CHOICES,
         label='',
         initial=20,
+        widget=forms.Select(attrs={'class': 'custom-select'}),
+        required=True
+    )
+
+######################################################################################################################
+
+
+class FormMonth(forms.Form):
+
+    MONTH_CHOICES = []
+    locale.setlocale(locale.LC_ALL, "")
+    start_date = datetime(2018, 10, 1)
+    curr_date = start_date
+    today_date = datetime.now()
+    count = (today_date.year - start_date.year) * 12 + today_date.month - start_date.month
+    i = 0
+    MONTH_CHOICES.append([i, start_date.strftime('%B %Y г.')])
+    while i < count:
+        days = calendar.monthrange(start_date.year, start_date.month)[1]
+        curr_date = curr_date + timedelta(days=days)
+        i += 1
+        MONTH_CHOICES.append([i, curr_date.strftime('%B %Y г.')])
+
+    month = forms.ChoiceField(
+        choices=MONTH_CHOICES,
+        label='',
         widget=forms.Select(attrs={'class': 'custom-select'}),
         required=True
     )
