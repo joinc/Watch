@@ -27,7 +27,6 @@
                         <a href="{% url 'users' %}" class="dropdown-item bg-danger text-white">Список пользователей</a>
                         <a href="{% url 'load' %}" class="dropdown-item bg-danger text-white">Загрузка работодателей</a>
                         <a href="{% url 'send' %}" class="dropdown-item bg-danger text-white">Отправить почту</a>
-                        <a href="{% url 'reportlist' %}" class="dropdown-item bg-danger text-white">Отчеты</a>
                     {% endif %}
                     {% ifequal profile.role 1 %}
                         <div class="dropdown-divider"></div>
@@ -44,6 +43,7 @@
                         <a href="{% url 'responslist' %}" class="dropdown-item">Назначение ответственного</a>
                     {% endifequal %}
                     <div class="dropdown-divider"></div>
+                    <a href="{% url 'reportlist' %}" class="dropdown-item">Отчеты</a>
                     <a href="{% url 'messagelist' %}" class="dropdown-item">Уведомления</a>
                     <div class="dropdown-divider"></div>
                     <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>

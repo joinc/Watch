@@ -9,15 +9,22 @@
             <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
             <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
         </ol>
-        <form class="form-inline mb-0" method="post" action="{% url 'reportview' %}">
-            {% csrf_token %}
-            <input type="hidden" name="emp" value="{{ i.id }}">
-            <div class="input-group">
-                {{ month_form.month }}
-                <div class="input-group-append">
-                    <button type="submit" class="btn btn-success">Назначить</button>
-                </div>
+        <div class="card">
+            <div class="card-header">
+                Количество карточек направленых в отдел трудоустройства и специальных программ
             </div>
-        </form>
+            <div class="card-body">
+                <p class="card-text">Выберите отчетный период: </p>
+                <form class="form-inline mb-0" method="post" action="{% url 'reportview' %}">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        {{ month_form.month }}
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-success">Показать</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 {% endblock %}

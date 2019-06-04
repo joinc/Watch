@@ -14,24 +14,51 @@
             <div class="card-header">
                 <form class="form-inline mb-0" method="post" action="{% url 'reportview' %}">
                     {% csrf_token %}
-                    <input type="hidden" name="emp" value="{{ i.id }}">
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text bg-transparent">Выберите отчетный период: </span>
                         </div>
                         {{ month_form.month }}
                         <div class="input-group-append">
-                            <button type="submit" class="btn btn-success">Назначить</button>
+                            <button type="submit" class="btn btn-success">Показать</button>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="card-body">
-                <h5 class="card-title">Special title treatment</h5>
-                <ul class="list-group list-group-flush">
-                    {% for u, c in elist %}
-                        <li class="list-group-item">{{ u.user.get_full_name }} - {{ c }}</li>
+                <h5 class="card-title">Направлено в отдел трудоустройства и специальных программ (в работе/закрыто/вынесено постановлений):</h5>
+                <table class="table table-hover table-sm">
+                    <thead>
+                    <tr>
+                        <th scope="col">Центр занятости</th>
+                        <th scope="col">Направлено [{{ emp_all }}]</th>
+                        <th scope="col">В работе [{{ aw }}]</th>
+                        <th scope="col">Закрыто [{{ ac }}]</th>
+                        <th scope="col">Вынесено постановлений [{{ ar }}]</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for u, c, ew, ec, er, pw, pc, pr in elist %}
+                        <tr>
+                            <td>{{ u.user.get_full_name }}</td>
+                            <td>{{ c }}</td>
+                            <td>{{ ew }}</td>
+                            <td>{{ ec }}</td>
+                            <td>{{ er }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="5">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ pw }}%" aria-valuenow="{{ ew }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: {{ pc }}%" aria-valuenow="{{ ec }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ pr }}%" aria-valuenow="{{ er }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </td>
+                        </tr>
                     {% endfor %}
+                    </tbody>
+                </table>
+                <ul class="list-group list-group-flush">
                 </ul>
             </div>
         </div>

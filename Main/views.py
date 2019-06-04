@@ -16,7 +16,6 @@ from .choices import RESULT_CHOICES
 from django.conf import settings
 import xlrd
 import os
-import locale
 import calendar
 
 ######################################################################################################################
@@ -498,13 +497,28 @@ def report_view(request):
         i += 1
     plist = UserProfile.objects.filter(role=1)
     elist = []
+    aw = 0
+    ac = 0
+    ar = 0
+    emp_all = 0
     for u in plist:
         emp_count = Employer.objects.filter(SendDate__month=curr_date.month).filter(Owner=u).count()
-        elist.append([u, emp_count])
+        emp_closed = Employer.objects.filter(SendDate__month=curr_date.month).filter(Owner=u).filter(Status=12).count()
+        emp_ready = Employer.objects.filter(SendDate__month=curr_date.month).filter(Owner=u).filter(Status=9).count()
+        emp_work = emp_count - emp_closed - emp_ready
+        percent_closed = 100*emp_closed//emp_count if emp_count else 0
+        percent_ready = 100*emp_ready//emp_count if emp_count else 0
+        percent_work = 100*emp_work//emp_count if emp_count else 0
+        if emp_count > 0:
+            emp_all += emp_count
+            aw += emp_work
+            ac += emp_closed
+            ar += emp_ready
+            elist.append([u, emp_count, emp_work, emp_closed, emp_ready, percent_work, percent_closed, percent_ready])
 
     return render(request, 'report_view.html',
                   {'profile': profile, 'breadcrumb': breadcrumb, 'curr_date': curr_date, 'month_form': month_form,
-                   'plist': plist, 'elist': elist, })
+                   'elist': elist, 'aw': aw, 'ac': ac, 'ar': ar, 'emp_all': emp_all })
 
 ######################################################################################################################
 

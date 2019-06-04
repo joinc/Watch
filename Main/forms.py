@@ -291,7 +291,7 @@ class FormFilterStatus(forms.Form):
 class FormMonth(forms.Form):
 
     MONTH_CHOICES = []
-    locale.setlocale(locale.LC_ALL, "")
+    locale.setlocale(locale.LC_ALL, 'ru')
     start_date = datetime(2018, 10, 1)
     curr_date = start_date
     today_date = datetime.now()
