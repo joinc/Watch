@@ -4,3 +4,4 @@ Main/__pycache__
 Watch/__pycache__
 upload
 db.sqlite3
+Watch/settings.py
