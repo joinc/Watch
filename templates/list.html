@@ -5,20 +5,32 @@
 {% block html_body %}
     <br />
     <div class="container-fluid">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item active">{% ifequal breadcrumb '' %}Все карточки{% else %}{{ breadcrumb }}{% endifequal %}</li>
-        </ol>
+        <div class="row">
+            <div class="col-auto mr-auto">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+                    <li class="breadcrumb-item active">{% ifequal breadcrumb '' %}Все карточки{% else %}{{ breadcrumb }}{% endifequal %}</li>
+                </ol>
+            </div>
+        </div>
         <form method='post' action='{% url 'list' %}'>
-            <div class="input-group mb-3">
-                {{ filter_czn_form }}
-                {{ filter_status_form }}
-                {{ search_form }}
-                {% csrf_token %}
-                <div class="input-group-append">
-                    <button class="btn btn-info" type="submit">Поиск</button>
+            <div class="row">
+                <div class="col-auto mr-auto">
+                    <div class="input-group mb-3">
+                        {{ filter_czn_form }}
+                        {{ filter_status_form }}
+                        {{ search_form }}
+                        {% csrf_token %}
+                        <div class="input-group-append">
+                            <button class="btn btn-info" type="submit">Поиск</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto mr-0 text-right">
+                    <button class="btn btn-outline-secondary">Сформировать и скачать таблицу</button>
                 </div>
             </div>
+
         </form>
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
             Найдено карточек - <strong>{{ acnt }}</strong>. Отображается - <strong>{{ vcnt }}</strong>.

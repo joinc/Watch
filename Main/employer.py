@@ -10,8 +10,6 @@ from .forms import FormReturn, FormResult, FormSearch, FormEmp, FormNotice, Form
     FormFilterStatus, FormClose
 from .choices import RETURN_CHOICES
 from django.conf import settings
-
-
 ######################################################################################################################
 
 
@@ -155,7 +153,9 @@ def employer_edit(request, employer_id):
     infolist = Info.objects.filter(EmpInfoID=emp)
     notifylist = Notify.objects.filter(EmpNotifyID=emp)
 
-    return render(request, 'edit.html', {'form': form, 'profile': profile, 'emp': emp, 'eventlist': eventlist, 'infolist': infolist, 'notifylist': notifylist, 'pemp': tools.p_emp_list(emp.INN), })
+    return render(request, 'edit.html', {'form': form, 'profile': profile, 'emp': emp, 'eventlist': eventlist,
+                                         'infolist': infolist, 'notifylist': notifylist,
+                                         'pemp': tools.p_emp_list(emp.INN), })
 
 ######################################################################################################################
 
@@ -179,11 +179,15 @@ def employer_list(request):
         filter_czn_form = FormFilterCzn()
         filter_status_form = FormFilterStatus()
         oEmp = Employer.objects.all()
+    #if 'export' in request.POST:
+
 
     acnt = oEmp.count()
     oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
     vcnt = oEmp.count()
-    return render(request, 'list.html', {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form, 'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile, 'breadcrumb': breadcrumb})
+    return render(request, 'list.html', {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
+                                         'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt,
+                                         'profile': profile, 'breadcrumb': breadcrumb})
 
 ######################################################################################################################
 
