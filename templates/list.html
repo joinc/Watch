@@ -13,7 +13,7 @@
                 </ol>
             </div>
         </div>
-        <form method='post' action='{% url 'list' %}'>
+        <form method='post' action='{% url 'find' %}'>
             <div class="row">
                 <div class="col-auto mr-auto">
                     <div class="input-group mb-3">
@@ -27,7 +27,7 @@
                     </div>
                 </div>
                 <div class="col-auto mr-0 text-right">
-                    <button class="btn btn-outline-secondary">Сформировать и скачать таблицу</button>
+                    <button name='export' class="btn btn-outline-secondary" type="submit">Сформировать и скачать таблицу</button>
                 </div>
             </div>
 

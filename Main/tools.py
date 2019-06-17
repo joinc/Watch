@@ -39,3 +39,16 @@ def p_emp_list(inn):
     return pemp
 
 ######################################################################################################################
+
+
+def emp_filter(oFind, oCzn, oStatus):
+
+    oEmp = Employer.objects.all()
+    if oFind != '':
+        oEmp = oEmp.filter(INN__istartswith=oFind)
+    if oCzn != '0':
+        oEmp = oEmp.filter(Owner__user=oCzn)
+    if oStatus != '20':
+        oEmp = oEmp.filter(Status=oStatus)
+
+    return oEmp

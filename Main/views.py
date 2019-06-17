@@ -6,12 +6,13 @@ from django.urls import reverse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, logout
 from django.views.generic.edit import FormView
-from Main.models import UserProfile, TempEmployer, Employer, Event, Notify
-from Main import employer, tools, message
+from Main.models import UserProfile, TempEmployer, Employer, Event, Notify, ConfigWatch
+from Main import message, tools
 from datetime import date, datetime, timedelta
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-from .forms import FormRole, FormResult, FormSearch, FormEmp, FormNotice, FormFilterCzn, FormFilterStatus, FormRespons, FormMonth
+from .forms import FormRole, FormResult, FormSearch, FormEmp, FormNotice, FormFilterCzn, FormFilterStatus, \
+    FormRespons, FormMonth
 from .choices import RESULT_CHOICES
 from django.conf import settings
 import xlrd
@@ -39,11 +40,11 @@ def index(request):
         oEdit = 0
     oDraft = oEmp.filter(Status=0).count() + oEmp.filter(Status=1).count()
     oCheck = oEmp.filter(Status=2).count()
+    oReady = oEmp.filter(Status=9).count()
     oClosed = oEmp.filter(Status=12).count()
     oWork = 0
     for i in [3, 4, 5, 6, 7, 11]:
         oWork = oWork + oEmp.filter(Status=i).count()
-    oReady = oEmp.filter(Status=9).count()
     return render(request, 'index.html',
                   {'profile': profile, 'oAll': oAll, 'oDraft': oDraft, 'oCheck': oCheck, 'oWork': oWork,
                    'oReady': oReady, 'oEdit': oEdit, 'oClosed': oClosed, 'oAllMe': oAllMe, })
@@ -57,11 +58,11 @@ def emp_list(request, profile, status, breadcrumb):
     search_form = FormSearch()
     for i in status:
         if profile.role == 1 and not request.user.is_superuser:
-            for emp in employer.employer_filter('', profile.user.id, i):
+            for emp in tools.emp_filter('', profile.user.id, i):
                 oEmp.append(emp)
             filter_czn_form = FormFilterCzn({'czn': profile.user.id})
         else:
-            for emp in employer.employer_filter('', '0', i):
+            for emp in tools.emp_filter('', '0', i):
                 oEmp.append(emp)
             filter_czn_form = FormFilterCzn()
     if status.__len__() == 1:
@@ -79,6 +80,68 @@ def emp_list(request, profile, status, breadcrumb):
 ######################################################################################################################
 
 
+def emp_find_list(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    profile = get_object_or_404(UserProfile, user=request.user)
+    breadcrumb = 'Все карточки'
+    if request.POST:
+        search_form = FormSearch(request.POST)
+        filter_czn_form = FormFilterCzn(request.POST)
+        filter_status_form = FormFilterStatus(request.POST)
+        if search_form.is_valid():
+            oEmp = tools.emp_filter(request.POST['find'], request.POST['czn'], request.POST['status'])
+        else:
+            return HttpResponseRedirect(reverse('all'))
+        if 'export' in request.POST:
+            now = datetime.now()
+            file_name = 'export' + now.strftime('%y%m%d-%H%M%S') + '.ods'
+            data = OrderedDict()
+            data.update({'Sheet 1': [['ID', 'AGE', 'SCORE'], [1, 22, 5], [2, 15, 6], [3, 28, 9]]})
+            data.update({'Sheet 2': [['X', 'Y', 'Z'], [1, 2, 3], [4, 5, 6], [7, 8, 9]]})
+            data.update({'Sheet 3': [['M', 'N', 'O', 'P'], [10, 11, 12, 13], [14, 15, 16, 17], [18, 19, 20, 21]]})
+            save_data(file_name, data)
+            fp = open(file_name, 'rb')
+            response = HttpResponse(fp.read())
+            fp.close()
+            file_type = mimetypes.guess_type(file_name)
+            if file_type is None:
+                file_type = 'application/octet-stream'
+            response['Content-Type'] = file_type
+            response['Content-Length'] = str(os.stat(file_name).st_size)
+            response['Content-Disposition'] = "attachment; filename=" + file_name
+            os.remove(file_name)
+
+            return response
+    else:
+        search_form = FormSearch()
+        filter_czn_form = FormFilterCzn()
+        filter_status_form = FormFilterStatus()
+        oEmp = Employer.objects.all()
+
+
+    acnt = oEmp.count()
+    oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
+    vcnt = oEmp.count()
+    return render(request, 'list.html', {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
+                                         'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt,
+                                         'profile': profile, 'breadcrumb': breadcrumb})
+
+######################################################################################################################
+# Выводит список всех карточек
+
+def emp_all_list(request):
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse('login'))
+
+    profile = get_object_or_404(UserProfile, user=request.user)
+    return emp_list(request, profile, range(11), 'Все карточки')
+
+
+######################################################################################################################
+# Выводит список карточек в статусе Черновик
+
 def emp_draft_list(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
@@ -87,7 +150,7 @@ def emp_draft_list(request):
     return emp_list(request, profile, ['0', '1'], 'Черновики')
 
 ######################################################################################################################
-
+# Выводит список карточек в статусе Карточки на проверке
 
 def emp_check_list(request):
     if not request.user.is_authenticated:
@@ -97,7 +160,7 @@ def emp_check_list(request):
     return emp_list(request, profile, ['2'], 'Карточки на проверке')
 
 ######################################################################################################################
-
+# Выводит список карточек в статусе В работе
 
 def emp_work_list(request):
     if not request.user.is_authenticated:
@@ -107,7 +170,7 @@ def emp_work_list(request):
     return emp_list(request, profile, ['3', '4', '5', '6', '7', '11'], 'Карточки в работе')
 
 ######################################################################################################################
-
+# Выводит список карточек в статусе Вынесено постановлений
 
 def emp_ready_list(request):
     if not request.user.is_authenticated:
@@ -117,7 +180,7 @@ def emp_ready_list(request):
     return emp_list(request, profile, ['9'], 'Вынесено постановлений')
 
 ######################################################################################################################
-
+# Выводит список карточек в статусе Закрытые карточки
 
 def emp_closed_list(request):
     if not request.user.is_authenticated:
@@ -175,7 +238,9 @@ def emp_upload(request):
                 oTempEmp.save()
 
         os.remove(file)
-
+    UpDate = ConfigWatch()
+    UpDate.UploadDate = datetime.now()
+    UpDate.save()
     return HttpResponseRedirect(reverse('emps'))
 
 ######################################################################################################################
@@ -281,10 +346,11 @@ def temp_emp_list(request):
     for emp in aEmp:
         for emp_f in Employer.objects.filter(INN=emp.INN):
             pemp.append(emp_f)
+    update = ConfigWatch.objects.all().first()
 
     return render(request, 'emps.html',
                   {'aEmp': aEmp, 'profile': profile, 'search_form': search_form, 'find': oFind, 'scnt': scnt,
-                   'vcnt': vcnt, 'pemp': pemp, })
+                   'vcnt': vcnt, 'pemp': pemp, 'update': update, })
 
 ######################################################################################################################
 

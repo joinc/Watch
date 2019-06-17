@@ -6,10 +6,9 @@ from django.urls import reverse
 from Main.models import UserProfile, Employer, Event, Info, Notify
 from Main import tools, message
 from datetime import datetime
-from .forms import FormReturn, FormResult, FormSearch, FormEmp, FormNotice, FormProtocol, FormFilterCzn, \
-    FormFilterStatus, FormClose
+from .forms import FormReturn, FormResult, FormEmp, FormNotice, FormProtocol, FormClose
 from .choices import RETURN_CHOICES
-from django.conf import settings
+
 ######################################################################################################################
 
 
@@ -148,7 +147,7 @@ def employer_edit(request, employer_id):
                             'oEventComment': emp.EventComment,
                             'oSendDate': tools.e_date(emp.SendDate),
                             'oContact': emp.Contact, })
-    notice_form = FormNotice()
+#    notice_form = FormNotice()
     eventlist = Event.objects.filter(EmpEventID=emp)
     infolist = Info.objects.filter(EmpInfoID=emp)
     notifylist = Notify.objects.filter(EmpNotifyID=emp)
@@ -156,53 +155,6 @@ def employer_edit(request, employer_id):
     return render(request, 'edit.html', {'form': form, 'profile': profile, 'emp': emp, 'eventlist': eventlist,
                                          'infolist': infolist, 'notifylist': notifylist,
                                          'pemp': tools.p_emp_list(emp.INN), })
-
-######################################################################################################################
-
-
-def employer_list(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
-    profile = get_object_or_404(UserProfile, user=request.user)
-    breadcrumb = 'Все карточки'
-    if request.POST:
-        search_form = FormSearch(request.POST)
-        filter_czn_form = FormFilterCzn(request.POST)
-        filter_status_form = FormFilterStatus(request.POST)
-        if search_form.is_valid():
-            oEmp = employer_filter(request.POST['find'], request.POST['czn'], request.POST['status'])
-        else:
-            return HttpResponseRedirect(reverse('all'))
-    else:
-        search_form = FormSearch()
-        filter_czn_form = FormFilterCzn()
-        filter_status_form = FormFilterStatus()
-        oEmp = Employer.objects.all()
-    #if 'export' in request.POST:
-
-
-    acnt = oEmp.count()
-    oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
-    vcnt = oEmp.count()
-    return render(request, 'list.html', {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
-                                         'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt,
-                                         'profile': profile, 'breadcrumb': breadcrumb})
-
-######################################################################################################################
-
-
-def employer_filter(oFind, oCzn, oStatus):
-
-    oEmp = Employer.objects.all()
-    if oFind != '':
-        oEmp = oEmp.filter(INN__istartswith=oFind)
-    if oCzn != '0':
-        oEmp = oEmp.filter(Owner__user=oCzn)
-    if oStatus != '20':
-        oEmp = oEmp.filter(Status=oStatus)
-
-    return oEmp
 
 ######################################################################################################################
 

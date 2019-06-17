@@ -8,7 +8,7 @@
     <div class="container-fluid">
         <section class="row text-center placeholders">
             <div class="col-6 col-md-2 col-sm-4 placeholder">
-                <a href="{% url 'list' %}">
+                <a href="{% url 'all' %}">
                     <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mPccev/fwAIdQOSaxKbGgAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
                 </a>
                 <h1>{{ oAll }}{% ifnotequal oAllMe 0 %}<span class="badge badge-primary" title="Всего ваших карточек">{{ oAllMe }}</span>{% endifnotequal %}</h1>
