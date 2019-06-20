@@ -56,6 +56,7 @@ def emp_list(request, profile, status, breadcrumb):
 
     oEmp = []
     search_form = FormSearch()
+    filter_czn_form = FormFilterCzn()
     for i in status:
         if profile.role == 1 and not request.user.is_superuser:
             for emp in tools.emp_filter('', profile.user.id, i):
@@ -64,7 +65,6 @@ def emp_list(request, profile, status, breadcrumb):
         else:
             for emp in tools.emp_filter('', '0', i):
                 oEmp.append(emp)
-            filter_czn_form = FormFilterCzn()
     if status.__len__() == 1:
         filter_status_form = FormFilterStatus({'status': status[0]})
     else:
@@ -97,10 +97,11 @@ def emp_find_list(request):
         if 'export' in request.POST:
             now = datetime.now()
             file_name = 'export' + now.strftime('%y%m%d-%H%M%S') + '.ods'
+            data_emp = [['ID', 'Название', 'ИНН']]
             data = OrderedDict()
-            data.update({'Sheet 1': [['ID', 'AGE', 'SCORE'], [1, 22, 5], [2, 15, 6], [3, 28, 9]]})
-            data.update({'Sheet 2': [['X', 'Y', 'Z'], [1, 2, 3], [4, 5, 6], [7, 8, 9]]})
-            data.update({'Sheet 3': [['M', 'N', 'O', 'P'], [10, 11, 12, 13], [14, 15, 16, 17], [18, 19, 20, 21]]})
+            for emp in oEmp:
+                data_emp.append([emp.id, emp.Title, emp.INN])
+            data.update({'Данные': data_emp})
             save_data(file_name, data)
             fp = open(file_name, 'rb')
             response = HttpResponse(fp.read())

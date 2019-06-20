@@ -46,6 +46,8 @@ def emp_filter(oFind, oCzn, oStatus):
     oEmp = Employer.objects.all()
     if oFind != '':
         oEmp = oEmp.filter(INN__istartswith=oFind)
+        if oEmp.count() == 0:
+            oEmp = Employer.objects.filter(Title__icontains=oFind)
     if oCzn != '0':
         oEmp = oEmp.filter(Owner__user=oCzn)
     if oStatus != '20':
