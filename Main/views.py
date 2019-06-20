@@ -137,7 +137,7 @@ def emp_all_list(request):
         return HttpResponseRedirect(reverse('login'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
-    return emp_list(request, profile, range(11), 'Все карточки')
+    return emp_list(request, profile, range(13), 'Все карточки')
 
 
 ######################################################################################################################
