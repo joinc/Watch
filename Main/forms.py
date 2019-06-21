@@ -6,6 +6,7 @@ from .choices import ROLE_CHOICES, EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CH
 from datetime import date, datetime, timedelta
 import locale
 import calendar
+from django.conf import settings
 
 ######################################################################################################################
 
@@ -291,7 +292,7 @@ class FormFilterStatus(forms.Form):
 class FormMonth(forms.Form):
 
     MONTH_CHOICES = []
-    locale.setlocale(locale.LC_ALL, 'ru')
+    locale.setlocale(locale.LC_ALL, settings.LOCALE)
     start_date = datetime(2018, 10, 1)
     curr_date = start_date
     today_date = datetime.now()

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 
 ROLE_CHOICES = (
     (1, 'ЦЗН'),

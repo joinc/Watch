@@ -95,26 +95,7 @@ def emp_find_list(request):
         else:
             return HttpResponseRedirect(reverse('all'))
         if 'export' in request.POST:
-            now = datetime.now()
-            file_name = 'export' + now.strftime('%y%m%d-%H%M%S') + '.ods'
-            data_emp = [['ID', 'Название', 'ИНН']]
-            data = OrderedDict()
-            for emp in oEmp:
-                data_emp.append([emp.id, emp.Title, emp.INN])
-            data.update({'Данные': data_emp})
-            save_data(file_name, data)
-            fp = open(file_name, 'rb')
-            response = HttpResponse(fp.read())
-            fp.close()
-            file_type = mimetypes.guess_type(file_name)
-            if file_type is None:
-                file_type = 'application/octet-stream'
-            response['Content-Type'] = file_type
-            response['Content-Length'] = str(os.stat(file_name).st_size)
-            response['Content-Disposition'] = "attachment; filename=" + file_name
-            os.remove(file_name)
-
-            return response
+            return emp_export(oEmp)
     else:
         search_form = FormSearch()
         filter_czn_form = FormFilterCzn()
@@ -247,24 +228,27 @@ def emp_upload(request):
 ######################################################################################################################
 
 
-def emp_export(request):
+def emp_export(oEmp):
     now = datetime.now()
     file_name = 'export' + now.strftime('%y%m%d-%H%M%S') + '.ods'
+    file = settings.EXPORT_FILE + file_name
+
+    data_emp = [['ID', 'Название', 'ИНН']]
     data = OrderedDict()
-    data.update({'Sheet 1': [['ID', 'AGE', 'SCORE'], [1, 22, 5], [2, 15, 6], [3, 28, 9]]})
-    data.update({'Sheet 2': [['X', 'Y', 'Z'], [1, 2, 3], [4, 5, 6], [7, 8, 9]]})
-    data.update({'Sheet 3': [['M', 'N', 'O', 'P'], [10, 11, 12, 13], [14, 15, 16, 17], [18, 19, 20, 21]]})
-    save_data(file_name, data)
-    fp = open(file_name, 'rb')
+    for emp in oEmp:
+        data_emp.append([emp.id, emp.Title, emp.INN])
+    data.update({'Данные': data_emp})
+    save_data(file, data)
+    fp = open(file, 'rb')
     response = HttpResponse(fp.read())
     fp.close()
-    file_type = mimetypes.guess_type(file_name)
+    file_type = mimetypes.guess_type(file)
     if file_type is None:
         file_type = 'application/octet-stream'
     response['Content-Type'] = file_type
-    response['Content-Length'] = str(os.stat(file_name).st_size)
+    response['Content-Length'] = str(os.stat(file).st_size)
     response['Content-Disposition'] = "attachment; filename=" + file_name
-    os.remove(file_name)
+    os.remove(file)
 
     return response
 
