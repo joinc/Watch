@@ -20,6 +20,9 @@ import calendar
 from pyexcel_ods3 import save_data
 from collections import OrderedDict
 import mimetypes, os
+import django_tables2 as tables
+from django_tables2 import RequestConfig
+
 
 ######################################################################################################################
 
@@ -69,13 +72,17 @@ def emp_list(request, profile, status, breadcrumb):
         filter_status_form = FormFilterStatus({'status': status[0]})
     else:
         filter_status_form = FormFilterStatus()
+
+    table = ViewTables(oEmp)
+    RequestConfig(request, paginate={'per_page': 20}).configure(table)
+
     acnt = oEmp.__len__()
     oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
     vcnt = oEmp.__len__()
     return render(request, 'list.html',
                   {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
                    'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile,
-                   'breadcrumb': breadcrumb})
+                   'breadcrumb': breadcrumb, 'table': table, })
 
 ######################################################################################################################
 
@@ -102,13 +109,17 @@ def emp_find_list(request):
         filter_status_form = FormFilterStatus()
         oEmp = Employer.objects.all()
 
+    table = ViewTables(oEmp)
+    RequestConfig(request, paginate={'per_page': 20}).configure(table)
+
 
     acnt = oEmp.count()
     oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
     vcnt = oEmp.count()
-    return render(request, 'list.html', {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
-                                         'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt,
-                                         'profile': profile, 'breadcrumb': breadcrumb})
+    return render(request, 'list.html',
+                  {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
+                   'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile,
+                   'breadcrumb': breadcrumb, 'table': table, })
 
 ######################################################################################################################
 # Выводит список всех карточек
@@ -318,8 +329,11 @@ def temp_emp_list(request):
         search_form = FormSearch(request.POST)
         if search_form.is_valid():
             oFind = request.POST['find']
-            scnt = TempEmployer.objects.filter(INN__istartswith=oFind).count()
-            aEmp = TempEmployer.objects.filter(INN__istartswith=oFind)[settings.START_LIST:settings.STOP_LIST]
+            oTempEmp = TempEmployer.objects.filter(INN__startswith=oFind)
+            if oTempEmp.count() == 0:
+                oTempEmp = TempEmployer.objects.filter(Title__icontains=oFind)
+            scnt = oTempEmp.count()
+            aEmp = oTempEmp[settings.START_LIST:settings.STOP_LIST]
         else:
             return HttpResponseRedirect(reverse('emps'))
     else:
@@ -336,25 +350,6 @@ def temp_emp_list(request):
     return render(request, 'emps.html',
                   {'aEmp': aEmp, 'profile': profile, 'search_form': search_form, 'find': oFind, 'scnt': scnt,
                    'vcnt': vcnt, 'pemp': pemp, 'update': update, })
-
-######################################################################################################################
-
-
-class LoginFormView(FormView):
-    form_class = AuthenticationForm
-
-    # Аналогично регистрации, только используем шаблон аутентификации.
-    template_name = "login.html"
-    # В случае успеха перенаправим на главную.
-    success_url = settings.SUCCESS_URL
-
-    def form_valid(self, form):
-        # Получаем объект пользователя на основе введённых в форму данных.
-        self.user = form.get_user()
-        # Выполняем аутентификацию пользователя.
-        login(self.request, self.user)
-
-        return super(LoginFormView, self).form_valid(form)
 
 ######################################################################################################################
 
@@ -692,3 +687,37 @@ def send_email(request):
     """
     send_mail('Заголовок', data, settings.DEFAULT_FROM_EMAIL, email, fail_silently=False)
     return HttpResponseRedirect(reverse('index'))
+
+######################################################################################################################
+
+
+class LoginFormView(FormView):
+    form_class = AuthenticationForm
+
+    # Аналогично регистрации, только используем шаблон аутентификации.
+    template_name = "login.html"
+    # В случае успеха перенаправим на главную.
+    success_url = settings.SUCCESS_URL
+
+    def form_valid(self, form):
+        # Получаем объект пользователя на основе введённых в форму данных.
+        self.user = form.get_user()
+        # Выполняем аутентификацию пользователя.
+        login(self.request, self.user)
+
+        return super(LoginFormView, self).form_valid(form)
+
+######################################################################################################################
+
+
+class ViewTables(tables.Table):
+
+    link_col = tables.Column(verbose_name='', orderable=False, accessor='link')
+
+    class Meta:
+        model = Employer
+        fields = ('Owner', 'Title', 'Status', 'link_col')
+        template_name = 'table.html'
+        attrs = {
+            'class': 'table table-sm table-hover',
+        }

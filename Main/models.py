@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from .choices import ROLE_CHOICES, STATUS_CHOICES, INFO_CHOICES, METHOD_CHOICES, RESULT_CHOICES
+from django.utils.html import format_html
 
 ######################################################################################################################
 
@@ -9,7 +10,7 @@ class UserProfile(models.Model):
     role = models.SmallIntegerField('Роль', choices=ROLE_CHOICES, default=0, null=False, blank=False, )
 
     def __str__(self):
-        return '{0}'.format(self.user)
+        return '{0}'.format(self.user.get_full_name())
 
     class Meta:
         ordering = 'user',
@@ -23,7 +24,7 @@ class Employer(models.Model):
     Status = models.SmallIntegerField('Статус', choices=STATUS_CHOICES, default=0, )
     Result = models.SmallIntegerField('Результат', choices=RESULT_CHOICES, null=True, )
     Number = models.CharField('Учётный номер', max_length=128, default='', )
-    Title = models.CharField('Наименование полное', max_length=1024, default='', )
+    Title = models.CharField('Наименование работодателя', max_length=1024, default='', )
     INN = models.CharField('ИНН', max_length=20, default='', )
     OGRN = models.CharField('ОГРН', max_length=20, default='', )
     JurAddress = models.CharField('Адрес юридический', max_length=256, default='', )
@@ -36,12 +37,15 @@ class Employer(models.Model):
     RegKatharsis = models.BooleanField('Зарегистрирован в ПК Катарсис', default=False, )
     Archive = models.BooleanField('Архивная карточка', default=False, )
     Contact = models.CharField('Контакт основной', max_length=512, default='', )
-    Owner = models.ForeignKey(UserProfile, verbose_name='Создатель карточки', null=True, related_name='Owner', on_delete=models.SET_NULL, )
+    Owner = models.ForeignKey(UserProfile, verbose_name='Автор карточки', null=True, related_name='Owner', on_delete=models.SET_NULL, )
     Respons = models.ForeignKey(UserProfile, verbose_name='Ответственное лицо', null=True, default=None, related_name='Respons', on_delete=models.SET_NULL, )
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
     def __str__(self):
         return '{0}'.format(self.Title)
+
+    def link(self):
+        return format_html('<a href="/emp/{0}/" class="btn btn-info btn-sm" role="button">Перейти</a>', self.id)
 
     class Meta:
         ordering = 'Title',
