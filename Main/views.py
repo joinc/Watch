@@ -55,8 +55,45 @@ def index(request):
 ######################################################################################################################
 
 
-def emp_list(request, profile, status, breadcrumb):
+def emp_search(request):
 
+    profile = get_object_or_404(UserProfile, user=request.user)
+    breadcrumb = 'Все карточки'
+
+    if request.GET:
+        find = request.GET.get('find', None)
+        czn = request.GET.get('czn', 0)
+        status = request.GET.get('status', 20)
+        search_form = FormSearch({'find': find})
+        filter_czn_form = FormFilterCzn({'czn': czn})
+        filter_status_form = FormFilterStatus({'status': status})
+        if search_form.is_valid():
+            oEmp = tools.emp_filter(find, czn, status)
+        else:
+            return HttpResponseRedirect(reverse('all'))
+        if 'export' in request.GET:
+            return emp_export(oEmp)
+    else:
+        search_form = FormSearch()
+        filter_czn_form = FormFilterCzn()
+        filter_status_form = FormFilterStatus()
+        oEmp = Employer.objects.all()
+
+    table = ViewTables(oEmp)
+    RequestConfig(request, paginate={'per_page': 3}).configure(table)
+
+    acnt = oEmp.count()
+    oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
+    vcnt = oEmp.count()
+    return render(request, 'list_get.html',
+                  {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
+                   'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile,
+                   'breadcrumb': breadcrumb, 'table': table, })
+
+######################################################################################################################
+
+
+def emp_list(request, profile, status, breadcrumb):
     oEmp = []
     search_form = FormSearch()
     filter_czn_form = FormFilterCzn()
@@ -74,7 +111,7 @@ def emp_list(request, profile, status, breadcrumb):
         filter_status_form = FormFilterStatus()
 
     table = ViewTables(oEmp)
-    RequestConfig(request, paginate={'per_page': 20}).configure(table)
+    RequestConfig(request, paginate={'per_page': settings.STOP_LIST}).configure(table)
 
     acnt = oEmp.__len__()
     oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
@@ -87,7 +124,7 @@ def emp_list(request, profile, status, breadcrumb):
 ######################################################################################################################
 
 
-def emp_find_list(request):
+def emp_find_list(request, page=1):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse('login'))
 
@@ -109,17 +146,13 @@ def emp_find_list(request):
         filter_status_form = FormFilterStatus()
         oEmp = Employer.objects.all()
 
-    table = ViewTables(oEmp)
-    RequestConfig(request, paginate={'per_page': 20}).configure(table)
-
-
     acnt = oEmp.count()
     oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
     vcnt = oEmp.count()
     return render(request, 'list.html',
                   {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
                    'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile,
-                   'breadcrumb': breadcrumb, 'table': table, })
+                   'breadcrumb': breadcrumb, 'page': page, })
 
 ######################################################################################################################
 # Выводит список всех карточек

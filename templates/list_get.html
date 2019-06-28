@@ -13,14 +13,13 @@
                 </ol>
             </div>
         </div>
-        <form method='post' action='{% url 'find' %}'>
+        <form method='get' action='{% url 'search' %}'>
             <div class="row">
                 <div class="col-auto mr-auto flex-fill">
                     <div class="input-group mb-3">
                         {{ filter_czn_form }}
                         {{ filter_status_form }}
                         {{ search_form }}
-                        {% csrf_token %}
                         <div class="input-group-append">
                             <button class="btn btn-info" type="submit">Поиск</button>
                         </div>
@@ -37,27 +36,7 @@
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-
-        <table class="table table-hover table-sm">
-            <thead>
-            <tr>
-                <th scope="col">Автор карточки</th>
-                <th scope="col">Наименование работодателя</th>
-                <th scope="col">Статус</th>
-                <th scope="col"></th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for i in oEmp %}
-                <tr{% ifequal i.Status 9 %} class="table-success"{% endifequal %}{% ifequal i.Status 12 %} class="table-success"{% endifequal %}{% ifequal i.Status 1 %} class="table-danger"{% endifequal %}>
-                    <td>{{ i.Owner.user.get_full_name }}</td>
-                    <td>{{ i.Title }}</td>
-                    <td>{{ i.get_Status_display }}</td>
-                    <td><a href="{% url 'emp' i.id %}" class="btn btn-info btn-sm" role="button">Перейти</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
     </div>
-    {{ page }}
+    {% render_table table %}
+
 {% endblock %}
