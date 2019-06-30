@@ -1,35 +1,30 @@
 # -*- coding: utf-8 -*-
 
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect, HttpResponse
-from django.urls import reverse
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import login, logout
-from django.views.generic.edit import FormView
-from Main.models import UserProfile, TempEmployer, Employer, Event, Notify, ConfigWatch
-from Main import message, tools
 from datetime import date, datetime, timedelta
-from django.contrib.auth.models import User
+from django.http import HttpResponse
+from django.contrib import messages
+from django.contrib.auth.models import auth, User
+from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
+from django.shortcuts import render, get_object_or_404, redirect, reverse
 from .forms import FormRole, FormResult, FormSearch, FormEmp, FormNotice, FormFilterCzn, FormFilterStatus, \
     FormRespons, FormMonth
 from .choices import RESULT_CHOICES
+from .models import UserProfile, TempEmployer, Employer, Event, Notify, ConfigWatch
+from Main import message, tools
 from django.conf import settings
-import xlrd
-import calendar
 from pyexcel_ods3 import save_data
 from collections import OrderedDict
-import mimetypes, os
-import django_tables2 as tables
-from django_tables2 import RequestConfig
-
+import xlrd
+import calendar
+import mimetypes
+import os
 
 ######################################################################################################################
 
 
+@login_required
 def index(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
     oAll = Employer.objects.all().count()
@@ -55,40 +50,27 @@ def index(request):
 ######################################################################################################################
 
 
-def emp_search(request):
-
-    profile = get_object_or_404(UserProfile, user=request.user)
-    breadcrumb = 'Все карточки'
-
-    if request.GET:
-        find = request.GET.get('find', None)
-        czn = request.GET.get('czn', 0)
-        status = request.GET.get('status', 20)
-        search_form = FormSearch({'find': find})
-        filter_czn_form = FormFilterCzn({'czn': czn})
-        filter_status_form = FormFilterStatus({'status': status})
-        if search_form.is_valid():
-            oEmp = tools.emp_filter(find, czn, status)
+def login(request):
+    if request.POST:
+        username = request.POST['username']
+        password = request.POST['password']
+        user = auth.authenticate(username=username, password=password)
+        if user is not None:
+            auth.login(request, user)
+            #return redirect(request.META.get('HTTP_REFERER'))
+            return redirect(settings.SUCCESS_URL)
         else:
-            return HttpResponseRedirect(reverse('all'))
-        if 'export' in request.GET:
-            return emp_export(oEmp)
+            messages.info(request, 'Не правильно введенные данные')
+            return redirect(reverse('login'))
     else:
-        search_form = FormSearch()
-        filter_czn_form = FormFilterCzn()
-        filter_status_form = FormFilterStatus()
-        oEmp = Employer.objects.all()
+        return render(request, 'login.html')
 
-    table = ViewTables(oEmp)
-    RequestConfig(request, paginate={'per_page': 3}).configure(table)
+######################################################################################################################
 
-    acnt = oEmp.count()
-    oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
-    vcnt = oEmp.count()
-    return render(request, 'list_get.html',
-                  {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
-                   'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile,
-                   'breadcrumb': breadcrumb, 'table': table, })
+
+def logout(request):
+    auth.logout(request)
+    return redirect(reverse('index'))
 
 ######################################################################################################################
 
@@ -110,26 +92,22 @@ def emp_list(request, profile, status, breadcrumb):
     else:
         filter_status_form = FormFilterStatus()
 
-    table = ViewTables(oEmp)
-    RequestConfig(request, paginate={'per_page': settings.STOP_LIST}).configure(table)
-
     acnt = oEmp.__len__()
     oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
     vcnt = oEmp.__len__()
     return render(request, 'list.html',
                   {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
                    'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile,
-                   'breadcrumb': breadcrumb, 'table': table, })
+                   'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
 
+@login_required
 def emp_find_list(request, page=1):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
-    breadcrumb = 'Все карточки'
+    breadcrumb = 'Поиск карточек'
     if request.POST:
         search_form = FormSearch(request.POST)
         filter_czn_form = FormFilterCzn(request.POST)
@@ -137,7 +115,7 @@ def emp_find_list(request, page=1):
         if search_form.is_valid():
             oEmp = tools.emp_filter(request.POST['find'], request.POST['czn'], request.POST['status'])
         else:
-            return HttpResponseRedirect(reverse('all'))
+            return redirect(reverse('all'))
         if 'export' in request.POST:
             return emp_export(oEmp)
     else:
@@ -155,72 +133,67 @@ def emp_find_list(request, page=1):
                    'breadcrumb': breadcrumb, 'page': page, })
 
 ######################################################################################################################
-# Выводит список всех карточек
 
+
+@login_required
 def emp_all_list(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
+    # Выводит список всех карточек
     profile = get_object_or_404(UserProfile, user=request.user)
     return emp_list(request, profile, range(13), 'Все карточки')
 
 
 ######################################################################################################################
-# Выводит список карточек в статусе Черновик
 
+
+@login_required
 def emp_draft_list(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
+    # Выводит список карточек в статусе Черновик
     profile = get_object_or_404(UserProfile, user=request.user)
     return emp_list(request, profile, ['0', '1'], 'Черновики')
 
 ######################################################################################################################
-# Выводит список карточек в статусе Карточки на проверке
 
+
+@login_required
 def emp_check_list(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
+    # Выводит список карточек в статусе Карточки на проверке
     profile = get_object_or_404(UserProfile, user=request.user)
     return emp_list(request, profile, ['2'], 'Карточки на проверке')
 
 ######################################################################################################################
-# Выводит список карточек в статусе В работе
 
+
+@login_required
 def emp_work_list(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
+    # Выводит список карточек в статусе В работе
     profile = get_object_or_404(UserProfile, user=request.user)
     return emp_list(request, profile, ['3', '4', '5', '6', '7', '11'], 'Карточки в работе')
 
 ######################################################################################################################
-# Выводит список карточек в статусе Вынесено постановлений
 
+
+@login_required
 def emp_ready_list(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
+    # Выводит список карточек в статусе Вынесено постановлений
     profile = get_object_or_404(UserProfile, user=request.user)
     return emp_list(request, profile, ['9'], 'Вынесено постановлений')
 
 ######################################################################################################################
-# Выводит список карточек в статусе Закрытые карточки
 
+
+@login_required
 def emp_closed_list(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
+    # Выводит список карточек в статусе Закрытые карточки
     profile = get_object_or_404(UserProfile, user=request.user)
     return emp_list(request, profile, ['12'], 'Закрытые карточки')
 
 ######################################################################################################################
 
 
+@login_required
 def emp_load(request):
     if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
+        return redirect(reverse('index'))
     profile = get_object_or_404(UserProfile, user=request.user)
 
     return render(request, 'load.html', {'profile': profile, })
@@ -228,9 +201,10 @@ def emp_load(request):
 ######################################################################################################################
 
 
+@login_required
 def emp_upload(request):
     if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
+        return redirect(reverse('index'))
 
     TempEmployer.objects.all().delete()
     for count, x in enumerate(request.FILES.getlist('files')):
@@ -267,7 +241,7 @@ def emp_upload(request):
     UpDate = ConfigWatch()
     UpDate.UploadDate = datetime.now()
     UpDate.save()
-    return HttpResponseRedirect(reverse('emps'))
+    return redirect(reverse('emps'))
 
 ######################################################################################################################
 
@@ -299,10 +273,8 @@ def emp_export(oEmp):
 ######################################################################################################################
 
 
+@login_required
 def create_temp_emp(request, temp_employer_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     temp_emp = get_object_or_404(TempEmployer, id=temp_employer_id)
     emp = Employer()
@@ -323,19 +295,17 @@ def create_temp_emp(request, temp_employer_id):
     emp.save()
     tools.event_create(emp, emp.Owner, 'Создана карточка предприятия', None)
     if profile.role == 1:
-        return HttpResponseRedirect(reverse('edit', args=(emp.id,)))
+        return redirect(reverse('edit', args=(emp.id,)))
     elif profile.role == 3:
-        return HttpResponseRedirect(reverse('archedit', args=(emp.id,)))
+        return redirect(reverse('archedit', args=(emp.id,)))
     else:
-        return HttpResponseRedirect(reverse('delete', args=(emp.id, )))
+        return redirect(reverse('delete', args=(emp.id, )))
 
 ######################################################################################################################
 
 
+@login_required
 def temp_arch_new(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     emp = Employer()
     emp.Status = 0
@@ -345,17 +315,15 @@ def temp_arch_new(request):
     emp.save()
     tools.event_create(emp, emp.Owner, 'Создана карточка предприятия', None)
     if profile.role == 3:
-        return HttpResponseRedirect(reverse('archedit', args=(emp.id,)))
+        return redirect(reverse('archedit', args=(emp.id,)))
     else:
-        return HttpResponseRedirect(reverse('delete', args=(emp.id, )))
+        return redirect(reverse('delete', args=(emp.id, )))
 
 ######################################################################################################################
 
 
+@login_required
 def temp_emp_list(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     oFind = ''
     profile = get_object_or_404(UserProfile, user=request.user)
     if request.POST:
@@ -368,7 +336,7 @@ def temp_emp_list(request):
             scnt = oTempEmp.count()
             aEmp = oTempEmp[settings.START_LIST:settings.STOP_LIST]
         else:
-            return HttpResponseRedirect(reverse('emps'))
+            return redirect(reverse('emps'))
     else:
         search_form = FormSearch
         scnt = TempEmployer.objects.all().count()
@@ -387,22 +355,12 @@ def temp_emp_list(request):
 ######################################################################################################################
 
 
-def Logout(request):
-    logout(request)
-    return HttpResponseRedirect(reverse('index'))
-
-######################################################################################################################
-
-
+@login_required
 def employer_arch_edit(request, employer_id):
-
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     emp = get_object_or_404(Employer, id=employer_id)
     profile = get_object_or_404(UserProfile, user=request.user)
     if emp.Owner != profile or (emp.Status != 0 and emp.Status != 1):
-        return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
+        return redirect(reverse('emp', args=(emp.id,)))
 
     form = FormEmp(initial={'oTitle': emp.Title,
                             'oJurAddress': emp.JurAddress,
@@ -427,10 +385,8 @@ def employer_arch_edit(request, employer_id):
 ######################################################################################################################
 
 
+@login_required
 def employer_arch_save(request, employer_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     if request.POST:
         comment = request.POST['comment']
@@ -455,17 +411,15 @@ def employer_arch_save(request, employer_id):
         emp.save()
         tools.event_create(emp, profile, comment, myfile)
         message.message_create(emp.id, 0, comment, profile)
-        return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
+        return redirect(reverse('emp', args=(emp.id,)))
 
-    return HttpResponseRedirect(reverse('index'))
+    return redirect(reverse('index'))
 
 ######################################################################################################################
 
 
+@login_required
 def notify_add(request, employer_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     emp = get_object_or_404(Employer, id=employer_id)
     if request.POST:
@@ -480,30 +434,26 @@ def notify_add(request, employer_id):
             noti.Attache.save(myfile.name, myfile)
         noti.Comment = request.POST['oNotifyComment']
         noti.save()
-        return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
+        return redirect(reverse('emp', args=(emp.id,)))
 
 ######################################################################################################################
 
 
+@login_required
 def notify_delete(request, notify_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     noti = get_object_or_404(Notify, id=notify_id)
     emp_id = noti.EmpNotifyID_id
     if noti.EmpNotifyID.Owner == profile:
         noti.Attache.delete()
         noti.delete()
-    return HttpResponseRedirect(reverse('emp', args=(emp_id,)))
+    return redirect(reverse('emp', args=(emp_id,)))
 
 ######################################################################################################################
 
 
+@login_required
 def event_add(request, employer_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     emp = get_object_or_404(Employer, id=employer_id)
     if request.POST:
@@ -563,17 +513,15 @@ def event_add(request, employer_id):
         tools.event_create(emp, profile, comment, myfile)
         message.message_create(emp.id, 0, comment, profile)
 
-        return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
+        return redirect(reverse('emp', args=(emp.id,)))
 
-    return HttpResponseRedirect(reverse('index'))
+    return redirect(reverse('index'))
 
 ######################################################################################################################
 
 
+@login_required
 def report_list(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     breadcrumb = 'Список отчетов'
     month_form = FormMonth()
@@ -583,17 +531,15 @@ def report_list(request):
 ######################################################################################################################
 
 
+@login_required
 def report_view(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     breadcrumb = 'Отчет на выбранную дату'
     if request.POST:
         month = int(request.POST['month'])
         month_form = FormMonth({'month': month})
     else:
-        return HttpResponseRedirect(reverse('reportlist'))
+        return redirect(reverse('reportlist'))
     curr_date = datetime(2018, 10, 1)
     i = 0
     while i < month:
@@ -623,15 +569,13 @@ def report_view(request):
 
     return render(request, 'report_view.html',
                   {'profile': profile, 'breadcrumb': breadcrumb, 'curr_date': curr_date, 'month_form': month_form,
-                   'elist': elist, 'aw': aw, 'ac': ac, 'ar': ar, 'emp_all': emp_all })
+                   'elist': elist, 'aw': aw, 'ac': ac, 'ar': ar, 'emp_all': emp_all, })
 
 ######################################################################################################################
 
 
+@login_required
 def respons_list(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     breadcrumb = 'Назначение ответственных лиц'
     respons_form = FormRespons()
@@ -643,29 +587,27 @@ def respons_list(request):
 ######################################################################################################################
 
 
+@login_required
 def respons_set(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     if request.POST:
         oRespons = request.POST['respons']
         oEmp = request.POST['emp']
     else:
-        return HttpResponseRedirect(reverse('responslist'))
+        return redirect(reverse('responslist'))
 
     emp = get_object_or_404(Employer, id=oEmp)
     respons = get_object_or_404(UserProfile, id=oRespons)
     emp.Respons = respons
     emp.save()
 
-    return HttpResponseRedirect(reverse('responslist'))
+    return redirect(reverse('responslist'))
 
 ######################################################################################################################
 
 
 def user_list(request):
     if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
+        return redirect(reverse('index'))
 
     profile = get_object_or_404(UserProfile, user=request.user)
     role_form = FormRole()
@@ -676,20 +618,21 @@ def user_list(request):
         if UserProfile.objects.filter(user=u).count() == 0:
             ulist.append(u)
 
-    return render(request, 'users.html', {'ulist': ulist, 'plist': plist, 'role_form': role_form, 'profile': profile, })
+    return render(request, 'users.html',
+                  {'ulist': ulist, 'plist': plist, 'role_form': role_form, 'profile': profile, })
 
 ######################################################################################################################
 
 
 def user_role(request):
     if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
+        return redirect(reverse('index'))
 
     if request.POST:
         oRole = request.POST['role']
         oUser = request.POST['user']
     else:
-        return HttpResponseRedirect(reverse('users'))
+        return redirect(reverse('users'))
 
     profiles = UserProfile.objects.filter(user_id=oUser)
     if len(profiles) > 0:
@@ -702,14 +645,14 @@ def user_role(request):
         user_profile.role = oRole
         user_profile.save()
 
-    return HttpResponseRedirect(reverse('users'))
+    return redirect(reverse('users'))
 
 ######################################################################################################################
 
 
 def send_email(request):
     if not request.user.is_superuser:
-        return HttpResponseRedirect(reverse('index'))
+        return redirect(reverse('index'))
 
     email = ['yubelyakov@omskzan.ru']
     data = """
@@ -719,38 +662,6 @@ def send_email(request):
     С Уважением Робот.
     """
     send_mail('Заголовок', data, settings.DEFAULT_FROM_EMAIL, email, fail_silently=False)
-    return HttpResponseRedirect(reverse('index'))
+    return redirect(reverse('index'))
 
 ######################################################################################################################
-
-
-class LoginFormView(FormView):
-    form_class = AuthenticationForm
-
-    # Аналогично регистрации, только используем шаблон аутентификации.
-    template_name = "login.html"
-    # В случае успеха перенаправим на главную.
-    success_url = settings.SUCCESS_URL
-
-    def form_valid(self, form):
-        # Получаем объект пользователя на основе введённых в форму данных.
-        self.user = form.get_user()
-        # Выполняем аутентификацию пользователя.
-        login(self.request, self.user)
-
-        return super(LoginFormView, self).form_valid(form)
-
-######################################################################################################################
-
-
-class ViewTables(tables.Table):
-
-    link_col = tables.Column(verbose_name='', orderable=False, accessor='link')
-
-    class Meta:
-        model = Employer
-        fields = ('Owner', 'Title', 'Status', 'link_col')
-        template_name = 'table.html'
-        attrs = {
-            'class': 'table table-sm table-hover',
-        }

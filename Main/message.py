@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.shortcuts import render, get_object_or_404, reverse, redirect
 from Main.models import UserProfile, Employer, Message
 from django.conf import settings
 
@@ -44,7 +42,7 @@ def message_create(empid, group, text, sender):
 
 def message_list(request):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
+        return redirect(reverse('login'))
 
     breadcrumb = 'Уведомления'
     profile = get_object_or_404(UserProfile, user=request.user)
@@ -58,10 +56,10 @@ def message_list(request):
 
 def message_read(request, message_id):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
+        return redirect(reverse('login'))
 
     oMessage = get_object_or_404(Message, id=message_id)
     oMessage.Reading = True
     oMessage.save()
-    return HttpResponseRedirect(reverse('messagelist'))
+    return redirect(reverse('messagelist'))
 

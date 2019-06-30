@@ -84,29 +84,29 @@
                 <p class="card-text">
                     <dl class="row">
                         <dt class="col-sm-4">Юридический адрес:</dt>
-                        <dd class="col-sm-8">{{ emp.JurAddress }}</dd>
+                <dd class="col-sm-8">{{ emp.JurAddress }}</dd>
                         <dt class="col-sm-4">Фактический адрес:</dt>
                         <dd class="col-sm-8">{{ emp.FactAddress }}</dd>
                     </dl>
-                    <hr class="my-4">
+                    <hr class="my-2">
                     <dl class="row">
                         <dt class="col-sm-4">ИНН:</dt>
                         <dd class="col-sm-8">{{ emp.INN }}</dd>
                         <dt class="col-sm-4">ОГРН:</dt>
                         <dd class="col-sm-8">{{ emp.OGRN }}</dd>
                     </dl>
-                    <hr class="my-4">
+                    <hr class="my-2">
                     {% if not emp.Archive %}
                         <dl class="row">
                             <dt class="col-sm-4" title='Указывается для работодателей, разместивших сведения о вакансиях в информационно-телекоммуникационой сети "Интернет", включая информационно-аналитическую систему Общероссийская база вакансий "Работа в России", а также на сйтах организаций, предоставляющих услуги по подбору работников, в средствах массовой информации Омской области, в том числе периодических печатных изданиях'>Дата размещения вакансии*:</dt>
                             <dd class="col-sm-8">{% if emp.VacancyDate %}{{ emp.VacancyDate }} {% endif %}{% if emp.VacancyComment != '' %}{{ emp.VacancyComment }}{% endif %}</dd>
                         </dl>
-                        <hr class="my-4">
+                        <hr class="my-2">
                         <dl class="row">
                             <dt class="col-sm-4">Дата последнего взаимодействия работодателя и центра занятости:</dt>
                             <dd class="col-sm-8">{% if emp.EventDate %}{{ emp.EventDate }} {% endif %}{% if emp.EventComment != '' %}{{ emp.EventComment }}{% endif %}</dd>
                         </dl>
-                        <hr class="my-4">
+                        <hr class="my-2">
                         <dl class="row">
                             <dt class="col-sm-4">Наименование непредставленной, представленной с нарушением сроков или не в полном объеме информации в центре занятости в соответствии с законодательством о занятости:</dt>
                             <dd class="col-sm-8">
@@ -119,34 +119,34 @@
                                 </ul>
                             </dd>
                         </dl>
-                        <hr class="my-4">
+                        <hr class="my-2">
                         <dl class="row">
                             <dt class="col-sm-4">Дата информирования работодателя центром занятости о необходимости предоставления информации о наличии свободных рабочих мест и вакантных должностей:</dt>
                             <dd class="col-sm-8">
                                 <ul class="list-group list-group-flush">
                                     {% for notify in notifylist %}
                                         <li class="list-group-item bg-light">
-                                            {{ notify.NotifyDate }} {{ notify.get_Method_display }} {% ifnotequal notify.Comment '' %}(Комментарий: {{ notify.Comment }}){% endifnotequal %}{% if notify.Attache %} <a href="{{ notify.Attache.url }}">Скачать приложение</a> {% endif %} - {{ notify.CreateDate }}, {% firstof notify.Owner.user.get_full_name notify.Owner.user %}
+                                            {% if notify.NotifyDate %}{{ notify.NotifyDate }}{% else %}Дата не указана{% endif %}, {{ notify.get_Method_display }} {% ifnotequal notify.Comment '' %}(Комментарий: {{ notify.Comment }}){% endifnotequal %}{% if notify.Attache %} <a href="{{ notify.Attache.url }}">Скачать приложение</a> {% endif %} - {{ notify.CreateDate }}, {% firstof notify.Owner.user.get_full_name notify.Owner.user %}
                                         </li>
                                     {% endfor %}
                                 </ul>
                             </dd>
                         </dl>
-                        <hr class="my-4">
+                        <hr class="my-2">
                         <dl class="row">
                             <dt class="col-sm-4">Дата направления информации в отдел трудоустройства и специальных программ Главного управления государственной службы занятости населения Омской области:</dt>
                             <dd class="col-sm-8">{% if emp.SendDate %}{{ emp.SendDate }}{% endif %}</dd>
                         </dl>
-                        <hr class="my-4">
+                        <hr class="my-2">
                     {% endif %}
                     <dl class="row">
                         <dt class="col-sm-4">Контакт:</dt>
                         <dd class="col-sm-8">{{ emp.Contact }}</dd>
                     </dl>
-                    <hr class="my-4">
+                    <hr class="my-2">
                     <dl class="row">
                         <dt class="col-sm-4">Зарегистрирован в ПК Катарсис:</dt>
-                        <dd class="col-sm-8">{% if emp.RegKatharsis == True %}ДА{% else %}НЕТ{% endif %}</dd>
+                        <dd class="col-sm-8">{% if emp.RegKatharsis %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-times"></i>{% endif %}</dd>
                         <dt class="col-sm-4">Запросить выписку из ЕГРЮЛ:</dt>
                         <dd class="col-sm-8"><a href="https://egrul.nalog.ru/" target="_blank">Перейти</a></dd>
                     </dl>
@@ -170,13 +170,11 @@
                         <div class="input-group-prepend">
                             <button type="submit" name='accept' class="btn btn-success">Принято</button>
                             <button type="submit" name='return' class="btn btn-warning">Возврат для доработки по причине:</button>
-                            {{ return_form.return_result }}
                         </div>
-                        <div class="input-group-append">
-                            {{ return_form.return_comment }}
-                        </div>
-                        {% csrf_token %}
+                        {{ return_form.return_result }}
+                        {{ return_form.return_comment }}
                     </div>
+                    {% csrf_token %}
                 </form>
             {% endifequal %}
         {% endifequal %}

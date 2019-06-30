@@ -1,0 +1,14 @@
+dl {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+dd {
+    margin-bottom: 0;
+}
+
+.list-group-item {
+    padding-left: 0;
+    padding-top: 0;
+    border: 0 solid rgba(0,0,0,.125);
+}

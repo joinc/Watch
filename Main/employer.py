@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.shortcuts import render, get_object_or_404, redirect, reverse
+from django.contrib.auth.decorators import login_required
 from Main.models import UserProfile, Employer, Event, Info, Notify
 from Main import tools, message
 from datetime import datetime
@@ -12,30 +11,25 @@ from .choices import RETURN_CHOICES
 ######################################################################################################################
 
 
+@login_required
 def employer_new(request):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     emp = Employer()
     emp.Owner = profile
     emp.RegKatharsis = False
     emp.save()
     tools.event_create(emp, emp.Owner, 'Создана карточка предприятия', None)
-    return HttpResponseRedirect(reverse('edit', args=(emp.id,)))
+    return redirect(reverse('edit', args=(emp.id,)))
 
 ######################################################################################################################
 
 
+@login_required
 def employer_view(request, employer_id):
-
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     emp = get_object_or_404(Employer, id=employer_id)
     if emp.Owner == profile and (emp.Status == 0 or emp.Status == 1):
-        return HttpResponseRedirect(reverse('edit', args=(emp.id,)))
+        return redirect(reverse('edit', args=(emp.id,)))
 
     return_form = FormReturn()
     result_form = FormResult()
@@ -66,10 +60,8 @@ def employer_view(request, employer_id):
 ######################################################################################################################
 
 
+@login_required
 def employer_save(request, employer_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     if request.POST:
         emp = get_object_or_404(Employer, id=employer_id)
@@ -95,7 +87,7 @@ def employer_save(request, employer_id):
             inf.Name = request.POST['oInfName']
             inf.save()
             emp.save()
-            return HttpResponseRedirect(reverse('edit', args=(emp.id,)))
+            return redirect(reverse('edit', args=(emp.id,)))
         elif 'notify' in request.POST:
             noti = Notify()
             noti.EmpNotifyID = emp
@@ -109,32 +101,29 @@ def employer_save(request, employer_id):
             noti.Comment = request.POST['oNotifyComment']
             noti.save()
             emp.save()
-            return HttpResponseRedirect(reverse('edit', args=(emp.id,)))
+            return redirect(reverse('edit', args=(emp.id,)))
         elif 'send' in request.POST:
             emp.SendDate = datetime.now()
             emp.Status = 2
         emp.save()
         tools.event_create(emp, profile, 'Сохранена карточка предприятия, направлена на проверку в отдел '
                                          'трудоустройства и специальных программ Главного управления', None)
-        return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
+        return redirect(reverse('emp', args=(emp.id,)))
 
-    return HttpResponseRedirect(reverse('index'))
+    return redirect(reverse('index'))
 
 ######################################################################################################################
 
 
+@login_required
 def employer_edit(request, employer_id):
-
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     emp = get_object_or_404(Employer, id=employer_id)
     profile = get_object_or_404(UserProfile, user=request.user)
     if emp.Owner != profile or (emp.Status != 0 and emp.Status != 1):
-        return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
+        return redirect(reverse('emp', args=(emp.id,)))
 
     if emp.Archive:
-        return HttpResponseRedirect(reverse('archedit', args=(emp.id,)))
+        return redirect(reverse('archedit', args=(emp.id,)))
 
     form = FormEmp(initial={'oTitle': emp.Title,
                             'oJurAddress': emp.JurAddress,
@@ -159,10 +148,8 @@ def employer_edit(request, employer_id):
 ######################################################################################################################
 
 
+@login_required
 def employer_print(request, employer_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     emp = get_object_or_404(Employer, id=employer_id)
     eventlist = Event.objects.filter(EmpEventID=emp)
@@ -174,23 +161,19 @@ def employer_print(request, employer_id):
 ######################################################################################################################
 
 
+@login_required
 def employer_delete(request, employer_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     profile = get_object_or_404(UserProfile, user=request.user)
     emp = get_object_or_404(Employer, id=employer_id)
     if (emp.Status == 0 and emp.Owner == profile) or profile.role == 3:
         emp.delete()
-    return HttpResponseRedirect(reverse('index'))
+    return redirect(reverse('index'))
 
 ######################################################################################################################
 
 
+@login_required
 def employer_audit(request, employer_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     if request.POST:
         profile = get_object_or_404(UserProfile, user=request.user)
         emp = get_object_or_404(Employer, id=employer_id)
@@ -214,17 +197,15 @@ def employer_audit(request, employer_id):
             tools.event_create(emp, profile, return_message, None)
             message.message_create(emp.id, 0, return_message, profile)
 
-        return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
+        return redirect(reverse('emp', args=(emp.id,)))
 
-    return HttpResponseRedirect(reverse('index'))
+    return redirect(reverse('index'))
 
 ######################################################################################################################
 
 
+@login_required
 def employer_close(request, employer_id):
-    if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse('login'))
-
     if request.POST:
         profile = get_object_or_404(UserProfile, user=request.user)
         emp = get_object_or_404(Employer, id=employer_id)
@@ -235,5 +216,5 @@ def employer_close(request, employer_id):
             close_message = 'Карточка предприятия закрыта по причине: ' + oComment
             tools.event_create(emp, profile, close_message, None)
             message.message_create(emp.id, 0, close_message, profile)
-        return HttpResponseRedirect(reverse('emp', args=(emp.id,)))
-    return HttpResponseRedirect(reverse('index'))
+        return redirect(reverse('emp', args=(emp.id,)))
+    return redirect(reverse('index'))
