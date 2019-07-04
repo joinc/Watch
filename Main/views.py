@@ -75,8 +75,9 @@ def logout(request):
 ######################################################################################################################
 
 
-def emp_list(request, profile, status, breadcrumb):
+def emp_list(request, status, breadcrumb):
     oEmp = []
+    profile = get_object_or_404(UserProfile, user=request.user)
     search_form = FormSearch()
     filter_czn_form = FormFilterCzn()
     for i in status:
@@ -105,7 +106,6 @@ def emp_list(request, profile, status, breadcrumb):
 
 @login_required
 def emp_find_list(request, page=1):
-
     profile = get_object_or_404(UserProfile, user=request.user)
     breadcrumb = 'Поиск карточек'
     if request.POST:
@@ -138,8 +138,7 @@ def emp_find_list(request, page=1):
 @login_required
 def emp_all_list(request):
     # Выводит список всех карточек
-    profile = get_object_or_404(UserProfile, user=request.user)
-    return emp_list(request, profile, range(13), 'Все карточки')
+    return emp_list(request, range(13), 'Все карточки')
 
 
 ######################################################################################################################
@@ -148,8 +147,7 @@ def emp_all_list(request):
 @login_required
 def emp_draft_list(request):
     # Выводит список карточек в статусе Черновик
-    profile = get_object_or_404(UserProfile, user=request.user)
-    return emp_list(request, profile, ['0', '1'], 'Черновики')
+    return emp_list(request, ['0', '1'], 'Черновики')
 
 ######################################################################################################################
 
@@ -157,8 +155,7 @@ def emp_draft_list(request):
 @login_required
 def emp_check_list(request):
     # Выводит список карточек в статусе Карточки на проверке
-    profile = get_object_or_404(UserProfile, user=request.user)
-    return emp_list(request, profile, ['2'], 'Карточки на проверке')
+    return emp_list(request, ['2'], 'Карточки на проверке')
 
 ######################################################################################################################
 
@@ -166,8 +163,7 @@ def emp_check_list(request):
 @login_required
 def emp_work_list(request):
     # Выводит список карточек в статусе В работе
-    profile = get_object_or_404(UserProfile, user=request.user)
-    return emp_list(request, profile, ['3', '4', '5', '6', '7', '11'], 'Карточки в работе')
+    return emp_list(request, ['3', '4', '5', '6', '7', '11'], 'Карточки в работе')
 
 ######################################################################################################################
 
@@ -175,8 +171,7 @@ def emp_work_list(request):
 @login_required
 def emp_ready_list(request):
     # Выводит список карточек в статусе Вынесено постановлений
-    profile = get_object_or_404(UserProfile, user=request.user)
-    return emp_list(request, profile, ['9'], 'Вынесено постановлений')
+    return emp_list(request, ['9'], 'Вынесено постановлений')
 
 ######################################################################################################################
 
@@ -184,8 +179,7 @@ def emp_ready_list(request):
 @login_required
 def emp_closed_list(request):
     # Выводит список карточек в статусе Закрытые карточки
-    profile = get_object_or_404(UserProfile, user=request.user)
-    return emp_list(request, profile, ['12'], 'Закрытые карточки')
+    return emp_list(request, ['12'], 'Закрытые карточки')
 
 ######################################################################################################################
 
