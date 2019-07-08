@@ -1,0 +1,8 @@
+            {% for i in oEmp %}
+                <tr{% ifequal i.Status 9 %} class="table-success"{% endifequal %}{% ifequal i.Status 12 %} class="table-success"{% endifequal %}{% ifequal i.Status 1 %} class="table-danger"{% endifequal %}>
+                    <td>{{ i.Owner.user.get_full_name }}</td>
+                    <td>{{ i.Title }}</td>
+                    <td>{{ i.get_Status_display }}</td>
+                    <td><a href="{% url 'emp' i.id %}" class="btn btn-info btn-sm" role="button">Перейти</a></td>
+                </tr>
+            {% endfor %}

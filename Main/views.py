@@ -93,44 +93,65 @@ def emp_list(request, status, breadcrumb):
     else:
         filter_status_form = FormFilterStatus()
 
-    acnt = oEmp.__len__()
-    oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
-    vcnt = oEmp.__len__()
-    return render(request, 'list.html',
-                  {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
-                   'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile,
-                   'breadcrumb': breadcrumb, })
+    emp_count = oEmp.__len__()
+    page_count = emp_count // settings.COUNT_LIST
+    if emp_count % settings.COUNT_LIST > 0:
+        page_count += 1
+
+    if request.GET:
+        page_number = int(request.GET.get('page', 1))
+        START_LIST = (page_number - 1) * settings.COUNT_LIST
+        STOP_LIST = START_LIST + settings.COUNT_LIST
+        oEmp = oEmp[START_LIST:STOP_LIST]
+        return render(request, 'emp_list.html', {'oEmp': oEmp, })
+    else:
+        oEmp = oEmp[0:settings.COUNT_LIST]
+        return render(request, 'list.html',
+                      {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
+                       'filter_status_form': filter_status_form, 'emp_count': emp_count, 'profile': profile,
+                       'per_page': settings.COUNT_LIST, 'page_count': page_count, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
 
 @login_required
-def emp_find_list(request, page=1):
+def emp_find_list(request):
     profile = get_object_or_404(UserProfile, user=request.user)
     breadcrumb = 'Поиск карточек'
+    oEmp = []
     if request.POST:
         search_form = FormSearch(request.POST)
         filter_czn_form = FormFilterCzn(request.POST)
         filter_status_form = FormFilterStatus(request.POST)
         if search_form.is_valid():
-            oEmp = tools.emp_filter(request.POST['find'], request.POST['czn'], request.POST['status'])
+            oEmp.append(tools.emp_filter(request.POST['find'], request.POST['czn'], request.POST['status']))
         else:
             return redirect(reverse('all'))
         if 'export' in request.POST:
             return emp_export(oEmp)
+    elif request.GET:
+        page_number = int(request.GET.get('page', 1))
+        find = request.GET.get('find', '')
+        czn = request.GET.get('czn', '0')
+        status = request.GET.get('status', '20')
+        START_LIST = (page_number - 1) * settings.COUNT_LIST
+        STOP_LIST = START_LIST + settings.COUNT_LIST
+        oEmp.append(tools.emp_filter(find, czn, status)[START_LIST:STOP_LIST])
+        return render(request, 'emp_list.html', {'oEmp': oEmp, })
     else:
         search_form = FormSearch()
         filter_czn_form = FormFilterCzn()
         filter_status_form = FormFilterStatus()
-        oEmp = Employer.objects.all()
-
-    acnt = oEmp.count()
-    oEmp = oEmp[settings.START_LIST:settings.STOP_LIST]
-    vcnt = oEmp.count()
+        oEmp.append(Employer.objects.all())
+    emp_count = oEmp.__len__()
+    page_count = emp_count // settings.COUNT_LIST
+    if emp_count % settings.COUNT_LIST > 0:
+        page_count += 1
+    oEmp = oEmp[0:settings.COUNT_LIST]
     return render(request, 'list.html',
                   {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
-                   'filter_status_form': filter_status_form, 'acnt': acnt, 'vcnt': vcnt, 'profile': profile,
-                   'breadcrumb': breadcrumb, 'page': page, })
+                   'filter_status_form': filter_status_form, 'emp_count': emp_count, 'profile': profile,
+                   'per_page': settings.COUNT_LIST, 'page_count': page_count, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
@@ -139,7 +160,6 @@ def emp_find_list(request, page=1):
 def emp_all_list(request):
     # Выводит список всех карточек
     return emp_list(request, range(13), 'Все карточки')
-
 
 ######################################################################################################################
 
@@ -483,11 +503,9 @@ def event_add(request, employer_id):
                 if protocol_form == '2':
                     comment = 'Работодатель (индивидуальный предприниматель) получил уведомление, не явился на ' \
                               'составление протокола. Карточка закрыта.'
-                    status = 12
                 if protocol_form == '3':
                     comment = 'Работодатель (индивидуальный предприниматель) не получил уведомление, не явился на ' \
                               'составление протокола. Карточка закрыта.'
-                    status = 12
         if status == '10':
             eventlist = Event.objects.filter(EmpEventID=employer_id)
             for event in eventlist:

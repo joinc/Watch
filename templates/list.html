@@ -32,7 +32,7 @@
             </div>
         </form>
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            Найдено карточек - <strong>{{ acnt }}</strong>. Отображается - <strong>{{ vcnt }}</strong>.
+            Найдено карточек - <span class="o_all"></span>. Отображается - <span class="o_view"></span>.
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -47,7 +47,7 @@
                 <th scope="col"></th>
             </tr>
             </thead>
-            <tbody>
+            <tbody class="find-result">
             {% for i in oEmp %}
                 <tr{% ifequal i.Status 9 %} class="table-success"{% endifequal %}{% ifequal i.Status 12 %} class="table-success"{% endifequal %}{% ifequal i.Status 1 %} class="table-danger"{% endifequal %}>
                     <td>{{ i.Owner.user.get_full_name }}</td>
@@ -58,6 +58,39 @@
             {% endfor %}
             </tbody>
         </table>
+        <div class="button-next"></div>
     </div>
-    {{ page }}
+    <script>
+        var page_count = {{ page_count }};
+        var per_page = {{ per_page }};
+        var emp_count = {{ emp_count }};
+        var page_number = 2;
+        var pathname = $(location).attr('href');
+
+        $(document).ready(function () {
+            if (page_count > 1) {
+                $('.o_all').html(emp_count);
+                $('.o_view').html((page_number - 1) * per_page);
+                $('.button-next').html('<button class="btn btn-light btn-block" id="button-next" type="submit">Показать больше записей</button>');
+                $('#button-next').click(function () {
+                    $.get(pathname, {page: page_number}, function(data) {
+                        $('.find-result').append(data);
+                    });
+
+                    console.log(pathname, {page: page_number});
+                    page_number = page_number + 1;
+                    if (page_number > page_count) {
+                        $('#button-next').hide();
+                        $('.o_view').html(emp_count);
+                    } else {
+                        $('.o_view').html((page_number - 1) * per_page);
+                    }
+                });
+            } else {
+                $('.o_all').html(emp_count);
+                $('.o_view').html(emp_count);
+            }
+        });
+    </script>
+
 {% endblock %}
