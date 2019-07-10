@@ -9,7 +9,7 @@ from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from .forms import FormRole, FormResult, FormSearch, FormEmp, FormNotice, FormFilterCzn, FormFilterStatus, \
     FormRespons, FormMonth
-from .choices import RESULT_CHOICES
+from .choices import RESULT_CHOICES, STATUS_CHOICES
 from .models import UserProfile, TempEmployer, Employer, Event, Notify, ConfigWatch
 from Main import message, tools
 from django.conf import settings
@@ -116,42 +116,56 @@ def emp_list(request, status, breadcrumb):
 
 @login_required
 def emp_find_list(request):
+
+    def get_page_count(emp_count):
+        page_count = emp_count // settings.COUNT_LIST
+        if emp_count % settings.COUNT_LIST > 0:
+            page_count += 1
+        return page_count
+
     profile = get_object_or_404(UserProfile, user=request.user)
     breadcrumb = 'Поиск карточек'
-    oEmp = []
     if request.POST:
         search_form = FormSearch(request.POST)
         filter_czn_form = FormFilterCzn(request.POST)
         filter_status_form = FormFilterStatus(request.POST)
         if search_form.is_valid():
-            oEmp.append(tools.emp_filter(request.POST['find'], request.POST['czn'], request.POST['status']))
+            # Если нажата кнопка "Сформировать и скачать таблицу" то выгружается все записи
+            emp_find = request.POST['find']
+            emp_czn = request.POST['czn']
+            emp_status = request.POST['status']
+            if 'export' in request.POST:
+                oEmp = tools.emp_filter(emp_find, emp_czn, emp_status)
+                return emp_export(oEmp)
+            else:
+                oEmp = tools.emp_filter(emp_find, emp_czn, emp_status)[0:settings.COUNT_LIST]
+                emp_count = tools.emp_filter(emp_find, emp_czn, emp_status).count()
         else:
             return redirect(reverse('all'))
-        if 'export' in request.POST:
-            return emp_export(oEmp)
     elif request.GET:
         page_number = int(request.GET.get('page', 1))
-        find = request.GET.get('find', '')
-        czn = request.GET.get('czn', '0')
-        status = request.GET.get('status', '20')
+        emp_find = request.GET.get('emp_find', '')
+        emp_czn = request.GET.get('emp_czn', '0')
+        emp_status = request.GET.get('emp_status', '20')
         START_LIST = (page_number - 1) * settings.COUNT_LIST
         STOP_LIST = START_LIST + settings.COUNT_LIST
-        oEmp.append(tools.emp_filter(find, czn, status)[START_LIST:STOP_LIST])
+        oEmp = tools.emp_filter(emp_find, emp_czn, emp_status)[START_LIST:STOP_LIST]
         return render(request, 'emp_list.html', {'oEmp': oEmp, })
     else:
         search_form = FormSearch()
         filter_czn_form = FormFilterCzn()
         filter_status_form = FormFilterStatus()
-        oEmp.append(Employer.objects.all())
-    emp_count = oEmp.__len__()
-    page_count = emp_count // settings.COUNT_LIST
-    if emp_count % settings.COUNT_LIST > 0:
-        page_count += 1
-    oEmp = oEmp[0:settings.COUNT_LIST]
+        oEmp = Employer.objects.all()
+        emp_count = Employer.objects.all().count()
+        emp_find = ''
+        emp_czn = '0'
+        emp_status = '20'
+
     return render(request, 'list.html',
                   {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
                    'filter_status_form': filter_status_form, 'emp_count': emp_count, 'profile': profile,
-                   'per_page': settings.COUNT_LIST, 'page_count': page_count, 'breadcrumb': breadcrumb, })
+                   'per_page': settings.COUNT_LIST, 'page_count': get_page_count(emp_count), 'emp_find': emp_find,
+                   'emp_czn': emp_czn, 'emp_status': emp_status, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
@@ -265,10 +279,10 @@ def emp_export(oEmp):
     file_name = 'export' + now.strftime('%y%m%d-%H%M%S') + '.ods'
     file = settings.EXPORT_FILE + file_name
 
-    data_emp = [['ID', 'Название', 'ИНН']]
+    data_emp = [['Автор карточки', 'Название', 'ИНН', 'Статус']]
     data = OrderedDict()
     for emp in oEmp:
-        data_emp.append([emp.id, emp.Title, emp.INN])
+        data_emp.append([emp.Owner.user.get_full_name(), emp.Title, emp.INN, dict(STATUS_CHOICES).get(emp.Status)])
     data.update({'Данные': data_emp})
     save_data(file, data)
     fp = open(file, 'rb')

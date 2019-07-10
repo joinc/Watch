@@ -73,7 +73,7 @@
                 $('.o_view').html((page_number - 1) * per_page);
                 $('.button-next').html('<button class="btn btn-light btn-block" id="button-next" type="submit">Показать больше записей</button>');
                 $('#button-next').click(function () {
-                    $.get(pathname, {page: page_number}, function(data) {
+                    $.get(pathname, {page: page_number, emp_find: {{ emp_find }}, emp_czn: {{emp_czn}}, emp_status: {{ emp_status }} }, function(data) {
                         $('.find-result').append(data);
                     });
 
