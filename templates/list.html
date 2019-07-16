@@ -28,6 +28,7 @@
                 </div>
                 <div class="col-auto mr-0 text-right">
                     <button name='export' class="btn btn-outline-secondary" type="submit">Сформировать и скачать таблицу</button>
+                    <a href="{% url 'export' %}" class="btn btn-outline-secondary">Сформировать и скачать таблицу</a>
                 </div>
             </div>
         </form>
@@ -73,7 +74,7 @@
                 $('.o_view').html((page_number - 1) * per_page);
                 $('.button-next').html('<button class="btn btn-light btn-block" id="button-next" type="submit">Показать больше записей</button>');
                 $('#button-next').click(function () {
-                    $.get(pathname, {page: page_number, emp_find: {{ emp_find }}, emp_czn: {{emp_czn}}, emp_status: {{ emp_status }} }, function(data) {
+                    $.get(pathname, {page: page_number, {% if emp_find %} emp_find: '{{ emp_find }}',{% endif %} {% if emp_czn %}emp_czn: {{emp_czn}},{% endif %} {% if emp_status %}emp_status: {{ emp_status }}{% endif %} }, function(data) {
                         $('.find-result').append(data);
                     });
 

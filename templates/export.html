@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}{% load static from staticfiles %}
+
+{% block html_title %}Профиль пользователя{% endblock %}
+{% block html_body %}
+    <br />
+    <div class="container-fluid">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+            <li class="breadcrumb-item active">Выгрузка данных в файл</li>
+        </ol>
+        <div class="card bg-light">
+            <div class="card-header">
+                <h4 class="card-title">Выгрузка данных в файл:</h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <form method="post" action='#' enctype="multipart/form-data">
+                        <div class="form-row">
+                            <input type="file" name="files" class="form-control-file" multiple>
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Загрузить</button>
+                        </div>
+                    </form>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

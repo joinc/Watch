@@ -274,6 +274,15 @@ def emp_upload(request):
 ######################################################################################################################
 
 
+@login_required
+def export_to_spreadsheet(request):
+    profile = get_object_or_404(UserProfile, user=request.user)
+
+    return render(request, 'export.html', {'profile': profile, })
+
+######################################################################################################################
+
+
 def emp_export(oEmp):
     now = datetime.now()
     file_name = 'export' + now.strftime('%y%m%d-%H%M%S') + '.ods'
