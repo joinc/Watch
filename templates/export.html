@@ -17,10 +17,14 @@
                 <p class="card-text">
                     <form method="post" action='#' enctype="multipart/form-data">
                         <div class="form-row">
-                            <input type="file" name="files" class="form-control-file" multiple>
+                            <ul>
+                                {% for field_name, field_verbose, field_default in fields %}
+                                    <li><label for="id_fields_{{ forloop.counter0 }}"><input type="checkbox" name="fields" value="{{ field_name }}" id="id_fields_{{ forloop.counter0 }}" {% if field_default %}checked{% endif %}> {{ field_verbose }}</label></li>
+                                {% endfor %}
+                            </ul>
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-primary">Загрузить</button>
                         </div>
+                        <button type="submit" class="btn btn-primary">Загрузить</button>
                     </form>
                 </p>
             </div>

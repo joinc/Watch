@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
-from Main.models import UserProfile
+from Main.models import UserProfile, Employer
 from .choices import ROLE_CHOICES, EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, INFO_CHOICES, STATUS_CHOICES, METHOD_CHOICES, RESULT_CHOICES
 from datetime import date, datetime, timedelta
 import locale

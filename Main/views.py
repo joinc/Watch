@@ -276,9 +276,20 @@ def emp_upload(request):
 
 @login_required
 def export_to_spreadsheet(request):
-    profile = get_object_or_404(UserProfile, user=request.user)
 
-    return render(request, 'export.html', {'profile': profile, })
+    profile = get_object_or_404(UserProfile, user=request.user)
+    all_fields = Employer._meta.get_fields(include_parents=False, include_hidden=False)
+    default_on_fileds = ['Title', 'INN', 'OGRN', 'Status', 'Owner', 'CreateDate', ]
+    default_off_fileds = ['Number', 'JurAddress', 'FactAddress', 'SendDate', 'Contact', 'Respons' ]
+    fields = []
+    for field in all_fields:
+        if field.name in default_on_fileds:
+            fields.append([field.name, field.verbose_name, True])
+        if field.name in default_off_fileds:
+            fields.append([field.name, field.verbose_name, False])
+
+
+    return render(request, 'export.html', {'profile': profile, 'fields': fields })
 
 ######################################################################################################################
 

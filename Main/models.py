@@ -21,10 +21,9 @@ class UserProfile(models.Model):
 ######################################################################################################################
 
 class Employer(models.Model):
-    Status = models.SmallIntegerField('Статус', choices=STATUS_CHOICES, default=0, )
-    Result = models.SmallIntegerField('Результат', choices=RESULT_CHOICES, null=True, )
-    Number = models.CharField('Учётный номер', max_length=128, default='', )
+    Owner = models.ForeignKey(UserProfile, verbose_name='Автор карточки', null=True, related_name='Owner', on_delete=models.SET_NULL, )
     Title = models.CharField('Наименование работодателя', max_length=1024, default='', )
+    Number = models.CharField('Учётный номер', max_length=128, default='', )
     INN = models.CharField('ИНН', max_length=20, default='', )
     OGRN = models.CharField('ОГРН', max_length=20, default='', )
     JurAddress = models.CharField('Адрес юридический', max_length=256, default='', )
@@ -33,11 +32,12 @@ class Employer(models.Model):
     VacancyComment = models.CharField('Комментарий даты размещения вакансии', max_length=512, default='', )
     EventDate = models.DateField('Дата взаимодействия', null=True, )
     EventComment = models.CharField('Комментарий даты взаимодействия', max_length=512, default='', )
+    Contact = models.CharField('Контакт основной', max_length=512, default='', )
+    Status = models.SmallIntegerField('Статус', choices=STATUS_CHOICES, default=0, )
+    Result = models.SmallIntegerField('Результат', choices=RESULT_CHOICES, null=True, )
     SendDate = models.DateField('Дата направления в трудоустройство', null=True, )
     RegKatharsis = models.BooleanField('Зарегистрирован в ПК Катарсис', default=False, )
     Archive = models.BooleanField('Архивная карточка', default=False, )
-    Contact = models.CharField('Контакт основной', max_length=512, default='', )
-    Owner = models.ForeignKey(UserProfile, verbose_name='Автор карточки', null=True, related_name='Owner', on_delete=models.SET_NULL, )
     Respons = models.ForeignKey(UserProfile, verbose_name='Ответственное лицо', null=True, default=None, related_name='Respons', on_delete=models.SET_NULL, )
     CreateDate = models.DateTimeField('Дата создания', auto_now_add=True, null=True, )
 
