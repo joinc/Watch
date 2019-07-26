@@ -313,3 +313,19 @@ class FormMonth(forms.Form):
     )
 
 ######################################################################################################################
+
+
+class FormFileds(forms.Form):
+    all_fields = Employer._meta.get_fields(include_parents=False, include_hidden=False)
+    default_on_fileds = ['Title', 'INN', 'OGRN', 'Status', 'Owner', 'CreateDate', ]
+    default_off_fileds = ['Number', 'JurAddress', 'FactAddress', 'SendDate', 'Contact', 'Respons' ]
+    for field in all_fields:
+        if field.name in default_on_fileds:
+
+            pass
+        if field.name in default_off_fileds:
+            pass
+
+#            fields.append([field.name, field.verbose_name, False])
+
+

@@ -16,15 +16,26 @@
             <div class="card-body">
                 <p class="card-text">
                     <form method="post" action='#' enctype="multipart/form-data">
-                        <div class="form-row">
-                            <ul>
-                                {% for field_name, field_verbose, field_default in fields %}
-                                    <li><label for="id_fields_{{ forloop.counter0 }}"><input type="checkbox" name="fields" value="{{ field_name }}" id="id_fields_{{ forloop.counter0 }}" {% if field_default %}checked{% endif %}> {{ field_verbose }}</label></li>
-                                {% endfor %}
-                            </ul>
-                            {% csrf_token %}
+                        <div class="form-group row">
+                            <label for="staticEmail" class="col-sm-2 col-form-label">Выберите центр занятости:</label>
+                            <div class="col-sm-10">
+                                {{ filter_czn_form }}
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Загрузить</button>
+                        <div class="form-group row">
+                            <label for="inputPassword" class="col-sm-2 col-form-label">Выберите выгружаемые поля:</label>
+                            <div class="col-sm-10">
+                                {% for field_name, field_verbose, field_default in fields %}
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="fields" value="{{ field_name }}" id="id_fields_{{ forloop.counter0 }}" {% if field_default %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_fields_{{ forloop.counter0 }}">
+                                            {{ field_verbose }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Выгрузить</button>
                     </form>
                 </p>
             </div>

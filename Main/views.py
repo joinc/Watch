@@ -281,6 +281,14 @@ def export_to_spreadsheet(request):
     all_fields = Employer._meta.get_fields(include_parents=False, include_hidden=False)
     default_on_fileds = ['Title', 'INN', 'OGRN', 'Status', 'Owner', 'CreateDate', ]
     default_off_fileds = ['Number', 'JurAddress', 'FactAddress', 'SendDate', 'Contact', 'Respons' ]
+    if profile.role == 1 and not request.user.is_superuser:
+        filter_czn_form = FormFilterCzn({'czn': profile.user.id})
+    else:
+        filter_czn_form = FormFilterCzn()
+
+    if request.POST:
+        oFind = request.POST['f']
+        pass
     fields = []
     for field in all_fields:
         if field.name in default_on_fileds:
@@ -289,7 +297,7 @@ def export_to_spreadsheet(request):
             fields.append([field.name, field.verbose_name, False])
 
 
-    return render(request, 'export.html', {'profile': profile, 'fields': fields })
+    return render(request, 'export.html', {'profile': profile, 'fields': fields, 'filter_czn_form': filter_czn_form, })
 
 ######################################################################################################################
 
