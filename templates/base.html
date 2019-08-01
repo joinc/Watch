@@ -44,8 +44,24 @@
                         <a href="{% url 'responslist' %}" class="dropdown-item">Назначение ответственного</a>
                     {% endifequal %}
                     <div class="dropdown-divider"></div>
-                    <a href="{% url 'reportlist' %}" class="dropdown-item">Отчеты</a>
-                    <a href="{% url 'messagelist' %}" class="dropdown-item">Уведомления</a>
+                    <a href="{% url 'reportlist' %}" class="dropdown-item">
+                        <div class="row">
+                            <div class="col-auto mr-auto">Отчеты</div>
+                            <div class="col-auto mt-1 text-right"><i class="fas fa-chart-bar"></i></div>
+                        </div>
+                    </a>
+                    <a href="{% url 'export' %}" class="dropdown-item">
+                        <div class="row">
+                            <div class="col-auto mr-auto">Скачать данные</div>
+                            <div class="col-auto mt-1 text-right"><i class="fas fa-download"></i></div>
+                        </div>
+                    </a>
+                    <a href="{% url 'messagelist' %}" class="dropdown-item">
+                        <div class="row">
+                            <div class="col-auto mr-auto">Уведомления</div>
+                            <div class="col-auto mt-1 text-right"><i class="far fa-comment-alt"></i></div>
+                        </div>
+                    </a>
                     <div class="dropdown-divider"></div>
                     <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>
                 </div>

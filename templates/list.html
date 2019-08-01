@@ -12,6 +12,9 @@
                     <li class="breadcrumb-item active">{% ifequal breadcrumb '' %}Все карточки{% else %}{{ breadcrumb }}{% endifequal %}</li>
                 </ol>
             </div>
+            <div class="col-auto mr-0 text-right">
+                <a href="{% url 'export' %}" class="btn btn-outline-secondary" title="Скачать данные"><i class="fas fa-download"></i></a>
+            </div>
         </div>
         <form method='post' action='{% url 'find' %}'>
             <div class="row">
@@ -25,10 +28,6 @@
                             <button class="btn btn-info" type="submit">Поиск</button>
                         </div>
                     </div>
-                </div>
-                <div class="col-auto mr-0 text-right">
-                    <button name='export' class="btn btn-outline-secondary" type="submit">Сформировать и скачать таблицу</button>
-                    <a href="{% url 'export' %}" class="btn btn-outline-secondary">Сформировать и скачать таблицу</a>
                 </div>
             </div>
         </form>

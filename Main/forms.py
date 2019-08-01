@@ -321,10 +321,10 @@ class FormFileds(forms.Form):
     default_off_fileds = ['Number', 'JurAddress', 'FactAddress', 'SendDate', 'Contact', 'Respons' ]
     for field in all_fields:
         if field.name in default_on_fileds:
-
             pass
         if field.name in default_off_fileds:
             pass
+
 
 #            fields.append([field.name, field.verbose_name, False])
 

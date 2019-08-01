@@ -55,7 +55,7 @@ def login(request):
         username = request.POST['username']
         password = request.POST['password']
         user = auth.authenticate(username=username, password=password)
-        if user is not None:
+        if user:
             auth.login(request, user)
             #return redirect(request.META.get('HTTP_REFERER'))
             return redirect(settings.SUCCESS_URL)
@@ -134,12 +134,8 @@ def emp_find_list(request):
             emp_find = request.POST['find']
             emp_czn = request.POST['czn']
             emp_status = request.POST['status']
-            if 'export' in request.POST:
-                oEmp = tools.emp_filter(emp_find, emp_czn, emp_status)
-                return emp_export(oEmp)
-            else:
-                oEmp = tools.emp_filter(emp_find, emp_czn, emp_status)[0:settings.COUNT_LIST]
-                emp_count = tools.emp_filter(emp_find, emp_czn, emp_status).count()
+            oEmp = tools.emp_filter(emp_find, emp_czn, emp_status)[0:settings.COUNT_LIST]
+            emp_count = tools.emp_filter(emp_find, emp_czn, emp_status).count()
         else:
             return redirect(reverse('all'))
     elif request.GET:
@@ -280,37 +276,69 @@ def export_to_spreadsheet(request):
     profile = get_object_or_404(UserProfile, user=request.user)
     all_fields = Employer._meta.get_fields(include_parents=False, include_hidden=False)
     default_on_fileds = ['Title', 'INN', 'OGRN', 'Status', 'Owner', 'CreateDate', ]
-    default_off_fileds = ['Number', 'JurAddress', 'FactAddress', 'SendDate', 'Contact', 'Respons' ]
-    if profile.role == 1 and not request.user.is_superuser:
-        filter_czn_form = FormFilterCzn({'czn': profile.user.id})
-    else:
-        filter_czn_form = FormFilterCzn()
-
+    default_view_fileds = default_on_fileds + ['Number', 'JurAddress', 'FactAddress', 'SendDate', 'Contact', 'Respons']
     if request.POST:
-        oFind = request.POST['f']
-        pass
-    fields = []
-    for field in all_fields:
-        if field.name in default_on_fileds:
-            fields.append([field.name, field.verbose_name, True])
-        if field.name in default_off_fileds:
-            fields.append([field.name, field.verbose_name, False])
-
+        czn = request.POST['czn']
+        field_list = request.POST.getlist('fields')
+        fields = []
+        for field in all_fields:
+            if field.name in default_view_fileds:
+                if field.name in field_list:
+                    fields.append([field.name, field.verbose_name, True])
+                else:
+                    fields.append([field.name, field.verbose_name, False])
+        return emp_export_ods(czn, field_list)
+    else:
+        if profile.role == 1 and not request.user.is_superuser:
+            filter_czn_form = FormFilterCzn({'czn': profile.user.id})
+        else:
+            filter_czn_form = FormFilterCzn()
+        fields = []
+        for field in all_fields:
+            if field.name in default_view_fileds:
+                if field.name in default_on_fileds:
+                    fields.append([field.name, field.verbose_name, True])
+                else:
+                    fields.append([field.name, field.verbose_name, False])
 
     return render(request, 'export.html', {'profile': profile, 'fields': fields, 'filter_czn_form': filter_czn_form, })
 
 ######################################################################################################################
 
 
-def emp_export(oEmp):
+def emp_export_ods(czn, fields):
+    all_fields = Employer._meta.get_fields(include_parents=False, include_hidden=False)
     now = datetime.now()
     file_name = 'export' + now.strftime('%y%m%d-%H%M%S') + '.ods'
     file = settings.EXPORT_FILE + file_name
-
-    data_emp = [['Автор карточки', 'Название', 'ИНН', 'Статус']]
+    if czn != '0':
+        emps = Employer.objects.filter(Owner__user=czn)
+    else:
+        emps = Employer.objects.all()
+    data_field = []
+    for field in all_fields:
+        if field.name in fields:
+            data_field.append(field.verbose_name)
+    data_emp = [data_field]
+    for emp in emps:
+        data_field = []
+        for field in all_fields:
+            if field.name in fields:
+                value = getattr(emp, field.name)
+                if value:
+                    if isinstance(value, UserProfile):
+                        data_field.append(value.user.get_full_name())
+                    elif isinstance(value, datetime) or isinstance(value, date):
+                        data_field.append(value.strftime('%d-%m-%G'))
+                    else:
+                        if field.name == 'Status':
+                            data_field.append(dict(STATUS_CHOICES).get(emp.Status))
+                        else:
+                            data_field.append(value)
+                else:
+                    data_field.append('')
+        data_emp.append(data_field)
     data = OrderedDict()
-    for emp in oEmp:
-        data_emp.append([emp.Owner.user.get_full_name(), emp.Title, emp.INN, dict(STATUS_CHOICES).get(emp.Status)])
     data.update({'Данные': data_emp})
     save_data(file, data)
     fp = open(file, 'rb')
