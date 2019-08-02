@@ -9,21 +9,22 @@
             <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
             <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
         </ol>
-        <div class="card">
-            <div class="card-header">
-                Количество карточек направленых в отдел трудоустройства и специальных программ
+        <div class="card-columns">
+            <div class="card border-dark mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Карточки за месяц.</h5>
+                    <p class="card-text">Количество карточек направленых в отдел трудоустройства и специальных программ за выбранный месяц.</p>
+                    <a href="{% url 'reportmonth' %}" class="btn btn-warning">Перейти</a>
+                </div>
             </div>
-            <div class="card-body">
-                <p class="card-text">Выберите отчетный период: </p>
-                <form class="form-inline mb-0" method="post" action="{% url 'reportview' %}">
-                    {% csrf_token %}
-                    <div class="input-group">
-                        {{ month_form.month }}
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-success">Показать</button>
-                        </div>
-                    </div>
-                </form>
+        </div>
+        <div class="card-columns">
+            <div class="card border-dark mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Карточки за период.</h5>
+                    <p class="card-text">Количество карточек направленых в отдел трудоустройства и специальных программ за выбранный период.</p>
+                    <a href="{% url 'reportdate' %}" class="btn btn-warning">Перейти</a>
+                </div>
             </div>
         </div>
     </div>

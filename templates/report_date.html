@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}{% load static from staticfiles %}
+
+{% block html_title %}{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}{% endblock %}
+{% block html_body %}
+    <br />
+    <div class="container-fluid">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'reportlist' %}">Список отчетов</a></li>
+            <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
+        </ol>
+        <div class="card border-dark mb-3">
+            <div class="card-header">
+                Направлено в отдел трудоустройства и специальных программ (в работе/закрыто/вынесено постановлений):
+            </div>
+            <div class="card-body">
+                <form class="form-inline mb-3" method="post" action="{% url 'reportmonth' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Выберите отчетный период:</label>
+                    </div>
+                    <div class="form-group mx-sm-3 mr-3">
+                        {{ date_form.start_date }}
+                    </div>
+                    -
+                    <div class="form-group mx-sm-3">
+                        {{ date_form.end_date }}
+                    </div>
+                    <button type="submit" class="btn btn-success mb-2">Показать</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

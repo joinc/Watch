@@ -56,7 +56,8 @@ urlpatterns = [
     path('message/', message.message_list, name='messagelist', ),
     path('message/<int:message_id>/read/', message.message_read, name='messageread', ),
     path('report/list/', views.report_list, name='reportlist', ),
-    path('report/view/', views.report_view, name='reportview', ),
+    path('report/month/', views.report_month, name='reportmonth', ),
+    path('report/date/', views.report_date, name='reportdate', ),
     path('respons/', views.respons_list, name='responslist', ),
     path('responsset/', views.respons_set, name='responsset', ),
 ]

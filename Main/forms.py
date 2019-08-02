@@ -70,7 +70,9 @@ class FormSearch(forms.Form):
 
     find = forms.CharField(
         label='',
-        widget=forms.TextInput(attrs={'size': '40', 'placeholder': 'Введите ИНН или наименование организации', 'type': 'text', 'class': 'form-control', 'aria-label': 'Введите ИНН или наименование организации'}),
+        widget=forms.TextInput(attrs={'size': '40', 'placeholder': 'Введите ИНН или наименование организации',
+                                      'type': 'text', 'class': 'form-control',
+                                      'aria-label': 'Введите ИНН или наименование организации'}),
         required=False,
     )
 
@@ -138,7 +140,8 @@ class FormEmp(forms.Form):
     )
 
     oSendDate = forms.DateField(
-        label='Дата направления информации в отдел трудоустройства и специальных программ Главного управления государственной службы занятости населения Омской области',
+        label='Дата направления информации в отдел трудоустройства и специальных программ Главного управления '
+              'государственной службы занятости населения Омской области',
         widget=forms.widgets.DateInput(attrs={'type': 'date', }),
         input_formats=('%d.%m.%Y', '%d/%m/%Y', '%d-%m-%Y'),
         initial=date.today().__format__('%d.%m.%Y'),
@@ -173,7 +176,8 @@ class FormEmp(forms.Form):
 
     oNotifyMethod = forms.ChoiceField(
         choices=METHOD_CHOICES,
-        label='Информирования работодателя центром занятости о необходимости предоставления информации о наличии свободных рабочих мест и вакантных должностей',
+        label='Информирования работодателя центром занятости о необходимости предоставления информации о наличии '
+              'свободных рабочих мест и вакантных должностей',
         initial=1,
         widget=forms.Select(attrs={'class': 'custom-select', 'placeholder': 'Выберите метод уведомления', }),
         required=True
@@ -315,17 +319,20 @@ class FormMonth(forms.Form):
 ######################################################################################################################
 
 
-class FormFileds(forms.Form):
-    all_fields = Employer._meta.get_fields(include_parents=False, include_hidden=False)
-    default_on_fileds = ['Title', 'INN', 'OGRN', 'Status', 'Owner', 'CreateDate', ]
-    default_off_fileds = ['Number', 'JurAddress', 'FactAddress', 'SendDate', 'Contact', 'Respons' ]
-    for field in all_fields:
-        if field.name in default_on_fileds:
-            pass
-        if field.name in default_off_fileds:
-            pass
+class FormReportDates(forms.Form):
 
+    start_date = forms.DateField(
+        label='Начальная дата',
+        widget=forms.widgets.DateInput(attrs={'type': 'date', }),
+        input_formats=('%d.%m.%Y', '%d/%m/%Y', '%d-%m-%Y'),
+        initial=date.today().__format__('2018-08-01'),
+        required=True,
+    )
 
-#            fields.append([field.name, field.verbose_name, False])
-
-
+    end_date = forms.DateField(
+        label='Конечная дата',
+        widget=forms.widgets.DateInput(attrs={'type': 'date', }),
+        input_formats=('%d.%m.%Y', '%d/%m/%Y', '%d-%m-%Y'),
+        initial=date.today().__format__('%Y-%m-%d'),
+        required=False,
+    )

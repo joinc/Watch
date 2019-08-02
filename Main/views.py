@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from .forms import FormRole, FormResult, FormSearch, FormEmp, FormNotice, FormFilterCzn, FormFilterStatus, \
-    FormRespons, FormMonth
+    FormRespons, FormMonth, FormReportDates
 from .choices import RESULT_CHOICES, STATUS_CHOICES
 from .models import UserProfile, TempEmployer, Employer, Event, Notify, ConfigWatch
 from Main import message, tools
@@ -606,23 +606,24 @@ def event_add(request, employer_id):
 def report_list(request):
     profile = get_object_or_404(UserProfile, user=request.user)
     breadcrumb = 'Список отчетов'
-    month_form = FormMonth()
     return render(request, 'reports.html',
-                  {'profile': profile, 'breadcrumb': breadcrumb, 'month_form': month_form, })
+                  {'profile': profile, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
 
 @login_required
-def report_view(request):
+def report_month(request):
     profile = get_object_or_404(UserProfile, user=request.user)
-    breadcrumb = 'Отчет на выбранную дату'
+    curr_date = datetime(2018, 10, 1)
+    breadcrumb = 'Отчет за месяц'
     if request.POST:
         month = int(request.POST['month'])
-        month_form = FormMonth({'month': month})
     else:
-        return redirect(reverse('reportlist'))
-    curr_date = datetime(2018, 10, 1)
+        now = datetime.now()
+        month = (now.year - curr_date.year) * 12 + now.month - curr_date.month
+        print(month)
+    month_form = FormMonth({'month': month})
     i = 0
     while i < month:
         days = calendar.monthrange(curr_date.year, curr_date.month)[1]
@@ -639,9 +640,9 @@ def report_view(request):
         emp_closed = Employer.objects.filter(SendDate__month=curr_date.month).filter(Owner=u).filter(Status=12).count()
         emp_ready = Employer.objects.filter(SendDate__month=curr_date.month).filter(Owner=u).filter(Status=9).count()
         emp_work = emp_count - emp_closed - emp_ready
-        percent_closed = 100*emp_closed//emp_count if emp_count else 0
-        percent_ready = 100*emp_ready//emp_count if emp_count else 0
-        percent_work = 100*emp_work//emp_count if emp_count else 0
+        percent_closed = 100 * emp_closed // emp_count if emp_count else 0
+        percent_ready = 100 * emp_ready // emp_count if emp_count else 0
+        percent_work = 100 * emp_work // emp_count if emp_count else 0
         if emp_count > 0:
             emp_all += emp_count
             aw += emp_work
@@ -649,9 +650,26 @@ def report_view(request):
             ar += emp_ready
             elist.append([u, emp_count, emp_work, emp_closed, emp_ready, percent_work, percent_closed, percent_ready])
 
-    return render(request, 'report_view.html',
-                  {'profile': profile, 'breadcrumb': breadcrumb, 'curr_date': curr_date, 'month_form': month_form,
-                   'elist': elist, 'aw': aw, 'ac': ac, 'ar': ar, 'emp_all': emp_all, })
+    return render(request, 'report_month.html',
+                  {'profile': profile, 'breadcrumb': breadcrumb, 'month_form': month_form, 'elist': elist, 'aw': aw,
+                   'ac': ac, 'ar': ar, 'emp_all': emp_all, })
+
+######################################################################################################################
+
+
+@login_required
+def report_date(request):
+    profile = get_object_or_404(UserProfile, user=request.user)
+    curr_date = datetime(2018, 10, 1)
+    breadcrumb = 'Отчет за выбранный период'
+    if request.POST:
+        pass
+    else:
+        pass
+    date_form = FormReportDates()
+
+    return render(request, 'report_date.html',
+                  {'profile': profile, 'breadcrumb': breadcrumb, 'date_form': date_form, })
 
 ######################################################################################################################
 
