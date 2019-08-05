@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from Main.models import Event, Employer
+from Main.models import Event, Employer, UserProfile
 
 ######################################################################################################################
 
@@ -53,3 +53,30 @@ def emp_filter(oFind, oCzn, oStatus):
     oEmp = oEmp.order_by('Status')
 
     return oEmp
+
+######################################################################################################################
+
+
+def report_filter(emps):
+    plist = UserProfile.objects.filter(role=1)
+    elist = []
+    aw = 0
+    ac = 0
+    ar = 0
+    emp_all = 0
+    for u in plist:
+        emp_count = emps.filter(Owner=u).count()
+        emp_closed = emps.filter(Owner=u).filter(Status=12).count()
+        emp_ready = emps.filter(Owner=u).filter(Status=9).count()
+        emp_work = emp_count - emp_closed - emp_ready
+        percent_closed = 100 * emp_closed // emp_count if emp_count else 0
+        percent_ready = 100 * emp_ready // emp_count if emp_count else 0
+        percent_work = 100 * emp_work // emp_count if emp_count else 0
+        if emp_count > 0:
+            emp_all += emp_count
+            aw += emp_work
+            ac += emp_closed
+            ar += emp_ready
+            elist.append([u, emp_count, emp_work, emp_closed, emp_ready, percent_work, percent_closed, percent_ready])
+    result = [elist, aw, ac, ar, emp_all]
+    return result

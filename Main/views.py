@@ -622,13 +622,15 @@ def report_month(request):
     else:
         now = datetime.now()
         month = (now.year - curr_date.year) * 12 + now.month - curr_date.month
-        print(month)
     month_form = FormMonth({'month': month})
     i = 0
     while i < month:
         days = calendar.monthrange(curr_date.year, curr_date.month)[1]
         curr_date = curr_date + timedelta(days=days)
         i += 1
+    emps = Employer.objects.filter(SendDate__month=curr_date.month)
+    elist, aw, ac, ar, emp_all = tools.report_filter(emps)
+    '''
     plist = UserProfile.objects.filter(role=1)
     elist = []
     aw = 0
@@ -636,9 +638,9 @@ def report_month(request):
     ar = 0
     emp_all = 0
     for u in plist:
-        emp_count = Employer.objects.filter(SendDate__month=curr_date.month).filter(Owner=u).count()
-        emp_closed = Employer.objects.filter(SendDate__month=curr_date.month).filter(Owner=u).filter(Status=12).count()
-        emp_ready = Employer.objects.filter(SendDate__month=curr_date.month).filter(Owner=u).filter(Status=9).count()
+        emp_count = emps.filter(Owner=u).count()
+        emp_closed = emps.filter(Owner=u).filter(Status=12).count()
+        emp_ready = emps.filter(Owner=u).filter(Status=9).count()
         emp_work = emp_count - emp_closed - emp_ready
         percent_closed = 100 * emp_closed // emp_count if emp_count else 0
         percent_ready = 100 * emp_ready // emp_count if emp_count else 0
@@ -649,7 +651,7 @@ def report_month(request):
             ac += emp_closed
             ar += emp_ready
             elist.append([u, emp_count, emp_work, emp_closed, emp_ready, percent_work, percent_closed, percent_ready])
-
+    '''
     return render(request, 'report_month.html',
                   {'profile': profile, 'breadcrumb': breadcrumb, 'month_form': month_form, 'elist': elist, 'aw': aw,
                    'ac': ac, 'ar': ar, 'emp_all': emp_all, })
@@ -660,13 +662,25 @@ def report_month(request):
 @login_required
 def report_date(request):
     profile = get_object_or_404(UserProfile, user=request.user)
-    curr_date = datetime(2018, 10, 1)
     breadcrumb = 'Отчет за выбранный период'
     if request.POST:
-        pass
+        date_form = FormReportDates(request.POST)
+        start_date = request.POST['start_date']
+        end_date = request.POST['end_date']
+        if start_date and not end_date:
+            emps = Employer.objects.filter(SendDate__gte=start_date)
+        elif not start_date and end_date:
+            emps = Employer.objects.filter(SendDate__lte=end_date)
+        elif start_date and end_date:
+            emps = Employer.objects.filter(SendDate__gte=start_date).filter(SendDate__lte=end_date)
+        else:
+            emps = Employer.objects.all()
+        elist, aw, ac, ar, emp_all = tools.report_filter(emps)
+        return render(request, 'report_date.html',
+                      {'profile': profile, 'breadcrumb': breadcrumb, 'date_form': date_form, 'elist': elist, 'aw': aw,
+                       'ac': ac, 'ar': ar, 'emp_all': emp_all, })
     else:
-        pass
-    date_form = FormReportDates()
+        date_form = FormReportDates()
 
     return render(request, 'report_date.html',
                   {'profile': profile, 'breadcrumb': breadcrumb, 'date_form': date_form, })

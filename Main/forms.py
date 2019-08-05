@@ -247,10 +247,10 @@ class FormProtocol(forms.Form):
 class FormFilterCzn(forms.Form):
 
     CZN_CHOICES = []
-    CznList = UserProfile.objects.filter(role=1).order_by('user')
+    czn_list = UserProfile.objects.filter(role=1).order_by('user')
     CZN_CHOICES.append([0, 'Все ЦЗН'])
-    for iCzn in CznList:
-        CZN_CHOICES.append([iCzn.id, iCzn.user.get_full_name()])
+    for iczn in czn_list:
+        CZN_CHOICES.append([iczn.id, iczn.user.get_full_name()])
 
     czn = forms.ChoiceField(
         choices=CZN_CHOICES,
@@ -334,5 +334,5 @@ class FormReportDates(forms.Form):
         widget=forms.widgets.DateInput(attrs={'type': 'date', }),
         input_formats=('%d.%m.%Y', '%d/%m/%Y', '%d-%m-%Y'),
         initial=date.today().__format__('%Y-%m-%d'),
-        required=False,
+        required=True,
     )
