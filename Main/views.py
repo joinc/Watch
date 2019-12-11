@@ -10,7 +10,7 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from .forms import FormRole, FormResult, FormSearch, FormEmp, FormNotice, FormFilterCzn, FormFilterStatus, \
     FormRespons, FormMonth, FormReportDates
 from .choices import RESULT_CHOICES, STATUS_CHOICES
-from .models import UserProfile, TempEmployer, Employer, Event, Notify, ConfigWatch
+from .models import UserProfile, TempEmployer, Employer, Event, Notify, Info, ConfigWatch
 from Main import message, tools
 from django.conf import settings
 from pyexcel_ods3 import save_data
@@ -519,6 +519,19 @@ def notify_add(request, employer_id):
         noti.Comment = request.POST['oNotifyComment']
         noti.save()
         return redirect(reverse('emp', args=(emp.id,)))
+
+######################################################################################################################
+
+
+@login_required
+def inf_delete(request, inf_id):
+    profile = get_object_or_404(UserProfile, user=request.user)
+    inf = get_object_or_404(Info, id=inf_id)
+    emp_id = inf.EmpInfoID_id
+    if inf.EmpInfoID.Owner == profile:
+        inf.Attache.delete()
+        inf.delete()
+    return redirect(reverse('emp', args=(emp_id,)))
 
 ######################################################################################################################
 

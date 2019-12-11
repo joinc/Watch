@@ -106,8 +106,8 @@ def employer_save(request, employer_id):
             emp.SendDate = datetime.now()
             emp.Status = 2
         emp.save()
-        tools.event_create(emp, profile, 'Сохранена карточка предприятия, направлена на проверку в отдел '
-                                         'трудоустройства и специальных программ Главного управления', None)
+        tools.event_create(emp, profile, 'Сохранена карточка предприятия, направлена на проверку в департамент '
+                                         'занятости населения Министерства труда и социального развития', None)
         return redirect(reverse('emp', args=(emp.id,)))
 
     return redirect(reverse('index'))
@@ -156,7 +156,8 @@ def employer_print(request, employer_id):
     infolist = Info.objects.filter(EmpInfoID=emp)
     notifylist = Notify.objects.filter(EmpNotifyID=emp)
 
-    return render(request, 'print.html', {'emp': emp, 'profile': profile, 'eventlist': eventlist, 'infolist': infolist, 'notifylist': notifylist, })
+    return render(request, 'print.html', {'emp': emp, 'profile': profile, 'eventlist': eventlist, 'infolist': infolist,
+                                          'notifylist': notifylist, })
 
 ######################################################################################################################
 
@@ -180,7 +181,8 @@ def employer_audit(request, employer_id):
         if 'accept' in request.POST:
             emp.Status = 3
             emp.save()
-            accept_message = 'Карточка предприятия согласована, направлена для составления протокола об административном правонарушении'
+            accept_message = 'Карточка предприятия согласована, направлена для составления протокола об ' \
+                             'административном правонарушении'
             tools.event_create(emp, profile, accept_message, None)
             message.message_create(emp.id, 0, accept_message, profile)
         elif 'return' in request.POST:

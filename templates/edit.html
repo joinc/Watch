@@ -63,7 +63,37 @@
                         <td>
                             {% for inf in infolist %}
                                 <div class="alert alert-info small" role="alert">
-                                    {{ inf.get_Name_display }} {% ifnotequal inf.Comment '' %}({{ inf.Comment }}){% endifnotequal %}{% if inf.Attache %} <a href="{{ inf.Attache.url }}">Скачать приложение</a> {% endif %}
+                                    <div class="row">
+                                        <div class="col">
+                                            {{ inf.get_Name_display }}
+                                            {% ifnotequal inf.Comment '' %} ({{ inf.Comment }}){% endifnotequal %}
+                                            {% if inf.Attache %} <a href="{{ inf.Attache.url }}">Скачать приложение</a> {% endif %}
+                                        </div>
+                                        {% ifequal profile.id emp.Owner.id %}
+                                            <div class="col-1">
+                                                <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#ModalDeleteInfo{{ inf.id }}" title="Удалить запись о непредставленной информации"><i class="fas fa-times"></i></button>
+                                                <div class="modal fade" id="ModalDeleteInfo{{ inf.id }}" tabindex="-1" role="dialog" aria-labelledby="ModalDeleteInfoTitle" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="ModalDeleteTitle">Удаление записи о непредставленной информации</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                Вы действительно хотите удалить запись о непредставленной информации <strong>{{ inf.get_Name_display }}</strong>?
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-success" data-dismiss="modal">Не удалять</button>
+                                                                <a class="btn btn-danger" href="{% url 'infdelete' inf.id %}" role="button">Удалить</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endifequal %}
+                                    </div>
                                 </div>
                             {% endfor %}
                             {% if infolist.count != 0 %}<p><a class="btn btn-outline-info" data-toggle="collapse" href="#collapseInfo" role="button" aria-expanded="false" aria-controls="collapseExample">Добавить</a></p>{% endif %}
@@ -84,18 +114,39 @@
                         <td>
                             {% for notify in notifylist %}
                                 <div class="alert alert-info small" role="alert">
-                                    {% if notify.NotifyDate %}
-                                        {{ notify.NotifyDate }}
-                                    {% else %}
-                                        Дата не указана
-                                    {% endif %},
-                                    {{ notify.get_Method_display }}
-                                    {% ifnotequal notify.Comment '' %}
-                                        ({{ notify.Comment }})
-                                    {% endifnotequal %}
-                                    {% if notify.Attache %}
-                                        <a href="{{ notify.Attache.url }}">Скачать приложение</a>
-                                    {% endif %} - {{ notify.CreateDate }}, {% firstof notify.Owner.user.get_full_name notify.Owner.user %}{% ifequal profile.id emp.Owner.id %} <a href="{% url 'notifydelete' notify.id %}"><button type="button" class="btn btn-outline-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Удалить информирование"><i class="fas fa-times"></i></button></a>{% endifequal %}
+                                    <div class="row">
+                                        <div class="col">
+                                            {% if notify.NotifyDate %}{{ notify.NotifyDate }}{% else %}Дата не указана{% endif %},
+                                            {{ notify.get_Method_display }}
+                                            {% ifnotequal notify.Comment '' %}({{ notify.Comment }}){% endifnotequal %}
+                                            {% if notify.Attache %}<a href="{{ notify.Attache.url }}">Скачать приложение</a>{% endif %}
+                                            - {{ notify.CreateDate }}, {% firstof notify.Owner.user.get_full_name notify.Owner.user %}
+                                        </div>
+                                        {% ifequal profile.id emp.Owner.id %}
+                                            <div class="col-1">
+                                                <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#ModalDeleteInfo{{ notify.id }}" title="Удалить информирование"><i class="fas fa-times"></i></button>
+                                                <div class="modal fade" id="ModalDeleteInfo{{ notify.id }}" tabindex="-1" role="dialog" aria-labelledby="ModalDeleteInfoTitle" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="ModalDeleteTitle">Удаление записи об информировании</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                Вы действительно хотите удалить запись об информировании <strong>{{ notify.get_Method_display }}</strong>?
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-success" data-dismiss="modal">Не удалять</button>
+                                                                <a class="btn btn-danger" href="{% url 'notifydelete' notify.id %}" role="button">Удалить</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endifequal %}
+                                    </div>
                                 </div>
                             {% endfor %}
                             {% if notifylist.count != 0 %}<p><a class="btn btn-outline-info" data-toggle="collapse" href="#collapseNotify" role="button" aria-expanded="false" aria-controls="collapseExample">Добавить</a></p>{% endif %}

@@ -48,6 +48,7 @@ urlpatterns = [
     path('arch/new/', views.temp_arch_new, name='arch', ),
     path('arch/<int:employer_id>/edit/', views.employer_arch_edit, name='archedit', ),
     path('arch/<int:employer_id>/save/', views.employer_arch_save, name='archsave', ),
+    path('inf/<int:inf_id>/delete/', views.inf_delete, name='infdelete', ),
     path('notify/<int:notify_id>/delete/', views.notify_delete, name='notifydelete', ),
     path('create/<int:temp_employer_id>/', views.create_temp_emp, name='create', ),
     path('users/', views.user_list, name='users', ),
