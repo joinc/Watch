@@ -57,13 +57,16 @@ def login(request):
         user = auth.authenticate(username=username, password=password)
         if user:
             auth.login(request, user)
-            #return redirect(request.META.get('HTTP_REFERER'))
-            return redirect(settings.SUCCESS_URL)
+            return redirect(request.POST['next'])
         else:
             messages.info(request, 'Не правильно введенные данные')
             return redirect(reverse('login'))
     else:
-        return render(request, 'login.html')
+        if request.GET.get('next'):
+            return render(request, 'login.html', {'next': request.GET.get('next')})
+        else:
+            return render(request, 'login.html', {'next': settings.SUCCESS_URL})
+
 
 ######################################################################################################################
 

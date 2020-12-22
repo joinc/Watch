@@ -1,9 +1,11 @@
 .idea
 venv/
-Main/migrations
-Main/static
+Main/migrations/
+Main/static/
+Main/__pycache__/
 Main/__init__.py
 upload/
 db.sqlite3
+Watch/__pycache__/
 Watch/settings.py
 Watch/__init__.py

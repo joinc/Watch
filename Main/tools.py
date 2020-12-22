@@ -6,7 +6,6 @@ from Main.models import Event, Employer, UserProfile
 
 
 def event_create(empid, profile, comment, attache):
-
     oEvent = Event()
     oEvent.EmpEventID = empid
     oEvent.Owner = profile
@@ -54,6 +53,7 @@ def emp_filter(oFind, oCzn, oStatus):
 
     return oEmp
 
+
 ######################################################################################################################
 
 
@@ -80,3 +80,6 @@ def report_filter(emps):
             elist.append([u, emp_count, emp_work, emp_closed, emp_ready, percent_work, percent_closed, percent_ready])
     result = [elist, aw, ac, ar, emp_all]
     return result
+
+
+######################################################################################################################
