@@ -1,28 +1,23 @@
 {% extends "base.html" %}{% load static %}
 
-{% block html_title %}Страница с данными{% endblock %}
+{% block html_title %}{{ title }}{% endblock %}
+{% block html_top_breadcrumb %}
+        <li class="nav-item">
+            <span class="navbar-text">/</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
+        </li>
+{% endblock %}
 {% block html_body %}
-    <br />
-    <div class="container-fluid">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item active">Cписок пользователей</li>
-        </ol>
-        <div class="card bg-light">
+    <main role="main" class="container-fluid">
+        <div class="shadow card border-dark mb-3">
             <div class="card-header">
-                <h4 class="card-title">Cписок пользователей:</h4>
+                <h4>{{ title }}:</h4>
             </div>
             <div class="card-body">
                 <p class="card-text">
-                    <table class="table table-hover table-sm table-responsive">
-                        <thead>
-                            <tr>
-                                <th>Пользователь</th>
-                                <th>Логин</th>
-                                <th>Роль</th>
-                                <th>Действие</th>
-                            </tr>
-                        </thead>
+                    <table class="table table-hover table-sm table-borderless">
                         <tbody>
                         {% for i in ulist %}
                             <tr>
@@ -31,9 +26,9 @@
                                 <td></td>
                                 <td>
                                     <form class="form-inline mb-0" method="post" action="{% url 'userrole' %}">
+                                        {% csrf_token %}
                                         <div class="form-row align-items-center" >
                                             <div class="col-auto">
-                                                {% csrf_token %}
                                                 {{ role_form.role }}
                                                 <input type="hidden" name="user" value="{{ i.id }}">
                                             </div>
@@ -47,18 +42,18 @@
                         {% endfor %}
                         {% for i in plist %}
                             <tr>
-                                <th scope="row"><a href="#">{{ i.user.get_full_name }}</a></th>
-                                <td>{{ i.user.get_username }}</td>
+                                <td class="small">
+                                    <strong class="text-gray-dark">{{ i.user.get_full_name }}</strong>
+                                    <span class="d-block">@{{ i.user.get_username }}</span>
+                                </td>
                                 <td>{{ i.get_role_display }}</td>
                                 <td>
                                     <form class="form-inline mb-0" method="post" action="{% url 'userrole' %}">
-                                        <div class="form-row align-items-center">
-                                            <div class="col-auto">
-                                                {% csrf_token %}
-                                                {{ role_form.role }}
-                                                <input type="hidden" name="user" value="{{ i.user.id }}">
-                                            </div>
-                                            <div class="col-auto">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="user" value="{{ i.user.id }}">
+                                        <div class="input-group">
+                                            {{ role_form.role }}
+                                            <div class="input-group-append">
                                                 <button type="submit" class="btn btn-warning">Сменить роль</button>
                                             </div>
                                         </div>
@@ -71,5 +66,5 @@
                 </p>
             </div>
         </div>
-    </div>
+    </main>
 {% endblock %}

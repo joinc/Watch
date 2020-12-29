@@ -1,28 +1,35 @@
 {% extends "base.html" %}{% load static %}
 
-{% block html_title %}Профиль пользователя{% endblock %}
+{% block html_title %}{{ title }}{% endblock %}
+{% block html_top_breadcrumb %}
+        <li class="nav-item">
+            <span class="navbar-text">/</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
+        </li>
+{% endblock %}
 {% block html_body %}
-    <br />
-    <div class="container-fluid">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item active">Загрузка списка работодателей</li>
-        </ol>
-        <div class="card bg-light">
+    <main role="main" class="container-fluid">
+        <div class="shadow card border-dark mb-3">
             <div class="card-header">
-                <h4 class="card-title">Загрузить работодателей:</h4>
+                <h4>{{ title }}:</h4>
             </div>
             <div class="card-body">
-                <p class="card-text">
+                <div class="input-group">
                     <form method="post" action='{% url 'upload' %}' enctype="multipart/form-data">
-                        <div class="form-row">
-                            <input type="file" name="files" class="form-control-file" multiple>
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-primary">Загрузить</button>
+                        {% csrf_token %}
+                        <div class="input-group d-flex">
+                            <div class="custom-file">
+                                <input type="file" name="files" class="form-control-file" multiple>
+                            </div>
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">Загрузить</button>
+                            </div>
                         </div>
                     </form>
-                </p>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
 {% endblock %}

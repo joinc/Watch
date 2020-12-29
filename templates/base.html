@@ -3,78 +3,77 @@
 <html>
 <head>
 <title>{% block html_title %}Заголовок{% endblock %}</title>
-    <link rel='stylesheet' href='{% static "css/bootstrap.min.css" %}' type='text/css' />
-    <link rel='stylesheet' href='{% static "css/jumbotron.css" %}' type='text/css' />
-    <link rel='stylesheet' href='{% static "css/bootstrap-datetimepicker.min.css" %}' type='text/css' />
-    <link rel='stylesheet' href='{% static "css/custom.css" %}' type='text/css' />
-{% block html_head %}{% endblock %}
-    <script src='{% static "js/jquery.min.js" %}'></script>
-    <script src='{% static "js/popper.min.js" %}'></script>
+    <script src='{% static "js/jquery-3.4.1.min.js" %}'></script>
     <script src='{% static "js/bootstrap.min.js" %}'></script>
-    <script src='{% static "js/bootstrap-datetimepicker.min.js" %}'></script>
-    <script src='{% static "fa/js/all.js" %}'></script> <!--load all styles -->
+    <script src='{% static "fa/js/all.js" %}'></script>
+    <link rel='stylesheet' href='{% static "css/main.css" %}' type='text/css' />
+    <link rel='stylesheet' href='{% static "css/bootstrap.min.css" %}' type='text/css' />
+{% block html_head %}{% endblock %}
 </head>
 <body>
-{% block html_body_menu %}
-{% if request.user.is_authenticated %}
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-            <div class="btn-group mr-2" role="group" aria-label="First group">
-                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">☰</button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <span class="dropdown-item"><strong>{% firstof user.get_full_name user.get_short_name user.get_username %}</strong></span>
-                    {% if request.user.is_superuser %}
-                        <div class="dropdown-divider"></div>
-                        <a href="{% url 'users' %}" class="dropdown-item bg-danger text-white">Список пользователей</a>
-                        <a href="{% url 'load' %}" class="dropdown-item bg-danger text-white">Загрузка работодателей</a>
-                        <a href="{% url 'send' %}" class="dropdown-item bg-danger text-white">Отправить почту</a>
-                    {% endif %}
-                    {% ifequal profile.role 1 %}
-                        <div class="dropdown-divider"></div>
-                        <a href="{% url 'emps' %}" class="dropdown-item">Создать карточку из Катарсиса</a>
-                        <a href="{% url 'new' %}" class="dropdown-item">Создать карточку вручную</a>
-                    {% endifequal %}
-                    {% ifequal profile.role 3 %}
-                        <div class="dropdown-divider"></div>
-                        <a href="{% url 'emps' %}" class="dropdown-item">Создать архивную карточку из Катарсиса</a>
-                        <a href="{% url 'arch' %}" class="dropdown-item">Создать архивную карточку вручную</a>
-                    {% endifequal %}
-                    {% ifequal profile.role 4 %}
-                        <div class="dropdown-divider"></div>
-                        <a href="{% url 'responslist' %}" class="dropdown-item">Назначение ответственного</a>
-                    {% endifequal %}
-                    <div class="dropdown-divider"></div>
-                    <a href="{% url 'reportlist' %}" class="dropdown-item">
-                        <div class="row">
-                            <div class="col-auto mr-auto">Отчеты</div>
-                            <div class="col-auto mt-1 text-right"><i class="fas fa-chart-bar"></i></div>
+    {% block html_top %}
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark">
+            {% block html_top_menu %}
+                {% if request.user.is_authenticated %}
+                    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+                        <div class="btn-group mr-2" role="group" aria-label="First group">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">☰</button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <span class="dropdown-item"><strong>{% firstof user.get_full_name user.get_short_name user.get_username %}</strong></span>
+                                {% if request.user.is_superuser %}
+                                    <div class="dropdown-divider"></div>
+                                    <a href="{% url 'users' %}" class="dropdown-item bg-danger text-white">Список пользователей</a>
+                                    <a href="{% url 'load' %}" class="dropdown-item bg-danger text-white">Загрузка работодателей</a>
+                                    <a href="{% url 'send' %}" class="dropdown-item bg-danger text-white">Отправить почту</a>
+                                {% endif %}
+                                {% ifequal profile.role 1 %}
+                                    <div class="dropdown-divider"></div>
+                                    <a href="{% url 'emps' %}" class="dropdown-item">Создать карточку из Катарсиса</a>
+                                    <a href="{% url 'new' %}" class="dropdown-item">Создать карточку вручную</a>
+                                {% endifequal %}
+                                {% ifequal profile.role 3 %}
+                                    <div class="dropdown-divider"></div>
+                                    <a href="{% url 'emps' %}" class="dropdown-item">Создать архивную карточку из Катарсиса</a>
+                                    <a href="{% url 'arch' %}" class="dropdown-item">Создать архивную карточку вручную</a>
+                                {% endifequal %}
+                                {% ifequal profile.role 4 %}
+                                    <div class="dropdown-divider"></div>
+                                    <a href="{% url 'responslist' %}" class="dropdown-item">Назначение ответственного</a>
+                                {% endifequal %}
+                                <div class="dropdown-divider"></div>
+                                <a href="{% url 'reportlist' %}" class="dropdown-item">
+                                    <div class="row">
+                                        <div class="col-auto mr-auto">Отчеты</div>
+                                        <div class="col-auto mt-1 text-right"><i class="fas fa-chart-bar"></i></div>
+                                    </div>
+                                </a>
+                                <a href="{% url 'export' %}" class="dropdown-item">
+                                    <div class="row">
+                                        <div class="col-auto mr-auto">Скачать данные</div>
+                                        <div class="col-auto mt-1 text-right"><i class="fas fa-download"></i></div>
+                                    </div>
+                                </a>
+                                <a href="{% url 'messagelist' %}" class="dropdown-item">
+                                    <div class="row">
+                                        <div class="col-auto mr-auto">Уведомления</div>
+                                        <div class="col-auto mt-1 text-right"><i class="far fa-comment-alt"></i></div>
+                                    </div>
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>
+                            </div>
                         </div>
-                    </a>
-                    <a href="{% url 'export' %}" class="dropdown-item">
-                        <div class="row">
-                            <div class="col-auto mr-auto">Скачать данные</div>
-                            <div class="col-auto mt-1 text-right"><i class="fas fa-download"></i></div>
-                        </div>
-                    </a>
-                    <a href="{% url 'messagelist' %}" class="dropdown-item">
-                        <div class="row">
-                            <div class="col-auto mr-auto">Уведомления</div>
-                            <div class="col-auto mt-1 text-right"><i class="far fa-comment-alt"></i></div>
-                        </div>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>
-                </div>
-            </div>
-        </div>
-        <a href="{% url 'index' %}" class="navbar-brand">&nbsp;Главная</a>
-    </nav>
-{% endif %}
-{% endblock %}
-{% block html_body %}{% endblock %}
-<footer class="footer mt-auto py-3">
-  <div class="container">
-  </div>
-</footer>
+                    </div>
+                {% endif %}
+            {% endblock %}
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a href="{% url 'index' %}" class="nav-link">Главная</a>
+                </li>
+                {% block html_top_breadcrumb %}{% endblock %}
+            </ul>
+        </nav>
+    {% endblock %}
+    {% block html_body %}{% endblock %}
 </body>
 </html>

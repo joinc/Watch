@@ -23,9 +23,25 @@ import os
 ######################################################################################################################
 
 
-@login_required
-def index(request):
+def admin_only(function):
+    def _inner(request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return redirect(reverse('index'))
+        else:
+            return function(request, *args, **kwargs)
+    return _inner
 
+
+######################################################################################################################
+
+
+@login_required
+def index(request) -> HttpResponse:
+    """
+    Отображение главной страницы
+    :param request:
+    :return: HttpResponse
+    """
     profile = get_object_or_404(UserProfile, user=request.user)
     oAll = Employer.objects.all().count()
     if profile.role == 1:
@@ -47,10 +63,16 @@ def index(request):
                   {'profile': profile, 'oAll': oAll, 'oDraft': oDraft, 'oCheck': oCheck, 'oWork': oWork,
                    'oReady': oReady, 'oEdit': oEdit, 'oClosed': oClosed, 'oAllMe': oAllMe, })
 
+
 ######################################################################################################################
 
 
-def login(request):
+def login(request) -> HttpResponse:
+    """
+    Вход пользователя
+    :param request:
+    :return: HttpResponse
+    """
     if request.POST:
         username = request.POST['username']
         password = request.POST['password']
@@ -72,13 +94,26 @@ def login(request):
 
 
 def logout(request):
+    """
+    Выход пользователя
+    :param request:
+    :return:
+    """
     auth.logout(request)
     return redirect(reverse('index'))
+
 
 ######################################################################################################################
 
 
 def emp_list(request, status, breadcrumb):
+    """
+
+    :param request:
+    :param status:
+    :param breadcrumb:
+    :return:
+    """
     oEmp = []
     profile = get_object_or_404(UserProfile, user=request.user)
     search_form = FormSearch()
@@ -112,33 +147,45 @@ def emp_list(request, status, breadcrumb):
         return render(request, 'list.html',
                       {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
                        'filter_status_form': filter_status_form, 'emp_count': emp_count, 'profile': profile,
-                       'per_page': settings.COUNT_LIST, 'page_count': page_count, 'breadcrumb': breadcrumb, })
+                       'per_page': settings.COUNT_LIST, 'page_count': page_count, 'breadcrumb': breadcrumb, 'title': breadcrumb })
+
 
 ######################################################################################################################
 
 
 @login_required
 def emp_find_list(request):
+    """
 
+    :param request:
+    :return:
+    """
     def get_page_count(emp_count):
         page_count = emp_count // settings.COUNT_LIST
         if emp_count % settings.COUNT_LIST > 0:
             page_count += 1
         return page_count
 
-    profile = get_object_or_404(UserProfile, user=request.user)
-    breadcrumb = 'Поиск карточек'
+    context = {
+        'profile': get_object_or_404(UserProfile, user=request.user),
+        'title': 'Поиск карточек',
+        'per_page': settings.COUNT_LIST,
+    }
     if request.POST:
         search_form = FormSearch(request.POST)
-        filter_czn_form = FormFilterCzn(request.POST)
-        filter_status_form = FormFilterStatus(request.POST)
+        context['filter_czn_form'] = FormFilterCzn(request.POST)
+        context['filter_status_form'] = FormFilterStatus(request.POST)
         if search_form.is_valid():
-            # Если нажата кнопка "Сформировать и скачать таблицу" то выгружается все записи
-            emp_find = request.POST['find']
-            emp_czn = request.POST['czn']
-            emp_status = request.POST['status']
-            oEmp = tools.emp_filter(emp_find, emp_czn, emp_status)[0:settings.COUNT_LIST]
-            emp_count = tools.emp_filter(emp_find, emp_czn, emp_status).count()
+            emp_find = request.POST.get('find', '')
+            emp_czn = request.POST.get('czn', '0')
+            emp_status = request.POST.get('status', '20')
+            # oEmp = tools.emp_filter(emp_find, emp_czn, emp_status)[0:settings.COUNT_LIST]
+            context['search_form'] = search_form
+            context['emp_count'] = tools.emp_filter(emp_find, emp_czn, emp_status).count()
+            context['emp_find'] = emp_find
+            context['emp_czn'] = emp_czn
+            context['emp_status'] = emp_status
+            print(emp_find, emp_czn, emp_status)
         else:
             return redirect(reverse('all'))
     elif request.GET:
@@ -146,93 +193,129 @@ def emp_find_list(request):
         emp_find = request.GET.get('emp_find', '')
         emp_czn = request.GET.get('emp_czn', '0')
         emp_status = request.GET.get('emp_status', '20')
-        START_LIST = (page_number - 1) * settings.COUNT_LIST
-        STOP_LIST = START_LIST + settings.COUNT_LIST
-        oEmp = tools.emp_filter(emp_find, emp_czn, emp_status)[START_LIST:STOP_LIST]
-        return render(request, 'emp_list.html', {'oEmp': oEmp, })
+        start_count = (page_number - 1) * settings.COUNT_LIST
+        stop_count = start_count + settings.COUNT_LIST
+        emp_list = tools.emp_filter(emp_find, emp_czn, emp_status)[start_count:stop_count]
+        return render(request, 'emp_list.html', {'emp_list': emp_list, })
     else:
-        search_form = FormSearch()
-        filter_czn_form = FormFilterCzn()
-        filter_status_form = FormFilterStatus()
-        oEmp = Employer.objects.all()
-        emp_count = Employer.objects.all().count()
-        emp_find = ''
-        emp_czn = '0'
-        emp_status = '20'
+        context['search_form'] = FormSearch()
+        context['filter_czn_form'] = FormFilterCzn()
+        context['filter_status_form'] = FormFilterStatus()
+        context['emp_count'] = Employer.objects.all().count()
+        context['page_count'] = get_page_count(Employer.objects.all().count())
+        context['emp_find'] = ''
+        context['emp_czn'] = '0'
+        context['emp_status'] = '20'
+    return render(request, 'list.html', context)
 
-    return render(request, 'list.html',
-                  {'oEmp': oEmp, 'search_form': search_form, 'filter_czn_form': filter_czn_form,
-                   'filter_status_form': filter_status_form, 'emp_count': emp_count, 'profile': profile,
-                   'per_page': settings.COUNT_LIST, 'page_count': get_page_count(emp_count), 'emp_find': emp_find,
-                   'emp_czn': emp_czn, 'emp_status': emp_status, 'breadcrumb': breadcrumb, })
 
 ######################################################################################################################
 
 
 @login_required
 def emp_all_list(request):
-    # Выводит список всех карточек
+    """
+    Вывод списка всех карточек
+    :param request:
+    :return:
+    """
     return emp_list(request, range(13), 'Все карточки')
+
 
 ######################################################################################################################
 
 
 @login_required
 def emp_draft_list(request):
-    # Выводит список карточек в статусе Черновик
+    """
+    Вывод списка карточек в статусе Черновик
+    :param request:
+    :return:
+    """
     return emp_list(request, ['0', '1'], 'Черновики')
+
 
 ######################################################################################################################
 
 
 @login_required
 def emp_check_list(request):
-    # Выводит список карточек в статусе Карточки на проверке
+    """
+    Вывод списка карточек в статусе Карточки на проверке
+    :param request:
+    :return:
+    """
     return emp_list(request, ['2'], 'Карточки на проверке')
+
 
 ######################################################################################################################
 
 
 @login_required
 def emp_work_list(request):
-    # Выводит список карточек в статусе В работе
+    """
+    Вывод списка карточек в статусе В работе
+    :param request:
+    :return:
+    """
     return emp_list(request, ['3', '4', '5', '6', '7', '11'], 'Карточки в работе')
+
 
 ######################################################################################################################
 
 
 @login_required
 def emp_ready_list(request):
-    # Выводит список карточек в статусе Вынесено постановлений
+    """
+    Вывод списка карточек в статусе Вынесено постановлений
+    :param request:
+    :return:
+    """
     return emp_list(request, ['9'], 'Вынесено постановлений')
+
 
 ######################################################################################################################
 
 
 @login_required
 def emp_closed_list(request):
-    # Выводит список карточек в статусе Закрытые карточки
+    """
+    Вывод списка карточек в статусе Закрытые карточки
+    :param request:
+    :return:
+    """
     return emp_list(request, ['12'], 'Закрытые карточки')
 
+
 ######################################################################################################################
 
 
 @login_required
+@admin_only
 def emp_load(request):
-    if not request.user.is_superuser:
-        return redirect(reverse('index'))
-    profile = get_object_or_404(UserProfile, user=request.user)
+    """
 
-    return render(request, 'load.html', {'profile': profile, })
+    :param request:
+    :return:
+    """
+    context = {
+        'profile': get_object_or_404(UserProfile, user=request.user),
+        'title': 'Загрузить работодателей',
+    }
+    return render(request, 'load.html', context)
+
 
 ######################################################################################################################
 
 
 @login_required
+@admin_only
 def emp_upload(request):
-    if not request.user.is_superuser:
-        return redirect(reverse('index'))
+    """
 
+    :param request:
+    :return:
+    """
     TempEmployer.objects.all().delete()
     for count, x in enumerate(request.FILES.getlist('files')):
         file = settings.UPLOAD_FILE + str(count)
@@ -270,18 +353,22 @@ def emp_upload(request):
     UpDate.save()
     return redirect(reverse('emps'))
 
+
 ######################################################################################################################
 
 
 @login_required
 def export_to_spreadsheet(request):
-
-    profile = get_object_or_404(UserProfile, user=request.user)
+    """
+    Выгрузка данных в файл
+    :param request:
+    :return:
+    """
     all_fields = Employer._meta.get_fields(include_parents=False, include_hidden=False)
     default_on_fileds = ['Title', 'INN', 'OGRN', 'Status', 'Owner', 'CreateDate', ]
     default_view_fileds = default_on_fileds + ['Number', 'JurAddress', 'FactAddress', 'SendDate', 'Contact', 'Respons']
     if request.POST:
-        czn = request.POST['czn']
+        czn = request.POST.get('czn', '0')
         field_list = request.POST.getlist('fields')
         fields = []
         for field in all_fields:
@@ -292,10 +379,15 @@ def export_to_spreadsheet(request):
                     fields.append([field.name, field.verbose_name, False])
         return emp_export_ods(czn, field_list)
     else:
+        profile = get_object_or_404(UserProfile, user=request.user)
+        context = {
+            'profile': profile,
+            'title': 'Выгрузка данных в файл',
+        }
         if profile.role == 1 and not request.user.is_superuser:
-            filter_czn_form = FormFilterCzn({'czn': profile.user.id})
+            context['filter_czn_form'] = FormFilterCzn({'czn': profile.user.id})
         else:
-            filter_czn_form = FormFilterCzn()
+            context['filter_czn_form'] = FormFilterCzn()
         fields = []
         for field in all_fields:
             if field.name in default_view_fileds:
@@ -303,13 +395,20 @@ def export_to_spreadsheet(request):
                     fields.append([field.name, field.verbose_name, True])
                 else:
                     fields.append([field.name, field.verbose_name, False])
+        context['fields'] = fields
+        return render(request, 'export.html', context)
 
-    return render(request, 'export.html', {'profile': profile, 'fields': fields, 'filter_czn_form': filter_czn_form, })
 
 ######################################################################################################################
 
 
 def emp_export_ods(czn, fields):
+    """
+
+    :param czn:
+    :param fields:
+    :return:
+    """
     all_fields = Employer._meta.get_fields(include_parents=False, include_hidden=False)
     now = datetime.now()
     file_name = 'export' + now.strftime('%y%m%d-%H%M%S') + '.ods'
@@ -357,11 +456,18 @@ def emp_export_ods(czn, fields):
 
     return response
 
+
 ######################################################################################################################
 
 
 @login_required
 def create_temp_emp(request, temp_employer_id):
+    """
+
+    :param request:
+    :param temp_employer_id:
+    :return:
+    """
     profile = get_object_or_404(UserProfile, user=request.user)
     temp_emp = get_object_or_404(TempEmployer, id=temp_employer_id)
     emp = Employer()
@@ -388,17 +494,19 @@ def create_temp_emp(request, temp_employer_id):
     else:
         return redirect(reverse('delete', args=(emp.id, )))
 
+
 ######################################################################################################################
 
 
 @login_required
 def temp_arch_new(request):
+    """
+
+    :param request:
+    :return:
+    """
     profile = get_object_or_404(UserProfile, user=request.user)
-    emp = Employer()
-    emp.Status = 0
-    emp.Owner = profile
-    emp.RegKatharsis = False
-    emp.Archive = True
+    emp = Employer(Status=0, Owner=profile, RegKatharsis=False, Archive=True)
     emp.save()
     tools.event_create(emp, emp.Owner, 'Создана карточка предприятия', None)
     if profile.role == 3:
@@ -406,13 +514,18 @@ def temp_arch_new(request):
     else:
         return redirect(reverse('delete', args=(emp.id, )))
 
+
 ######################################################################################################################
 
 
 @login_required
 def temp_emp_list(request):
+    """
+
+    :param request:
+    :return:
+    """
     oFind = ''
-    profile = get_object_or_404(UserProfile, user=request.user)
     if request.POST:
         search_form = FormSearch(request.POST)
         if search_form.is_valid():
@@ -425,25 +538,38 @@ def temp_emp_list(request):
         else:
             return redirect(reverse('emps'))
     else:
-        search_form = FormSearch
+        search_form = FormSearch()
         scnt = TempEmployer.objects.all().count()
         aEmp = TempEmployer.objects.all()[settings.START_LIST:settings.STOP_LIST]
-    vcnt = aEmp.count()
     pemp = []
     for emp in aEmp:
         for emp_f in Employer.objects.filter(INN=emp.INN):
             pemp.append(emp_f)
-    update = ConfigWatch.objects.all().first()
+    context = {
+        'profile': get_object_or_404(UserProfile, user=request.user),
+        'title': 'Работодатели из Катарсиса',
+        'aEmp': aEmp,
+        'search_form': search_form,
+        'find': oFind,
+        'scnt': scnt,
+        'vcnt': aEmp.count(),
+        'pemp': pemp,
+        'update': ConfigWatch.objects.all().first(),
+    }
+    return render(request, 'emps.html', context)
 
-    return render(request, 'emps.html',
-                  {'aEmp': aEmp, 'profile': profile, 'search_form': search_form, 'find': oFind, 'scnt': scnt,
-                   'vcnt': vcnt, 'pemp': pemp, 'update': update, })
 
 ######################################################################################################################
 
 
 @login_required
 def employer_arch_edit(request, employer_id):
+    """
+
+    :param request:
+    :param employer_id:
+    :return:
+    """
     emp = get_object_or_404(Employer, id=employer_id)
     profile = get_object_or_404(UserProfile, user=request.user)
     if emp.Owner != profile or (emp.Status != 0 and emp.Status != 1):
@@ -469,11 +595,18 @@ def employer_arch_edit(request, employer_id):
                   {'form': form, 'profile': profile, 'emp': emp, 'eventlist': eventlist, 'notice_form': notice_form,
                    'result_form': result_form, 'pemp': tools.p_emp_list(emp.INN), })
 
+
 ######################################################################################################################
 
 
 @login_required
 def employer_arch_save(request, employer_id):
+    """
+
+    :param request:
+    :param employer_id:
+    :return:
+    """
     profile = get_object_or_404(UserProfile, user=request.user)
     if request.POST:
         comment = request.POST['comment']
@@ -502,11 +635,18 @@ def employer_arch_save(request, employer_id):
 
     return redirect(reverse('index'))
 
+
 ######################################################################################################################
 
 
 @login_required
 def notify_add(request, employer_id):
+    """
+
+    :param request:
+    :param employer_id:
+    :return:
+    """
     profile = get_object_or_404(UserProfile, user=request.user)
     emp = get_object_or_404(Employer, id=employer_id)
     if request.POST:
@@ -523,11 +663,18 @@ def notify_add(request, employer_id):
         noti.save()
         return redirect(reverse('emp', args=(emp.id,)))
 
+
 ######################################################################################################################
 
 
 @login_required
 def inf_delete(request, inf_id):
+    """
+
+    :param request:
+    :param inf_id:
+    :return:
+    """
     profile = get_object_or_404(UserProfile, user=request.user)
     inf = get_object_or_404(Info, id=inf_id)
     emp_id = inf.EmpInfoID_id
@@ -536,11 +683,18 @@ def inf_delete(request, inf_id):
         inf.delete()
     return redirect(reverse('emp', args=(emp_id,)))
 
+
 ######################################################################################################################
 
 
 @login_required
 def notify_delete(request, notify_id):
+    """
+
+    :param request:
+    :param notify_id:
+    :return:
+    """
     profile = get_object_or_404(UserProfile, user=request.user)
     noti = get_object_or_404(Notify, id=notify_id)
     emp_id = noti.EmpNotifyID_id
@@ -549,11 +703,18 @@ def notify_delete(request, notify_id):
         noti.delete()
     return redirect(reverse('emp', args=(emp_id,)))
 
+
 ######################################################################################################################
 
 
 @login_required
 def event_add(request, employer_id):
+    """
+
+    :param request:
+    :param employer_id:
+    :return:
+    """
     profile = get_object_or_404(UserProfile, user=request.user)
     emp = get_object_or_404(Employer, id=employer_id)
     if request.POST:
@@ -605,40 +766,50 @@ def event_add(request, employer_id):
             if resultat == 2:
                 status = 11
             comment = comment + '. ' + dict(RESULT_CHOICES).get(resultat)
-
         emp.Status = status
         emp.save()
         tools.event_create(emp, profile, comment, myfile)
         message.message_create(emp.id, 0, comment, profile)
-
         return redirect(reverse('emp', args=(emp.id,)))
-
     return redirect(reverse('index'))
+
 
 ######################################################################################################################
 
 
 @login_required
 def report_list(request):
-    profile = get_object_or_404(UserProfile, user=request.user)
-    breadcrumb = 'Список отчетов'
-    return render(request, 'reports.html',
-                  {'profile': profile, 'breadcrumb': breadcrumb, })
+    """
+
+    :param request:
+    :return:
+    """
+    context = {
+        'profile': get_object_or_404(UserProfile, user=request.user),
+        'title': 'Список отчетов',
+    }
+    return render(request, 'report_list.html', context)
+
 
 ######################################################################################################################
 
 
 @login_required
 def report_month(request):
-    profile = get_object_or_404(UserProfile, user=request.user)
+    """
+    Строит отчет за изменения в карточках за выбранный месяц
+    :param request:
+    :return:
+    """
     curr_date = datetime(2018, 10, 1)
-    breadcrumb = 'Отчет за месяц'
     if request.POST:
-        month = int(request.POST['month'])
+        if request.POST['month'].isdigit():
+            month = int(request.POST['month'])
+        else:
+            month = datetime.now().month
     else:
         now = datetime.now()
         month = (now.year - curr_date.year) * 12 + now.month - curr_date.month
-    month_form = FormMonth({'month': month})
     i = 0
     while i < month:
         days = calendar.monthrange(curr_date.year, curr_date.month)[1]
@@ -646,39 +817,33 @@ def report_month(request):
         i += 1
     emps = Employer.objects.filter(SendDate__month=curr_date.month)
     elist, aw, ac, ar, emp_all = tools.report_filter(emps)
-    '''
-    plist = UserProfile.objects.filter(role=1)
-    elist = []
-    aw = 0
-    ac = 0
-    ar = 0
-    emp_all = 0
-    for u in plist:
-        emp_count = emps.filter(Owner=u).count()
-        emp_closed = emps.filter(Owner=u).filter(Status=12).count()
-        emp_ready = emps.filter(Owner=u).filter(Status=9).count()
-        emp_work = emp_count - emp_closed - emp_ready
-        percent_closed = 100 * emp_closed // emp_count if emp_count else 0
-        percent_ready = 100 * emp_ready // emp_count if emp_count else 0
-        percent_work = 100 * emp_work // emp_count if emp_count else 0
-        if emp_count > 0:
-            emp_all += emp_count
-            aw += emp_work
-            ac += emp_closed
-            ar += emp_ready
-            elist.append([u, emp_count, emp_work, emp_closed, emp_ready, percent_work, percent_closed, percent_ready])
-    '''
-    return render(request, 'report_month.html',
-                  {'profile': profile, 'breadcrumb': breadcrumb, 'month_form': month_form, 'elist': elist, 'aw': aw,
-                   'ac': ac, 'ar': ar, 'emp_all': emp_all, })
+    context = {
+        'profile': get_object_or_404(UserProfile, user=request.user),
+        'title': 'Отчет за месяц',
+        'month_form': FormMonth(initial={'month': month}),
+        'elist': elist,
+        'aw': aw,
+        'ac': ac,
+        'ar': ar,
+        'emp_all': emp_all,
+    }
+    return render(request, 'report_month.html', context)
+
 
 ######################################################################################################################
 
 
 @login_required
 def report_date(request):
-    profile = get_object_or_404(UserProfile, user=request.user)
-    breadcrumb = 'Отчет за выбранный период'
+    """
+
+    :param request:
+    :return:
+    """
+    context = {
+        'profile': get_object_or_404(UserProfile, user=request.user),
+        'title': 'Отчет за выбранный период',
+    }
     if request.POST:
         date_form = FormReportDates(request.POST)
         start_date = request.POST['start_date']
@@ -692,33 +857,46 @@ def report_date(request):
         else:
             emps = Employer.objects.all()
         elist, aw, ac, ar, emp_all = tools.report_filter(emps)
-        return render(request, 'report_date.html',
-                      {'profile': profile, 'breadcrumb': breadcrumb, 'date_form': date_form, 'elist': elist, 'aw': aw,
-                       'ac': ac, 'ar': ar, 'emp_all': emp_all, })
+        context['date_form'] = date_form
+        context['elist'] = elist
+        context['aw'] = aw
+        context['ac'] = ac
+        context['ar'] = ar
+        context['emp_all'] = emp_all
     else:
-        date_form = FormReportDates()
+        context['date_form'] = FormReportDates()
+    return render(request, 'report_date.html', context)
 
-    return render(request, 'report_date.html',
-                  {'profile': profile, 'breadcrumb': breadcrumb, 'date_form': date_form, })
 
 ######################################################################################################################
 
 
 @login_required
 def respons_list(request):
-    profile = get_object_or_404(UserProfile, user=request.user)
-    breadcrumb = 'Назначение ответственных лиц'
-    respons_form = FormRespons()
-    elist = Employer.objects.filter(Respons__isnull=True)[settings.START_LIST:settings.STOP_LIST]
+    """
 
-    return render(request, 'respons.html',
-                  {'elist': elist, 'profile': profile, 'breadcrumb': breadcrumb, 'respons_form': respons_form, })
+    :param request:
+    :return:
+    """
+    context = {
+        'profile': get_object_or_404(UserProfile, user=request.user),
+        'title': 'Назначение ответственных лиц',
+        'elist': Employer.objects.filter(Respons__isnull=True)[:settings.STOP_LIST],
+        'respons_form': FormRespons(),
+    }
+    return render(request, 'respons.html', context)
+
 
 ######################################################################################################################
 
 
 @login_required
 def respons_set(request):
+    """
+
+    :param request:
+    :return:
+    """
     if request.POST:
         oRespons = request.POST['respons']
         oEmp = request.POST['emp']
@@ -729,32 +907,43 @@ def respons_set(request):
     respons = get_object_or_404(UserProfile, id=oRespons)
     emp.Respons = respons
     emp.save()
-
     return redirect(reverse('responslist'))
+
 
 ######################################################################################################################
 
-
+@login_required
+@admin_only
 def user_list(request):
-    if not request.user.is_superuser:
-        return redirect(reverse('index'))
+    """
 
-    profile = get_object_or_404(UserProfile, user=request.user)
-    role_form = FormRole()
+    :param request:
+    :return:
+    """
     userlist = User.objects.all()
-    plist = UserProfile.objects.all()
     ulist = []
     for u in userlist:
         if UserProfile.objects.filter(user=u).count() == 0:
             ulist.append(u)
+    context = {
+        'profile': get_object_or_404(UserProfile, user=request.user),
+        'title': 'Cписок пользователей',
+        'role_form': FormRole(),
+        'plist': UserProfile.objects.all(),
+        'ulist': ulist,
+    }
+    return render(request, 'users.html', context)
 
-    return render(request, 'users.html',
-                  {'ulist': ulist, 'plist': plist, 'role_form': role_form, 'profile': profile, })
 
 ######################################################################################################################
 
 
 def user_role(request):
+    """
+
+    :param request:
+    :return:
+    """
     if not request.user.is_superuser:
         return redirect(reverse('index'))
 
@@ -777,10 +966,16 @@ def user_role(request):
 
     return redirect(reverse('users'))
 
+
 ######################################################################################################################
 
 
 def send_email(request):
+    """
+
+    :param request:
+    :return:
+    """
     if not request.user.is_superuser:
         return redirect(reverse('index'))
 
@@ -793,5 +988,6 @@ def send_email(request):
     """
     send_mail('Заголовок', data, settings.DEFAULT_FROM_EMAIL, email, fail_silently=False)
     return redirect(reverse('index'))
+
 
 ######################################################################################################################

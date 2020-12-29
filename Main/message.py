@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, reverse, redirect
 from Main.models import UserProfile, Employer, Message
 from django.conf import settings
@@ -40,16 +41,18 @@ def message_create(empid, group, text, sender):
 ######################################################################################################################
 
 
+@login_required
 def message_list(request):
-    if not request.user.is_authenticated:
-        return redirect(reverse('login'))
-
-    breadcrumb = 'Уведомления'
     profile = get_object_or_404(UserProfile, user=request.user)
-    mlist = Message.objects.filter(Recipient=profile)[settings.START_LIST:settings.STOP_LIST]
-    mall = Message.objects.filter(Recipient=profile).count()
-    mnew = Message.objects.filter(Recipient=profile).exclude(Reading=True).count()
-    return render(request, 'messages.html', {'mlist': mlist, 'profile': profile, 'mall': mall, 'mnew': mnew, 'breadcrumb': breadcrumb, })
+    context = {
+        'profile': profile,
+        'title': 'Уведомления',
+        'mlist': Message.objects.filter(Recipient=profile)[settings.START_LIST:settings.STOP_LIST],
+        'mall': Message.objects.filter(Recipient=profile).count(),
+        'mnew': Message.objects.filter(Recipient=profile).exclude(Reading=True).count(),
+    }
+    return render(request, 'messages.html', context)
+
 
 ######################################################################################################################
 

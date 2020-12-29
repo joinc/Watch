@@ -1,81 +1,88 @@
 {% extends "base.html" %}{% load static %}
 
-{% block html_title %}Страница с данными{% endblock %}
-
+{% block html_title %}{{ title }}{% endblock %}
+{% block html_top_breadcrumb %}
+        <li class="nav-item">
+            <span class="navbar-text">/</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
+        </li>
+{% endblock %}
 {% block html_body %}
-    <br />
-    <div class="container-fluid">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item active">Работодатели из Катарсиса</li>
-        </ol>
-        <form method='post' action='{% url 'emps' %}'>
-            <div class="input-group mb-3">
-                {{ search_form }}
-                {% csrf_token %}
-                <div class="input-group-append">
-                    <button class="btn btn-info" type="submit">Поиск</button>
-                </div>
+    <main role="main" class="container-fluid">
+        <div class="shadow card border-dark mb-3">
+            <div class="card-header">
+                <h4>{{ title }}:</h4>
             </div>
-        </form>
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            Найдено работодателей из ПК Катарсис - <strong>{{ scnt }}</strong> . Отображается - <strong>{{ vcnt }}</strong>. Дата загрузки работодателей из Катарсиса - <strong>{{ update.UploadDate }}</strong>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-
-        <div id="accordion" role="tablist">
-            {% for emp in aEmp %}
-            <div class="card">
-                <div class="card-header" role="tab" id="heading{{ emp.id }}">
-                    <h5 class="mb-0">
-                        <a data-toggle="collapse" href="#collapse{{ emp.id }}" aria-expanded="false" aria-controls="collapse{{ emp.id }}">{{ emp.Title }}</a>
-                    </h5>
-                </div>
-
-                <div id="collapse{{ emp.id }}" class="collapse" role="tabpanel" aria-labelledby="heading{{ emp.id }}" data-parent="#accordion">
-                    <div class="card-body">
-                        <p class="card-text">
-                            <dl class="row">
-                                <dt class="col-sm-3">ОГРН:</dt>
-                                <dd class="col-sm-8">{{ emp.OGRN }}</dd>
-                                <dt class="col-sm-3">ИНН:</dt>
-                                <dd class="col-sm-8">{{ emp.INN }}</dd>
-                            </dl>
-                            <hr class="my-4">
-                            <dl class="row">
-                                <dt class="col-sm-3">Юридический адрес:</dt>
-                                <dd class="col-sm-8">{{ emp.JurAddress }}</dd>
-                                <dt class="col-sm-3">Фактический адрес:</dt>
-                                <dd class="col-sm-8">{{ emp.FactAddress }}</dd>
-                            </dl>
-                            <hr class="my-4">
-                            <dl class="row">
-                                <dt class="col-sm-3">Контакт:</dt>
-                                <dd class="col-sm-8">{{ emp.Contact }}</dd>
-                            </dl>
-                            <hr class="my-4">
-                            <dl class="row">
-                                <dt class="col-sm-3">Дата последнего взаимодействия:</dt>
-                                <dd class="col-sm-8">{{ emp.EventDate }}</dd>
-                            </dl>
-                        </p>
-                        {% for i in pemp %}
-                            {% ifequal i.INN emp.INN %}
-                                <div class="alert {% ifequal i.Status 9 %}alert-success{% else %}alert-danger{% endifequal %} small" role="alert">Карточка предприятия с таким же ИНН существует. <a href="{% url 'emp' i.id %}" class="alert-link">{{ i.Title }}</a> {{ i.get_Status_display }}</div>
-                            {% endifequal %}
-                        {% endfor %}
-                        {% ifequal profile.role 1 %}
-                            <a class="btn btn-primary btn-sm" href="{% url 'create' emp.id %}" role="button">Создать карточку предприятия</a>
-                        {% endifequal %}
-                        {% ifequal profile.role 3 %}
-                            <a class="btn btn-primary btn-sm" href="{% url 'create' emp.id %}" role="button">Создать архивную карточку предприятия</a>
-                        {% endifequal %}
+            <div class="card-body">
+                <form method='post' action='{% url 'emps' %}'>
+                    <div class="input-group mb-3">
+                        {{ search_form }}
+                        {% csrf_token %}
+                        <div class="input-group-append">
+                            <button class="btn btn-info" type="submit">Поиск</button>
+                        </div>
                     </div>
+                </form>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    Найдено работодателей из ПК Катарсис - <strong>{{ scnt }}</strong> . Отображается - <strong>{{ vcnt }}</strong>. Дата загрузки работодателей из Катарсиса - <strong>{{ update.UploadDate }}</strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="accordion" role="tablist">
+                    {% for emp in aEmp %}
+                        <div class="card">
+                            <div class="card-header" role="tab" id="heading{{ emp.id }}">
+                                <h5 class="mb-0">
+                                    <a data-toggle="collapse" href="#collapse{{ emp.id }}" aria-expanded="false" aria-controls="collapse{{ emp.id }}">{{ emp.Title }}</a>
+                                </h5>
+                            </div>
+                            <div id="collapse{{ emp.id }}" class="collapse" role="tabpanel" aria-labelledby="heading{{ emp.id }}" data-parent="#accordion">
+                                <div class="card-body">
+                                    <p class="card-text">
+                                        <dl class="row">
+                                            <dt class="col-sm-3">ОГРН:</dt>
+                                            <dd class="col-sm-8">{{ emp.OGRN }}</dd>
+                                            <dt class="col-sm-3">ИНН:</dt>
+                                            <dd class="col-sm-8">{{ emp.INN }}</dd>
+                                        </dl>
+                                        <hr class="my-4">
+                                        <dl class="row">
+                                            <dt class="col-sm-3">Юридический адрес:</dt>
+                                            <dd class="col-sm-8">{{ emp.JurAddress }}</dd>
+                                            <dt class="col-sm-3">Фактический адрес:</dt>
+                                            <dd class="col-sm-8">{{ emp.FactAddress }}</dd>
+                                        </dl>
+                                        <hr class="my-4">
+                                        <dl class="row">
+                                            <dt class="col-sm-3">Контакт:</dt>
+                                            <dd class="col-sm-8">{{ emp.Contact }}</dd>
+                                        </dl>
+                                        <hr class="my-4">
+                                        <dl class="row">
+                                            <dt class="col-sm-3">Дата последнего взаимодействия:</dt>
+                                            <dd class="col-sm-8">{{ emp.EventDate }}</dd>
+                                        </dl>
+                                    </p>
+                                    {% for i in pemp %}
+                                        {% ifequal i.INN emp.INN %}
+                                            <div class="alert {% ifequal i.Status 9 %}alert-success{% else %}alert-danger{% endifequal %} small" role="alert">Карточка предприятия с таким же ИНН существует. <a href="{% url 'emp' i.id %}" class="alert-link">{{ i.Title }}</a> {{ i.get_Status_display }}</div>
+                                        {% endifequal %}
+                                    {% endfor %}
+                                    {% ifequal profile.role 1 %}
+                                        <a class="btn btn-primary btn-sm" href="{% url 'create' emp.id %}" role="button">Создать карточку предприятия</a>
+                                    {% endifequal %}
+                                    {% ifequal profile.role 3 %}
+                                        <a class="btn btn-primary btn-sm" href="{% url 'create' emp.id %}" role="button">Создать архивную карточку предприятия</a>
+                                    {% endifequal %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
-            {% endfor %}
         </div>
-    </div>
+    </main>
 {% endblock %}

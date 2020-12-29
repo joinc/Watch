@@ -6,6 +6,14 @@ from Main.models import Event, Employer, UserProfile
 
 
 def event_create(empid, profile, comment, attache):
+    """
+
+    :param empid:
+    :param profile:
+    :param comment:
+    :param attache:
+    :return:
+    """
     oEvent = Event()
     oEvent.EmpEventID = empid
     oEvent.Owner = profile
@@ -20,6 +28,11 @@ def event_create(empid, profile, comment, attache):
 
 
 def e_date(emp_date):
+    """
+
+    :param emp_date:
+    :return:
+    """
     return_date = None
     if emp_date is not None:
         return_date = emp_date.__format__('%Y-%m-%d')
@@ -30,6 +43,11 @@ def e_date(emp_date):
 
 
 def p_emp_list(inn):
+    """
+
+    :param inn:
+    :return:
+    """
     pemp = []
     emps = Employer.objects.filter(INN__exact=inn)
     for emp in emps:
@@ -41,7 +59,13 @@ def p_emp_list(inn):
 
 
 def emp_filter(oFind, oCzn, oStatus):
-    # Функция отбора карточек предприятий
+    """
+    Функция отбора карточек предприятий
+    :param oFind:
+    :param oCzn:
+    :param oStatus:
+    :return:
+    """
     oEmp = Employer.objects.filter(INN__istartswith=oFind)
     if oEmp.count() == 0:
         oEmp = Employer.objects.filter(Title__icontains=oFind)
@@ -58,6 +82,11 @@ def emp_filter(oFind, oCzn, oStatus):
 
 
 def report_filter(emps):
+    """
+
+    :param emps:
+    :return:
+    """
     plist = UserProfile.objects.filter(role=1)
     elist = []
     aw = 0

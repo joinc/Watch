@@ -1,41 +1,46 @@
 {% extends "base.html" %}{% load static %}
 
-{% block html_title %}Страница с данными{% endblock %}
+{% block html_title %}{{ title }}{% endblock %}
+{% block html_top_breadcrumb %}
+        <li class="nav-item">
+            <span class="navbar-text">/</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
+        </li>
+{% endblock %}
 {% block html_body %}
-    <br />
-    <div class="container-fluid">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
-        </ol>
-        <table class="table table-hover table-sm table-responsive">
-            <thead>
-                <tr>
-                    <th>Работодатель</th>
-                    <th>Автор карточки</th>
-                    <th>Ответственное лицо</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for i in elist %}
-                <tr>
-                    <th class="w-50" scope="row"><a href="{% url 'emp' i.id %}">{{ i.Title }}</a></th>
-                    <td class="w-25">{{ i.Owner.user.get_full_name }}</td>
-                    <td class="w-25">
-                        <form class="form-inline mb-0" method="post" action="{% url 'responsset' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="emp" value="{{ i.id }}">
-                            <div class="input-group">
-                                {{ respons_form.respons }}
-                                <div class="input-group-append">
-                                    <button type="submit" class="btn btn-success">Назначить</button>
-                                </div>
-                            </div>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <main role="main" class="container-fluid">
+        <div class="shadow card border-dark mb-3">
+            <div class="card-header">
+                <h4>{{ title }}:</h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover table-sm table-borderless">
+                    <tbody>
+                    {% for i in elist %}
+                        <tr>
+                            <td class="small">
+                                <strong class="text-gray-dark"><a href="{% url 'emp' i.id %}">{{ i.Title }}</a></strong>
+                                <span class="d-block">{{ i.Owner.user.get_full_name }}</span>
+                            </td>
+                            <td>
+                                <form class="form-inline mb-0" method="post" action="{% url 'responsset' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="emp" value="{{ i.id }}">
+                                    <div class="input-group">
+                                        {{ respons_form.respons }}
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-success">Назначить</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 {% endblock %}

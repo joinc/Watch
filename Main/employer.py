@@ -121,29 +121,37 @@ def employer_edit(request, employer_id):
     profile = get_object_or_404(UserProfile, user=request.user)
     if emp.Owner != profile or (emp.Status != 0 and emp.Status != 1):
         return redirect(reverse('emp', args=(emp.id,)))
-
     if emp.Archive:
         return redirect(reverse('archedit', args=(emp.id,)))
 
-    form = FormEmp(initial={'oTitle': emp.Title,
-                            'oJurAddress': emp.JurAddress,
-                            'oFactAddress': emp.FactAddress,
-                            'oInn': emp.INN,
-                            'oOgrn': emp.OGRN,
-                            'oVacancyDate': tools.e_date(emp.VacancyDate),
-                            'oVacancyComment': emp.VacancyComment,
-                            'oEventDate': tools.e_date(emp.EventDate),
-                            'oEventComment': emp.EventComment,
-                            'oSendDate': tools.e_date(emp.SendDate),
-                            'oContact': emp.Contact, })
+    form = FormEmp(
+        initial={
+            'oTitle': emp.Title,
+            'oJurAddress': emp.JurAddress,
+            'oFactAddress': emp.FactAddress,
+            'oInn': emp.INN,
+            'oOgrn': emp.OGRN,
+            'oVacancyDate': tools.e_date(emp.VacancyDate),
+            'oVacancyComment': emp.VacancyComment,
+            'oEventDate': tools.e_date(emp.EventDate),
+            'oEventComment': emp.EventComment,
+            'oSendDate': tools.e_date(emp.SendDate),
+            'oContact': emp.Contact,
+        }
+    )
 #    notice_form = FormNotice()
-    eventlist = Event.objects.filter(EmpEventID=emp)
-    infolist = Info.objects.filter(EmpInfoID=emp)
-    notifylist = Notify.objects.filter(EmpNotifyID=emp)
+    context = {
+        'profile': profile,
+        'title': 'Редактирование карточки предприятия',
+        'form': form,
+        'emp': emp,
+        'eventlist': Event.objects.filter(EmpEventID=emp),
+        'infolist': Info.objects.filter(EmpInfoID=emp),
+        'notifylist': Notify.objects.filter(EmpNotifyID=emp),
+        'pemp': tools.p_emp_list(emp.INN),
+    }
+    return render(request, 'edit.html', context)
 
-    return render(request, 'edit.html', {'form': form, 'profile': profile, 'emp': emp, 'eventlist': eventlist,
-                                         'infolist': infolist, 'notifylist': notifylist,
-                                         'pemp': tools.p_emp_list(emp.INN), })
 
 ######################################################################################################################
 

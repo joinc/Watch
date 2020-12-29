@@ -1,95 +1,119 @@
 {% extends "base.html" %}{% load static %}{# load django_tables2 #}
 
-{% block html_title %}Страница с данными{% endblock %}
+{% block html_title %}{{ title }}{% endblock %}
+{% block html_head %}
+    <link rel='stylesheet' href='{% static "css/select2.min.css" %}' type='text/css' />
+    <link rel='stylesheet' href='{% static "css/select2-bootstrap4.min.css" %}' type='text/css' />
+    <script src='{% static "js/select2.min.js" %}'></script>
+    <script src='{% static "js/locales/select2.ru.js" %}'></script>
+{% endblock %}
+{% block html_top_breadcrumb %}
+        <li class="nav-item">
+            <span class="navbar-text">/</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
+        </li>
+{% endblock %}
 {% block html_body %}
-    <br />
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-auto mr-auto">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-                    <li class="breadcrumb-item active">{% ifequal breadcrumb '' %}Все карточки{% else %}{{ breadcrumb }}{% endifequal %}</li>
-                </ol>
-            </div>
-            <div class="col-auto mr-0 text-right">
-                <a href="{% url 'export' %}" class="btn btn-outline-secondary" title="Скачать данные"><i class="fas fa-download"></i></a>
-            </div>
-        </div>
-        <form method='post' action='{% url 'find' %}'>
-            <div class="row">
-                <div class="col-auto mr-auto flex-fill">
-                    <div class="input-group mb-3">
-                        {{ filter_czn_form }}
-                        {{ filter_status_form }}
-                        {{ search_form }}
-                        {% csrf_token %}
-                        <div class="input-group-append">
-                            <button class="btn btn-info" type="submit">Поиск</button>
-                        </div>
+    <main role="main" class="container-fluid">
+        <div class="shadow card border-dark mb-3">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-auto mr-auto">
+                        <h4>{{ title }}:</h4>
+                    </div>
+                    <div class="col-auto mr-0 text-right">
+                        <a href="{% url 'export' %}" class="btn btn-outline-secondary" title="Скачать данные"><i class="fas fa-download"></i> Скачать данные</a>
                     </div>
                 </div>
             </div>
-        </form>
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            Найдено карточек - <span class="o_all"></span>. Отображается - <span class="o_view"></span>.
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            <div class="card-body">
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    Найдено карточек - <span class="count_all"></span>. Отображается - <span class="count_view"></span>.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method='post' action='{% url 'find' %}'>
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Поиск карточек</span>
+                        </div>
+                        {{ search_form }}
+                        {{ filter_czn_form }}
+                        {{ filter_status_form }}
+                        <div class="input-group-append">
+                            <button class="btn btn-info" type="submit" name="search">Поиск</button>
+                        </div>
+                    </div>
+                </form>
+                <table class="table table-hover table-sm table-borderless">
+                    <thead>
+                    <tr>
+                        <th scope="col">Наименование работодателя</th>
+                        <th scope="col">Автор карточки</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody class="find-result"></tbody>
+                </table>
+            </div>
+            <div class="card-footer text-muted button-next"></div>
         </div>
-
-        <table class="table table-hover table-sm">
-            <thead>
-            <tr>
-                <th scope="col">Автор карточки</th>
-                <th scope="col">Наименование работодателя</th>
-                <th scope="col">Статус</th>
-                <th scope="col"></th>
-            </tr>
-            </thead>
-            <tbody class="find-result">
-            {% for i in oEmp %}
-                <tr{% ifequal i.Status 9 %} class="table-success"{% endifequal %}{% ifequal i.Status 12 %} class="table-success"{% endifequal %}{% ifequal i.Status 1 %} class="table-danger"{% endifequal %}>
-                    <td>{{ i.Owner.user.get_full_name }}</td>
-                    <td>{{ i.Title }}</td>
-                    <td>{{ i.get_Status_display }}</td>
-                    <td><a href="{% url 'emp' i.id %}" class="btn btn-info btn-sm" role="button">Перейти</a></td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <div class="button-next"></div>
-    </div>
+    </main>
     <script>
-        var page_count = {{ page_count }};
-        var per_page = {{ per_page }};
-        var emp_count = {{ emp_count }};
-        var page_number = 2;
-        var pathname = $(location).attr('href');
+        let page_count = {{ page_count }};
+        let per_page = {{ per_page }};
+        let emp_count = {{ emp_count }};
+        let page_number = 1;
+        let pathname = $(location).attr('href');
 
-        $(document).ready(function () {
+        $(document).ready(function() {
+            console.log('find' {{ emp_find }});
+            console.log('czn' {{ emp_czn }});
+            console.log('status' {{ emp_status }});
+            $('select[name=czn]').select2({
+                allowClear: true,
+                width: 40,
+                placeholder: "Выберите центр занятости",
+                theme: "bootstrap4",
+                language: "ru"
+            });
+            $('select[name=status]').select2({
+                allowClear: true,
+                width: 40,
+                placeholder: "Выберите статус",
+                theme: "bootstrap4",
+                language: "ru"
+            });
+            $.get(pathname, {page: page_number, {% if emp_find %} emp_find: '{{ emp_find }}',{% endif %} {% if emp_czn %}emp_czn: {{emp_czn}},{% endif %} {% if emp_status %}emp_status: {{ emp_status }}{% endif %} }, function(data) {
+                $('.find-result').append(data);
+            });
+            page_number = page_number + 1;
             if (page_count > 1) {
-                $('.o_all').html(emp_count);
-                $('.o_view').html((page_number - 1) * per_page);
+                $('.count_all').html(emp_count);
+                $('.count_view').html((page_number - 1) * per_page);
                 $('.button-next').html('<button class="btn btn-light btn-block" id="button-next" type="submit">Показать больше записей</button>');
                 $('#button-next').click(function () {
                     $.get(pathname, {page: page_number, {% if emp_find %} emp_find: '{{ emp_find }}',{% endif %} {% if emp_czn %}emp_czn: {{emp_czn}},{% endif %} {% if emp_status %}emp_status: {{ emp_status }}{% endif %} }, function(data) {
                         $('.find-result').append(data);
                     });
-
-                    console.log(pathname, {page: page_number});
-                    page_number = page_number + 1;
-                    if (page_number > page_count) {
-                        $('#button-next').hide();
-                        $('.o_view').html(emp_count);
+                    if (page_number >= page_count) {
+                        $('.button-next').hide();
+                        $('.count_view').html(emp_count);
                     } else {
-                        $('.o_view').html((page_number - 1) * per_page);
+                        $('.count_view').html(page_number * per_page);
+                        page_number = page_number + 1;
                     }
                 });
             } else {
-                $('.o_all').html(emp_count);
-                $('.o_view').html(emp_count);
+                $('.button-next').hide();
+                $('.count_all').html(emp_count);
+                $('.count_view').html(emp_count);
             }
         });
     </script>
-
 {% endblock %}

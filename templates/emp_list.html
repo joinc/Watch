@@ -1,8 +1,8 @@
-            {% for i in oEmp %}
-                <tr{% ifequal i.Status 9 %} class="table-success"{% endifequal %}{% ifequal i.Status 12 %} class="table-success"{% endifequal %}{% ifequal i.Status 1 %} class="table-danger"{% endifequal %}>
-                    <td>{{ i.Owner.user.get_full_name }}</td>
-                    <td>{{ i.Title }}</td>
-                    <td>{{ i.get_Status_display }}</td>
-                    <td><a href="{% url 'emp' i.id %}" class="btn btn-info btn-sm" role="button">Перейти</a></td>
+            {% for emp in emp_list %}
+                <tr{% ifequal emp.Status 9 %} class="table-success"{% endifequal %}{% ifequal emp.Status 12 %} class="table-success"{% endifequal %}{% ifequal emp.Status 1 %} class="table-danger"{% endifequal %}>
+                    <td title="{{ emp.Title }}">{{ emp.Title|truncatechars:40 }}</td>
+                    <td>{{ emp.Owner.user.get_full_name }}</td>
+                    <td title="{{ emp.get_Status_display }}">{{ emp.get_Status_display|truncatechars:40 }}</td>
+                    <td class="text-right"><a href="{% url 'emp' emp.id %}" class="btn btn-info btn-sm" title="Перейти в карточку" role="button">Перейти в карточку</a></td>
                 </tr>
             {% endfor %}

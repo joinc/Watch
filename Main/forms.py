@@ -16,7 +16,7 @@ class FormRole(forms.Form):
         choices=ROLE_CHOICES,
         label='',
         initial=0,
-        widget=forms.Select(attrs={'class': 'custom-select mb-0 mr-sm-2 mb-sm-0', 'id': 'inlineFormCustomSelect'}),
+        widget=forms.Select(attrs={'class': 'custom-select'}),
         required=True
     )
 
@@ -24,7 +24,6 @@ class FormRole(forms.Form):
 
 
 class FormReturn(forms.Form):
-
     return_result = forms.ChoiceField(
         choices=RETURN_CHOICES,
         label='',
@@ -32,7 +31,6 @@ class FormReturn(forms.Form):
         widget=forms.Select(attrs={'class': 'custom-select'}),
         required=True
     )
-
     return_comment = forms.CharField(
         label='',
         widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Оставить комментарий', }),
@@ -67,50 +65,74 @@ class FormResult(forms.Form):
 
 
 class FormSearch(forms.Form):
-
     find = forms.CharField(
         label='',
-        widget=forms.TextInput(attrs={'size': '40', 'placeholder': 'Введите ИНН или наименование организации',
-                                      'type': 'text', 'class': 'form-control',
-                                      'aria-label': 'Введите ИНН или наименование организации'}),
+        widget=forms.TextInput(
+            attrs={
+                'width': '300px;',
+                'placeholder': 'Введите ИНН или наименование организации',
+                'type': 'text', 'class': 'form-control',
+                'aria-label': 'Введите ИНН или наименование организации'
+            }
+        ),
         required=False,
     )
+
 
 ######################################################################################################################
 
 
 class FormEmp(forms.Form):
-
     oTitle = forms.CharField(
         label='Наименование работодателя',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', }),
+        widget=forms.TextInput(
+            attrs={
+                'type': 'text',
+                'class': 'form-control',
+            }
+        ),
         required=True,
     )
-
     oJurAddress = forms.CharField(
         label='Юридический адрес',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', }),
+        widget=forms.TextInput(
+            attrs={
+                'type': 'text',
+                'class': 'form-control',
+            }
+        ),
         required=True,
     )
-
     oFactAddress = forms.CharField(
         label='Фактический адрес',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', }),
+        widget=forms.TextInput(
+            attrs={
+                'type': 'text',
+                'class': 'form-control',
+            }
+        ),
         required=True,
     )
-
     oInn = forms.CharField(
         label='ИНН',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', }),
+        widget=forms.TextInput(
+            attrs={
+                'type': 'text',
+                'class': 'form-control',
+            }
+        ),
         required=True,
     )
-
     oOgrn = forms.CharField(
         label='ОГРН',
-        widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', }),
+        widget=forms.TextInput(
+            attrs={
+                'type': 'text',
+                'class': 'form-control',
+            }
+        ),
         required=False,
     )
-
     oVacancyDate = forms.DateField(
         label='Дата размещения вакансии',
         widget=forms.widgets.DateInput(attrs={'type': 'date', }),
@@ -118,13 +140,11 @@ class FormEmp(forms.Form):
         initial=date.today().__format__('%d.%m.%Y'),
         required=False,
     )
-
     oVacancyComment = forms.CharField(
         label='Комментарий даты размещения вакансии',
         widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Оставить комментарий', }),
         required=False,
     )
-
     oEventDate = forms.DateField(
         label='Дата последнего взаимодействия работодателя и центра занятости',
         widget=forms.widgets.DateInput(attrs={'type': 'date', }),
@@ -132,13 +152,11 @@ class FormEmp(forms.Form):
         initial=date.today().__format__('%d.%m.%Y'),
         required=False,
     )
-
     oEventComment = forms.CharField(
         label='Комментарий даты взаимодействия',
         widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Оставить комментарий', }),
         required=False,
     )
-
     oSendDate = forms.DateField(
         label='Дата направления информации в отдел трудоустройства и специальных программ Главного управления '
               'государственной службы занятости населения Омской области',
@@ -147,13 +165,11 @@ class FormEmp(forms.Form):
         initial=date.today().__format__('%d.%m.%Y'),
         required=False,
     )
-
     oContact = forms.CharField(
         label='Контакт основной',
         widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', }),
         required=False,
     )
-
     oInfName = forms.ChoiceField(
         choices=INFO_CHOICES,
         label='',
@@ -161,19 +177,16 @@ class FormEmp(forms.Form):
         widget=forms.Select(attrs={'class': 'custom-select', }),
         required=True
     )
-
     oInfAttach = forms.FileField(
         label='',
         widget=forms.FileInput(attrs={'class': 'form-control-file'}),
         required=False,
     )
-
     oInfComment = forms.CharField(
         label='Комментарий',
         widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Оставить комментарий', }),
         required=False,
     )
-
     oNotifyMethod = forms.ChoiceField(
         choices=METHOD_CHOICES,
         label='Информирования работодателя центром занятости о необходимости предоставления информации о наличии '
@@ -182,7 +195,6 @@ class FormEmp(forms.Form):
         widget=forms.Select(attrs={'class': 'custom-select', 'placeholder': 'Выберите метод уведомления', }),
         required=True
     )
-
     oNotifyDate = forms.DateField(
         label='',
         widget=forms.widgets.DateInput(attrs={'type': 'date', }),
@@ -190,24 +202,22 @@ class FormEmp(forms.Form):
         initial=date.today().__format__('%d.%m.%Y'),
         required=False,
     )
-
     oNotifyAttach = forms.FileField(
         label='',
         widget=forms.FileInput(attrs={'class': 'form-control-file'}),
         required=False,
     )
-
     oNotifyComment = forms.CharField(
         label='Комментарий',
         widget=forms.TextInput(attrs={'type': 'text', 'class': 'form-control', 'placeholder': 'Оставить комментарий', }),
         required=False,
     )
 
+
 ######################################################################################################################
 
 
 class FormNotice(forms.Form):
-
     notice = forms.FileField(
         label='',
         widget=forms.FileInput(attrs={'class': 'form-control-input'}),
@@ -264,12 +274,10 @@ class FormFilterCzn(forms.Form):
 
 
 class FormRespons(forms.Form):
-
     RESPONS_CHOICES = []
     ResponsList = UserProfile.objects.filter(role=3).order_by('user')
     for iRespons in ResponsList:
         RESPONS_CHOICES.append([iRespons.id, iRespons.user.get_full_name()])
-
     respons = forms.ChoiceField(
         choices=RESPONS_CHOICES,
         label='',
@@ -281,7 +289,6 @@ class FormRespons(forms.Form):
 
 
 class FormFilterStatus(forms.Form):
-
     status = forms.ChoiceField(
         choices=STATUS_CHOICES,
         label='',
@@ -290,11 +297,11 @@ class FormFilterStatus(forms.Form):
         required=True
     )
 
+
 ######################################################################################################################
 
 
 class FormMonth(forms.Form):
-
     MONTH_CHOICES = []
     locale.setlocale(locale.LC_ALL, settings.LOCALE)
     start_date = datetime(2018, 10, 1)
@@ -308,7 +315,6 @@ class FormMonth(forms.Form):
         curr_date = curr_date + timedelta(days=days)
         i += 1
         MONTH_CHOICES.append([i, curr_date.strftime('%B %Y г.')])
-
     month = forms.ChoiceField(
         choices=MONTH_CHOICES,
         label='',
@@ -316,11 +322,11 @@ class FormMonth(forms.Form):
         required=True
     )
 
+
 ######################################################################################################################
 
 
 class FormReportDates(forms.Form):
-
     start_date = forms.DateField(
         label='Начальная дата',
         widget=forms.widgets.DateInput(attrs={'type': 'date', }),
@@ -328,7 +334,6 @@ class FormReportDates(forms.Form):
         initial=date.today().__format__('2018-08-01'),
         required=True,
     )
-
     end_date = forms.DateField(
         label='Конечная дата',
         widget=forms.widgets.DateInput(attrs={'type': 'date', }),
@@ -336,3 +341,6 @@ class FormReportDates(forms.Form):
         initial=date.today().__format__('%Y-%m-%d'),
         required=True,
     )
+
+
+######################################################################################################################

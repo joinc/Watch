@@ -1,17 +1,25 @@
 {% extends "base.html" %}{% load static %}
 
 {% block html_title %}{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}{% endblock %}
+{% block html_top_breadcrumb %}
+        <li class="nav-item">
+            <span class="navbar-text">/</span>
+        </li>
+        <li class="nav-item active">
+            <a href="{% url 'reportlist' %}" class="nav-link">Список отчетов</a>
+        </li>
+        <li class="nav-item">
+            <span class="navbar-text">/</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
+        </li>
+{% endblock %}
 {% block html_body %}
-    <br />
-    <div class="container-fluid">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'reportlist' %}">Список отчетов</a></li>
-            <li class="breadcrumb-item active">{% ifnotequal breadcrumb '' %}{{ breadcrumb }}{% endifnotequal %}</li>
-        </ol>
-        <div class="card border-dark mb-3">
+    <main role="main" class="container-fluid">
+        <div class="shadow card border-dark mb-3">
             <div class="card-header">
-                Направлено в отдел трудоустройства и специальных программ (в работе/закрыто/вынесено постановлений):
+                <h4>Направлено в отдел трудоустройства и специальных программ (в работе/закрыто/вынесено постановлений):</h4>
             </div>
             <div class="card-body">
                 <form class="form-inline mb-3" method="post" action="{% url 'reportdate' %}">
@@ -61,5 +69,5 @@
                 </table>
             </div>
         </div>
-    </div>
+    </main>
 {% endblock %}

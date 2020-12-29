@@ -1,9 +1,10 @@
 {% extends "base.html" %}{% load static %}
 
 {% block html_title %}Страница с данными{% endblock %}
-
+{% block html_head %}
+    <link rel='stylesheet' href='{% static "css/main.css" %}' type='text/css' />
+{% endblock %}
 {% block html_body %}
-    <br />
     <div class="container-fluid">
         <section class="row text-center placeholders">
             <div class="col-6 col-md-2 col-sm-4 placeholder">
