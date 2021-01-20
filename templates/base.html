@@ -2,7 +2,7 @@
 
 <html>
 <head>
-<title>{% block html_title %}Заголовок{% endblock %}</title>
+<title>{% block html_title %}{{ title }}{% endblock %}</title>
     <script src='{% static "js/jquery-3.4.1.min.js" %}'></script>
     <script src='{% static "js/bootstrap.min.js" %}'></script>
     <script src='{% static "fa/js/all.js" %}'></script>
@@ -38,7 +38,7 @@
                                 {% endifequal %}
                                 {% ifequal profile.role 4 %}
                                     <div class="dropdown-divider"></div>
-                                    <a href="{% url 'responslist' %}" class="dropdown-item">Назначение ответственного</a>
+                                    <a href="{% url 'response_list' %}" class="dropdown-item">Назначение ответственного</a>
                                 {% endifequal %}
                                 <div class="dropdown-divider"></div>
                                 <a href="{% url 'reportlist' %}" class="dropdown-item">

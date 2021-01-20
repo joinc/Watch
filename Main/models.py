@@ -136,7 +136,7 @@ class Employer(models.Model):
         return format_html('<a href="/emp/{0}/" class="btn btn-info btn-sm" role="button">Перейти</a>', self.id)
 
     class Meta:
-        ordering = 'Title',
+        ordering = 'Status', 'Title',
         verbose_name = 'Работодатель'
         verbose_name_plural = 'Работодатели'
         managed = True

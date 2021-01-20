@@ -1,6 +1,5 @@
 {% extends "base.html" %}{% load static %}
 
-{% block html_title %}{{ title }}{% endblock %}
 {% block html_top_breadcrumb %}
         <li class="nav-item">
             <span class="navbar-text">/</span>
@@ -19,20 +18,20 @@
                 <p class="card-text">
                     <table class="table table-hover table-sm table-borderless">
                         <tbody>
-                        {% for i in ulist %}
+                        {% for i in list_user %}
                             <tr>
-                                <th scope="row">{{ i.get_full_name }}</th>
-                                <td>{{ i.get_username }}</td>
+                                <td class="small">
+                                    <strong class="text-gray-dark">{{ i.get_full_name }}</strong>
+                                    <span class="d-block">@{{ i.get_username }}</span>
+                                </td>
                                 <td></td>
                                 <td>
-                                    <form class="form-inline mb-0" method="post" action="{% url 'userrole' %}">
+                                    <form class="form-inline mb-0" method="post" action="{% url 'user_role_change' %}">
                                         {% csrf_token %}
-                                        <div class="form-row align-items-center" >
-                                            <div class="col-auto">
-                                                {{ role_form.role }}
-                                                <input type="hidden" name="user" value="{{ i.id }}">
-                                            </div>
-                                            <div class="col-auto">
+                                        <input type="hidden" name="user" value="{{ i.id }}">
+                                        <div class="input-group">
+                                            {{ role_form.role }}
+                                            <div class="input-group-append">
                                                 <button type="submit" class="btn btn-success">Добавить роль</button>
                                             </div>
                                         </div>
@@ -40,7 +39,7 @@
                                 </td>
                             </tr>
                         {% endfor %}
-                        {% for i in plist %}
+                        {% for i in list_profile %}
                             <tr>
                                 <td class="small">
                                     <strong class="text-gray-dark">{{ i.user.get_full_name }}</strong>
@@ -48,7 +47,7 @@
                                 </td>
                                 <td>{{ i.get_role_display }}</td>
                                 <td>
-                                    <form class="form-inline mb-0" method="post" action="{% url 'userrole' %}">
+                                    <form class="form-inline mb-0" method="post" action="{% url 'user_role_change' %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="user" value="{{ i.user.id }}">
                                         <div class="input-group">

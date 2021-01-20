@@ -255,12 +255,10 @@ class FormProtocol(forms.Form):
 
 
 class FormFilterCzn(forms.Form):
-
-    CZN_CHOICES = []
-    czn_list = UserProfile.objects.filter(role=1).order_by('user')
-    CZN_CHOICES.append([0, 'Все ЦЗН'])
-    for iczn in czn_list:
-        CZN_CHOICES.append([iczn.id, iczn.user.get_full_name()])
+    list_czn = UserProfile.objects.filter(role=1).order_by('user')
+    CZN_CHOICES = [[0, 'Все ЦЗН']]
+    for i in list_czn:
+        CZN_CHOICES.append([i.id, i.user.get_full_name()])
 
     czn = forms.ChoiceField(
         choices=CZN_CHOICES,
@@ -273,13 +271,13 @@ class FormFilterCzn(forms.Form):
 ######################################################################################################################
 
 
-class FormRespons(forms.Form):
-    RESPONS_CHOICES = []
-    ResponsList = UserProfile.objects.filter(role=3).order_by('user')
-    for iRespons in ResponsList:
-        RESPONS_CHOICES.append([iRespons.id, iRespons.user.get_full_name()])
-    respons = forms.ChoiceField(
-        choices=RESPONS_CHOICES,
+class FormResponse(forms.Form):
+    RESPONSE_CHOICES = []
+    list_response = UserProfile.objects.filter(role=3).order_by('user')
+    for i in list_response:
+        RESPONSE_CHOICES.append([i.id, i.user.get_full_name()])
+    response = forms.ChoiceField(
+        choices=RESPONSE_CHOICES,
         label='',
         widget=forms.Select(attrs={'class': 'custom-select'}),
         required=True
@@ -293,7 +291,11 @@ class FormFilterStatus(forms.Form):
         choices=STATUS_CHOICES,
         label='',
         initial=20,
-        widget=forms.Select(attrs={'class': 'custom-select'}),
+        widget=forms.Select(
+            attrs={
+                'class': 'custom-select',
+            }
+        ),
         required=True
     )
 

@@ -1,6 +1,5 @@
-{% extends "base.html" %}{% load static %}{# load django_tables2 #}
+{% extends "base.html" %}{% load static %}
 
-{% block html_title %}{{ title }}{% endblock %}
 {% block html_head %}
     <link rel='stylesheet' href='{% static "css/select2.min.css" %}' type='text/css' />
     <link rel='stylesheet' href='{% static "css/select2-bootstrap4.min.css" %}' type='text/css' />
@@ -72,9 +71,6 @@
         let pathname = $(location).attr('href');
 
         $(document).ready(function() {
-            console.log('find' {{ emp_find }});
-            console.log('czn' {{ emp_czn }});
-            console.log('status' {{ emp_status }});
             $('select[name=czn]').select2({
                 allowClear: true,
                 width: 40,
@@ -89,6 +85,12 @@
                 theme: "bootstrap4",
                 language: "ru"
             });
+            console.log({page: page_number, emp_find: '{{ emp_find }}', emp_czn: '{{emp_czn}}', emp_status: '{{ emp_status }}'});
+            $.get(pathname, {page: page_number, emp_find: '{{ emp_find }}', emp_czn: '{{emp_czn}}', emp_status: '{{ emp_status }}'}, function(data) {
+                console.log(data);
+                console.log(pathname);
+            });
+
             $.get(pathname, {page: page_number, {% if emp_find %} emp_find: '{{ emp_find }}',{% endif %} {% if emp_czn %}emp_czn: {{emp_czn}},{% endif %} {% if emp_status %}emp_status: {{ emp_status }}{% endif %} }, function(data) {
                 $('.find-result').append(data);
             });

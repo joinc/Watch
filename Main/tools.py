@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from Main.models import Event, Employer, UserProfile
+from django.conf import settings
 
 ######################################################################################################################
 
@@ -58,29 +59,6 @@ def p_emp_list(inn):
 ######################################################################################################################
 
 
-def emp_filter(oFind, oCzn, oStatus):
-    """
-    Функция отбора карточек предприятий
-    :param oFind:
-    :param oCzn:
-    :param oStatus:
-    :return:
-    """
-    oEmp = Employer.objects.filter(INN__istartswith=oFind)
-    if oEmp.count() == 0:
-        oEmp = Employer.objects.filter(Title__icontains=oFind)
-    if oCzn != '0':
-        oEmp = oEmp.filter(Owner__user=oCzn)
-    if oStatus != '20' and oStatus != '':
-        oEmp = oEmp.filter(Status=oStatus)
-    oEmp = oEmp.order_by('Status')
-
-    return oEmp
-
-
-######################################################################################################################
-
-
 def report_filter(emps):
     """
 
@@ -109,6 +87,121 @@ def report_filter(emps):
             elist.append([u, emp_count, emp_work, emp_closed, emp_ready, percent_work, percent_closed, percent_ready])
     result = [elist, aw, ac, ar, emp_all]
     return result
+
+
+######################################################################################################################
+
+
+def get_page_count(emp_count):
+    page_count = emp_count // settings.COUNT_LIST
+    if emp_count % settings.COUNT_LIST > 0:
+        page_count += 1
+    return page_count
+
+
+######################################################################################################################
+
+
+def get_emp_count(search, czn, list_status):
+    count = 0
+    for status in list_status:
+        if status == '20' or status == '':
+            if czn == '0':
+                if search == '':
+                    count = Employer.objects.all().count()
+                else:
+                    count = Employer.objects.filter(INN__istartswith=search).count() \
+                            + Employer.objects.filter(Title__icontains=search).count()
+            else:
+                if search == '':
+                    count = Employer.objects.filter(Owner__user=czn).count()
+                else:
+                    count = Employer.objects.filter(INN__istartswith=search, Owner__user=czn).count() \
+                            + Employer.objects.filter(Title__icontains=search, Owner__user=czn).count()
+            return count
+        else:
+            if czn == '0':
+                if search == '':
+                    count += Employer.objects.filter(Status=status).count()
+                else:
+                    count += Employer.objects.filter(INN__istartswith=search, Status=status).count()
+                    count += Employer.objects.filter(Title__icontains=search, Status=status).count()
+            else:
+                if search == '':
+                    count += Employer.objects.filter(Status=status, Owner__user=czn).count()
+                else:
+                    count += Employer.objects.filter(INN__istartswith=search, Status=status, Owner__user=czn).count()
+                    count += Employer.objects.filter(Title__icontains=search, Status=status, Owner__user=czn).count()
+    return count
+
+
+######################################################################################################################
+
+
+def get_emp_list(search, czn, list_status, start, stop):
+    class EmpList:
+        """
+        Класс списка организаций
+        """
+        def __init__(self):
+            self.list_emp = []
+
+        def equal(self, query):
+            """
+            Присвоить список организаций
+            :param query:
+            :return:
+            """
+            self.list_emp.clear()
+            self.append(query)
+
+        def append(self, query):
+            """
+            Добавление в список организаций элементов из запроса
+            :param query:
+            :return:
+            """
+            for emp in query:
+                self.list_emp.append(emp)
+
+        def total(self):
+            """
+            Возвращает список организаций
+            :return:
+            """
+            return self.list_emp
+
+    emp_list = EmpList()
+    for status in list_status:
+        if status == '20' or status == '':
+            if czn == '0':
+                if search == '':
+                    emp_list.equal(Employer.objects.all())
+                else:
+                    emp_list.equal(Employer.objects.filter(INN__istartswith=search))
+                    emp_list.append(Employer.objects.filter(Title__icontains=search))
+            else:
+                if search == '':
+                    emp_list.equal(Employer.objects.filter(Owner__user=czn))
+                else:
+                    emp_list.equal(Employer.objects.filter(INN__istartswith=search, Owner__user=czn))
+                    emp_list.append(Employer.objects.filter(Title__icontains=search, Owner__user=czn))
+            # Прерываем цикл for, чтобы не задублировать записи
+            break
+        else:
+            if czn == '0':
+                if search == '':
+                    emp_list.append(Employer.objects.filter(Status=status))
+                else:
+                    emp_list.append(Employer.objects.filter(INN__istartswith=search, Status=status))
+                    emp_list.append(Employer.objects.filter(Title__icontains=search, Status=status))
+            else:
+                if search == '':
+                    emp_list.append(Employer.objects.filter(Status=status, Owner__user=czn))
+                else:
+                    emp_list.append(Employer.objects.filter(INN__istartswith=search, Status=status, Owner__user=czn))
+                    emp_list.append(Employer.objects.filter(Title__icontains=search, Status=status, Owner__user=czn))
+    return emp_list.total()[start:stop]
 
 
 ######################################################################################################################

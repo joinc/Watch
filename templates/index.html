@@ -1,6 +1,5 @@
 {% extends "base.html" %}{% load static %}
 
-{% block html_title %}Страница с данными{% endblock %}
 {% block html_head %}
     <link rel='stylesheet' href='{% static "css/main.css" %}' type='text/css' />
 {% endblock %}
@@ -11,42 +10,42 @@
                 <a href="{% url 'all' %}">
                     <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mPccev/fwAIdQOSaxKbGgAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
                 </a>
-                <h1>{{ oAll }}{% ifnotequal oAllMe 0 %}<span class="badge badge-primary" title="Всего ваших карточек">{{ oAllMe }}</span>{% endifnotequal %}</h1>
+                <h1>{{ count_all }}{% ifnotequal count_my 0 %}<span class="badge badge-primary" title="Всего ваших карточек">{{ count_my }}</span>{% endifnotequal %}</h1>
                 <div class="text-muted">Всего карточек</div>
             </div>
             <div class="col-6 col-md-2 col-sm-4 placeholder">
                 <a href="{% url 'draft' %}">
-                    <img src="data:image/gif;base64,{% ifequal oDraft 0 %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mO8e//RfwAI3gOf4zSm2AAAAABJRU5ErkJggg=={% else %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8euz0fwAIxQOHBltBDwAAAABJRU5ErkJggg=={% endifequal %}" width="300" height="300" class="img-fluid rounded-circle">
+                    <img src="data:image/gif;base64,{% ifequal count_draft 0 %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mO8e//RfwAI3gOf4zSm2AAAAABJRU5ErkJggg=={% else %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8euz0fwAIxQOHBltBDwAAAABJRU5ErkJggg=={% endifequal %}" width="300" height="300" class="img-fluid rounded-circle">
                 </a>
-                <h1>{{ oDraft }}{% ifnotequal oEdit 0 %}<span class="badge badge-danger" title="Карточки возвращенные для редактирования">{{ oEdit }}</span>{% endifnotequal %}</h1>
+                <h1>{{ count_draft }}{% ifnotequal count_edit 0 %}<span class="badge badge-danger" title="Карточки возвращенные для редактирования">{{ count_edit }}</span>{% endifnotequal %}</h1>
                 <span class="text-muted">Карточек в черновиках</span>
             </div>
             <div class="col-6 col-md-2 col-sm-4 placeholder">
                 <a href="{% url 'check' %}">
-                    <img src="data:image/gif;base64,{% ifequal oCheck 0 %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mO8e//RfwAI3gOf4zSm2AAAAABJRU5ErkJggg=={% else %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8euz0fwAIxQOHBltBDwAAAABJRU5ErkJggg=={% endifequal %}" width="300" height="300" class="img-fluid rounded-circle">
+                    <img src="data:image/gif;base64,{% ifequal count_check 0 %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mO8e//RfwAI3gOf4zSm2AAAAABJRU5ErkJggg=={% else %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8euz0fwAIxQOHBltBDwAAAABJRU5ErkJggg=={% endifequal %}" width="300" height="300" class="img-fluid rounded-circle">
                 </a>
-                <h1>{{ oCheck }}</h1>
+                <h1>{{ count_check }}</h1>
                 <span class="text-muted">Карточек на проверке</span>
             </div>
             <div class="col-6 col-md-2 col-sm-4 placeholder">
                 <a href="{% url 'work' %}">
                     <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8//nsfwAJeAPA13E3/AAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
                 </a>
-                <h1>{{ oWork }}</h1>
+                <h1>{{ count_work }}</h1>
                 <span class="text-muted">Карточек в работе</span>
             </div>
             <div class="col-6 col-md-2 col-sm-4 placeholder">
                 <a href="{% url 'closed' %}">
                     <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mM8/Oz0fwAIXQN1yxhMEwAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
                 </a>
-                <h1>{{ oClosed }}</h1>
+                <h1>{{ count_closed }}</h1>
                 <span class="text-muted">Закрыто карточек</span>
             </div>
             <div class="col-6 col-md-2 col-sm-4 placeholder">
                 <a href="{% url 'ready' %}">
                     <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mM8/Oz0fwAIXQN1yxhMEwAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
                 </a>
-                <h1>{{ oReady }}</h1>
+                <h1>{{ count_ready }}</h1>
                 <span class="text-muted">Вынесено постановлений</span>
             </div>
         </section>

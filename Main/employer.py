@@ -31,31 +31,29 @@ def employer_view(request, employer_id):
     if emp.Owner == profile and (emp.Status == 0 or emp.Status == 1):
         return redirect(reverse('edit', args=(emp.id,)))
 
-    return_form = FormReturn()
-    result_form = FormResult()
-    notice_form = FormNotice()
-    close_form = FormClose()
-    protocol_form = FormProtocol()
-    eventlist = Event.objects.filter(EmpEventID=emp)
-    infolist = Info.objects.filter(EmpInfoID=emp)
-    notifylist = Notify.objects.filter(EmpNotifyID=emp)
-    form = FormEmp()
+    context = {
+        'profile': profile,
+        'title': 'Карточка учета работодателя',
+        'form': FormEmp(),
+        'emp': emp,
+        'notifylist': Notify.objects.filter(EmpNotifyID=emp),
+        'eventlist': Event.objects.filter(EmpEventID=emp),
+        'infolist': Info.objects.filter(EmpInfoID=emp),
+        'pemp': tools.p_emp_list(emp.INN),
+    }
 
     if profile.role == 4:
-        return render(request, 'emp.html',
-                      {'emp': emp, 'form': form, 'profile': profile, 'eventlist': eventlist, 'infolist': infolist,
-                       'notifylist': notifylist, 'pemp': tools.p_emp_list(emp.INN)})
-    elif profile.role == 3:
-        return render(request, 'emp.html',
-               {'emp': emp, 'form': form, 'profile': profile, 'close_form': close_form, 'result_form': result_form,
-                'eventlist': eventlist, 'infolist': infolist, 'notifylist': notifylist,
-                'pemp': tools.p_emp_list(emp.INN), 'notice_form': notice_form, 'protocol_form': protocol_form})
+        return render(request, 'emp.html', context)
     else:
-        return render(request, 'emp.html',
-                      {'emp': emp, 'form': form, 'profile': profile, 'return_form': return_form,
-                       'close_form': close_form, 'result_form': result_form, 'eventlist': eventlist,
-                       'infolist': infolist, 'notifylist': notifylist, 'pemp': tools.p_emp_list(emp.INN),
-                       'notice_form': notice_form, 'protocol_form': protocol_form})
+        context['close_form'] = FormClose()
+        context['result_form'] = FormResult()
+        context['notice_form'] = FormNotice()
+        context['protocol_form'] = FormProtocol()
+        if profile.role == 3:
+            return render(request, 'emp.html', context)
+        else:
+            context['return_form'] = FormReturn()
+            return render(request, 'emp.html', context)
 
 ######################################################################################################################
 

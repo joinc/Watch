@@ -1,87 +1,46 @@
 {% extends "base.html" %}{% load static %}
 
-{% block html_title %}Карточка учета работодателя{% endblock %}
+{% block html_top_breadcrumb %}
+        <li class="nav-item">
+            <span class="navbar-text">/</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
+        </li>
+{% endblock %}
 {% block html_body %}
-    <br />
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-auto mr-auto">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-                    <li class="breadcrumb-item active">Карточка учета работодателя</li>
-                </ol>
-            </div>
-            <div class="col-auto">
-                {% ifequal emp.Respons None %}
-                    {% ifequal profile.role 4 %}<a class="btn btn-primary" href="{% url 'responslist' %}" role="button">Назначить ответственного</a>{% endifequal %}
-                {% else %}
-                    <button type="button" class="btn btn-info" disabled>{{ emp.Respons.user.get_full_name }}</button>
-                {% endifequal %}
-                {% ifequal profile.role 3 %}
-                    {% if emp.Status != 9 and emp.Status != 12 %}
-                        <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#ModalClose">Закрыть</button>
-                        <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#ModalDelete">Удалить</button>
-                        <!-- Modal -->
-                        <div class="modal fade" id="ModalClose" tabindex="-1" role="dialog" aria-labelledby="ModalCloseTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="ModalCloseTitle">Закрытие карточки предприятия</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <form class="form" method="post" action='{% url 'close' emp.id %}'>
-                                        <div class="modal-body">
-                                            Вы действительно хотите закрыть карточку предприятия {{ emp.Title }}?
-                                            {{ close_form }}
-                                            {% csrf_token %}
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-success" data-dismiss="modal">Не закрывать</button>
-                                            <button type="submit" class="btn btn-danger">Закрыть</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal fade" id="ModalDelete" tabindex="-1" role="dialog" aria-labelledby="ModalDeleteTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="ModalDeleteTitle">Удаление карточки предприятия</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Вы действительно хотите удалить карточку предприятия {{ emp.Title }}?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-success" data-dismiss="modal">Не удалять</button>
-                                        <a class="btn btn-danger" href="{% url 'delete' emp.id %}" role="button">Удалить</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endifequal %}
-                <a class="btn btn-outline-dark" href="{% url 'print' emp.id %}" role="button" target="_blank">Печать</a>
-            </div>
-        </div>
-        <div class="alert alert-info" role="alert">
-            <h5>Сведения о работодателе, не предоставившем (предоставившем с нарушением срока) информации о наличии свободных рабочих мест и вакантных должностей в службу занятости населения Омской области</h5>
-        </div>
-
-        <div class="card bg-light">
-            <div class="card-header {% ifequal emp.Status 8 %}bg-danger{% endifequal %}{% ifequal emp.Status 9 %}bg-success{% endifequal %}{% ifequal emp.Status 12 %}bg-success{% endifequal %}">
-                <h4 class="card-title">{{ emp.Title }}</h4>
+    <main role="main" class="container-fluid">
+        <div class="shadow card border-dark mb-3">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-auto mr-auto">
+                        <h4>{{ title }}:</h4>
+                    </div>
+                    <div class="col-auto mr-0 text-right">
+                        <a class="btn btn-outline-dark" href="{% url 'print' emp.id %}" role="button" target="_blank">Печать</a>
+                        {% if profile.role == 3 and emp.Status != 9 and emp.Status != 12 %}
+                            <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#ModalClose">Закрыть</button>
+                            <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#ModalDelete">Удалить</button>
+                        {% endif %}
+                        {% ifequal emp.Respons None %}
+                            {% ifequal profile.role 4 %}<a class="btn btn-primary" href="{% url 'response_list' %}" role="button">Назначить ответственного</a>{% endifequal %}
+                        {% endifequal %}
+                    </div>
+                </div>
             </div>
             <div class="card-body">
-                <p class="card-text">
-                    <dl class="row">
+                <div class="alert alert-info" role="alert">
+                    <h5>Сведения о работодателе, не предоставившем (предоставившем с нарушением срока) информации о наличии свободных рабочих мест и вакантных должностей в службу занятости населения Омской области</h5>
+                </div>
+                <div class="card bg-light">
+                    <div class="card-header {% ifequal emp.Status 8 %}bg-danger{% endifequal %}{% ifequal emp.Status 9 %}bg-success{% endifequal %}{% ifequal emp.Status 12 %}bg-success{% endifequal %}">
+                        <h4 class="card-title">{{ emp.Title }}</h4>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                        <dl class="row">
                         <dt class="col-sm-4">Юридический адрес:</dt>
-                <dd class="col-sm-8">{{ emp.JurAddress }}</dd>
+                        <dd class="col-sm-8">{{ emp.JurAddress }}</dd>
                         <dt class="col-sm-4">Фактический адрес:</dt>
                         <dd class="col-sm-8">{{ emp.FactAddress }}</dd>
                     </dl>
@@ -277,4 +236,52 @@
             </div>
         {% endfor %}
     </div>
+        </div>
+    </main>
+    {% if profile.role == 3 and emp.Status != 9 and emp.Status != 12 %}
+        <!-- Modal -->
+        <div class="modal fade" id="ModalClose" tabindex="-1" role="dialog" aria-labelledby="ModalCloseTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalCloseTitle">Закрытие карточки предприятия</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form class="form" method="post" action='{% url 'close' emp.id %}'>
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            Вы действительно хотите закрыть карточку предприятия {{ emp.Title }}?
+                            {{ close_form }}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-dismiss="modal">Не закрывать</button>
+                            <button type="submit" class="btn btn-danger">Закрыть</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="ModalDelete" tabindex="-1" role="dialog" aria-labelledby="ModalDeleteTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalDeleteTitle">Удаление карточки предприятия</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Вы действительно хотите удалить карточку предприятия {{ emp.Title }}?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" data-dismiss="modal">Не удалять</button>
+                        <a class="btn btn-danger" href="{% url 'delete' emp.id %}" role="button">Удалить</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- EndModal -->
+    {% endif %}
 {% endblock %}
