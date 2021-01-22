@@ -1,0 +1,33 @@
+    <!-- Окно запроса назначениея ответственного лица -->
+    <div class="modal fade" id="ModalResponse" tabindex="-1" role="dialog" aria-labelledby="ModalResponseTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ModalResponseTitle">Назначение ответственного лица</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form class="form" method="post" action='{% url 'response_set' %}'>
+                    {% csrf_token %}
+                    <input type="hidden" name="employer" id="EmployerID" value="">
+                    <div class="modal-body">
+                        Назначить для карточки предприятия <strong id="EmployerTitle"></strong> ответственное лицо:
+                        {{ response_form.response }}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Назначить</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Не назначать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- /Окно запроса назначениея ответственного лица -->
+    <script type="text/javascript">
+        function SetResponse(employer_title, employer_id) {
+            $('#EmployerID').attr('value', employer_id);
+            $('#EmployerTitle').text(employer_title);
+            $('#ModalResponse').modal('show');
+        }
+    </script>

@@ -1,0 +1,122 @@
+{% extends "base.html" %}{% load static %}
+
+{% block html_top_breadcrumb %}
+        <li class="nav-item">
+            <span class="navbar-text">/</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
+        </li>
+{% endblock %}
+{% block html_body %}
+    <main role="main" class="container-fluid">
+        <div class="shadow card border-dark mb-3">
+            <div class="card-header">
+                <h4>{{ title }}:</h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <table class="table table-hover table-sm table-borderless">
+                        <tbody>
+                        {% for i in list_profile %}
+                            <tr>
+                                <td class="small">
+                                    <strong class="text-gray-dark">{{ i.user.get_full_name }}</strong>
+                                    <span class="d-block">@{{ i.user.get_username }}</span>
+                                </td>
+                                <td>{% ifnotequal i.role 0 %}{{ i.get_role_display }}{% endifnotequal %}</td>
+                                <td>
+                                    {% ifequal i.role 0 %}
+                                        <button type="button" class="btn btn-warning" onclick="ProfileRole('{{ i.user.get_full_name }}', '{{ i.id }}', '')" title="Добавить роль пользователя">Добавить роль</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-warning" onclick="ProfileRole('{{ i.user.get_full_name }}', '{{ i.id }}', '{{ i.get_role_display }}')" title="Сменить роль пользователя">Сменить роль</button>
+                                    {% endifequal %}
+                                    {% if i.blocked %}
+                                        <button type="button" class="btn btn-outline-success" onclick="ProfileUnblock('{{ i.user.get_full_name }}', '{{ i.id }}')" title="Разблокировать пользователя"><i class="fas fa-lock-open"></i> Разблокировать</button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-danger" onclick="ProfileBlock('{{ i.user.get_full_name }}', '{{ i.id }}')" title="Заблокировать пользователя"><i class="fas fa-lock"></i> Заблокировать</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </p>
+            </div>
+        </div>
+    </main>
+    <!-- Окно запроса на смену роли -->
+    <div class="modal fade" id="ModalProfileRole" tabindex="-1" role="dialog" aria-labelledby="ModalProfileRoleTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form method='post' action='{% url 'profile_role' %}'>
+                    {% csrf_token %}
+                    <input type="hidden" name="profile_id" id="ProfileRoleId" value="">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Сменить роль пользователя</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">Выберите роль пользователя <strong id="ProfileRoleName"></strong>:
+                        {{ role_form.role }}</div>
+                        <div>Текущая роль - <span id="ProfileRole"></span></div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-success" type="submit">Сменить роль</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Не менять роль</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- /Окно запроса на смену роли -->
+    <!-- Окно запроса подтверждения на блокировку/разблокировку -->
+    <div class="modal fade" id="ModalProfileBlock" tabindex="-1" role="dialog" aria-labelledby="ModalProfileBlockTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form method='post' action='' id="FormBlock">
+                    {% csrf_token %}
+                    <input type="hidden" name="profile_id" id="ProfileBlockId" value="">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ModalProfileBlockTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body" id="ModalProfileBlockBody"></div>
+                    <div class="modal-footer" id="ModalProfileBlockFooter"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- /Окно запроса подтверждения на блокировку/разблокировку -->
+    <script type="text/javascript">
+        function ProfileBlock(profile_name, profile_id) {
+            $('#FormBlock').attr('action', '{% url 'profile_block' %}');
+            $('#ProfileBlockId').attr('value', profile_id);
+            $('#ModalProfileBlockTitle').text('Заблокировать пользователя');
+            $('#ModalProfileBlockBody').html('Вы действительно хотите разблокировать пользователя <strong>'+profile_name+'</strong>?');
+            $('#ModalProfileBlockFooter').html(
+                '<button class="btn btn-danger" type="submit">Блокировать</button>' +
+                '<button type="button" class="btn btn-secondary" data-dismiss="modal">Не блокировать</button>'
+            );
+            $('#ModalProfileBlock').modal('show');
+        }
+        function ProfileUnblock(profile_name, profile_id) {
+            $('#FormBlock').attr('action', '{% url 'profile_unblock' %}');
+            $('#ProfileBlockId').attr('value', profile_id);
+            $('#ModalProfileBlockTitle').text('Разблокировать пользователя');
+            $('#ModalProfileBlockBody').html('Вы действительно хотите разблокировать пользователя <strong>'+profile_name+'</strong>?');
+            $('#ModalProfileBlockFooter').html(
+                '<button class="btn btn-success" type="submit">Разблокировать</button>' +
+                '<button type="button" class="btn btn-secondary" data-dismiss="modal">Не разблокировать</button>'
+            );
+            $('#ModalProfileBlock').modal('show');
+        }
+        function ProfileRole(profile_name, profile_id, profile_role) {
+            $('#ProfileRoleId').attr('value', profile_id);
+            $('#ProfileRoleName').text(profile_name);
+            $('#ProfileRole').text(profile_role);
+            $('#ModalProfileRole').modal('show');
+        }
+    </script>
+{% endblock %}

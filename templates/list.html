@@ -85,7 +85,6 @@
                 theme: "bootstrap4",
                 language: "ru"
             });
-            console.log({page: page_number, emp_find: '{{ emp_find }}', emp_czn: '{{emp_czn}}', emp_status: '{{ emp_status }}'});
             $.get(pathname, {page: page_number, emp_find: '{{ emp_find }}', emp_czn: '{{emp_czn}}', emp_status: '{{ emp_status }}'}, function(data) {
                 console.log(data);
                 console.log(pathname);

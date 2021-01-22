@@ -18,6 +18,18 @@ class UserProfile(models.Model):
         null=False,
         blank=False,
     )
+    blocked = models.BooleanField(
+        verbose_name='Учетная запись заблокирована',
+        default=False,
+    )
+
+    def block(self):
+        self.blocked = True
+        self.save()
+
+    def unblock(self):
+        self.blocked = False
+        self.save()
 
     def __str__(self):
         return '{0}'.format(self.user.get_full_name())
@@ -115,12 +127,12 @@ class Employer(models.Model):
         verbose_name='Архивная карточка',
         default=False,
     )
-    Respons = models.ForeignKey(
+    Response = models.ForeignKey(
         UserProfile,
         verbose_name='Ответственное лицо',
         null=True,
         default=None,
-        related_name='Respons',
+        related_name='Response',
         on_delete=models.SET_NULL,
     )
     CreateDate = models.DateTimeField(

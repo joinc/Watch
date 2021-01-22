@@ -5,7 +5,7 @@
             <span class="navbar-text">/</span>
         </li>
         <li class="nav-item active">
-            <a href="{% url 'reportlist' %}" class="nav-link">Список отчетов</a>
+            <a href="{% url 'report_list' %}" class="nav-link">Список отчетов</a>
         </li>
         <li class="nav-item">
             <span class="navbar-text">/</span>
@@ -21,7 +21,7 @@
                 <h4>Направлено в отдел трудоустройства и специальных программ (в работе/закрыто/вынесено постановлений):</h4>
             </div>
             <div class="card-body">
-                <form class="form-inline mb-3" method="post" action="{% url 'reportdate' %}">
+                <form class="form-inline mb-3" method="post" action="{% url 'report_date' %}">
                     {% csrf_token %}
                     <div class="form-group">
                         <label>Выберите отчетный период:</label>

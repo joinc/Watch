@@ -1,6 +1,6 @@
 {% load static %}
 
-<html>
+<html lang="ru">
 <head>
 <title>{% block html_title %}{{ title }}{% endblock %}</title>
     <script src='{% static "js/jquery-3.4.1.min.js" %}'></script>
@@ -22,7 +22,7 @@
                                 <span class="dropdown-item"><strong>{% firstof user.get_full_name user.get_short_name user.get_username %}</strong></span>
                                 {% if request.user.is_superuser %}
                                     <div class="dropdown-divider"></div>
-                                    <a href="{% url 'users' %}" class="dropdown-item bg-danger text-white">Список пользователей</a>
+                                    <a href="{% url 'profile_list' %}" class="dropdown-item bg-danger text-white">Список пользователей</a>
                                     <a href="{% url 'load' %}" class="dropdown-item bg-danger text-white">Загрузка работодателей</a>
                                     <a href="{% url 'send' %}" class="dropdown-item bg-danger text-white">Отправить почту</a>
                                 {% endif %}
@@ -41,7 +41,7 @@
                                     <a href="{% url 'response_list' %}" class="dropdown-item">Назначение ответственного</a>
                                 {% endifequal %}
                                 <div class="dropdown-divider"></div>
-                                <a href="{% url 'reportlist' %}" class="dropdown-item">
+                                <a href="{% url 'report_list' %}" class="dropdown-item">
                                     <div class="row">
                                         <div class="col-auto mr-auto">Отчеты</div>
                                         <div class="col-auto mt-1 text-right"><i class="fas fa-chart-bar"></i></div>
@@ -53,7 +53,7 @@
                                         <div class="col-auto mt-1 text-right"><i class="fas fa-download"></i></div>
                                     </div>
                                 </a>
-                                <a href="{% url 'messagelist' %}" class="dropdown-item">
+                                <a href="{% url 'message_list' %}" class="dropdown-item">
                                     <div class="row">
                                         <div class="col-auto mr-auto">Уведомления</div>
                                         <div class="col-auto mt-1 text-right"><i class="far fa-comment-alt"></i></div>
