@@ -23,18 +23,18 @@
                                 {% if request.user.is_superuser %}
                                     <div class="dropdown-divider"></div>
                                     <a href="{% url 'profile_list' %}" class="dropdown-item bg-danger text-white">Список пользователей</a>
-                                    <a href="{% url 'load' %}" class="dropdown-item bg-danger text-white">Загрузка работодателей</a>
+                                    <a href="{% url 'employer_load' %}" class="dropdown-item bg-danger text-white">Загрузка работодателей</a>
                                     <a href="{% url 'send' %}" class="dropdown-item bg-danger text-white">Отправить почту</a>
                                 {% endif %}
                                 {% ifequal profile.role 1 %}
                                     <div class="dropdown-divider"></div>
                                     <a href="{% url 'emps' %}" class="dropdown-item">Создать карточку из Катарсиса</a>
-                                    <a href="{% url 'new' %}" class="dropdown-item">Создать карточку вручную</a>
+                                    <a href="{% url 'employer_new' %}" class="dropdown-item">Создать карточку вручную</a>
                                 {% endifequal %}
                                 {% ifequal profile.role 3 %}
                                     <div class="dropdown-divider"></div>
                                     <a href="{% url 'emps' %}" class="dropdown-item">Создать архивную карточку из Катарсиса</a>
-                                    <a href="{% url 'arch' %}" class="dropdown-item">Создать архивную карточку вручную</a>
+                                    <a href="{% url 'archive' %}" class="dropdown-item">Создать архивную карточку вручную</a>
                                 {% endifequal %}
                                 {% ifequal profile.role 4 %}
                                     <div class="dropdown-divider"></div>
@@ -47,7 +47,7 @@
                                         <div class="col-auto mt-1 text-right"><i class="fas fa-chart-bar"></i></div>
                                     </div>
                                 </a>
-                                <a href="{% url 'export' %}" class="dropdown-item">
+                                <a href="{% url 'employer_export' %}" class="dropdown-item">
                                     <div class="row">
                                         <div class="col-auto mr-auto">Скачать данные</div>
                                         <div class="col-auto mt-1 text-right"><i class="fas fa-download"></i></div>

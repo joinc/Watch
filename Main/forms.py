@@ -3,9 +3,9 @@
 from django import forms
 from django.conf import settings
 from datetime import date, datetime, timedelta
-from Main.models import UserProfile
-from Main.choices import ROLE_CHOICES, EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, INFO_CHOICES, \
-    STATUS_CHOICES, METHOD_CHOICES, RESULT_CHOICES
+from Main.models import UserProfile, Info, Notify
+from Main.choices import ROLE_CHOICES, EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, STATUS_CHOICES, \
+    RESULT_CHOICES
 import locale
 import calendar
 
@@ -109,7 +109,7 @@ class FormSearch(forms.Form):
 ######################################################################################################################
 
 
-class FormEmp(forms.Form):
+class FormEmployer(forms.Form):
     title = forms.CharField(
         label='Наименование работодателя',
         widget=forms.TextInput(
@@ -120,7 +120,7 @@ class FormEmp(forms.Form):
         ),
         required=True,
     )
-    oJurAddress = forms.CharField(
+    legal_address = forms.CharField(
         label='Юридический адрес',
         widget=forms.TextInput(
             attrs={
@@ -130,7 +130,7 @@ class FormEmp(forms.Form):
         ),
         required=True,
     )
-    oFactAddress = forms.CharField(
+    actual_address = forms.CharField(
         label='Фактический адрес',
         widget=forms.TextInput(
             attrs={
@@ -226,81 +226,79 @@ class FormEmp(forms.Form):
         ),
         required=False,
     )
-    inf_name = forms.ChoiceField(
-        choices=INFO_CHOICES,
-        label='',
-        initial=0,
-        widget=forms.Select(
-            attrs={
-                'class': 'custom-select',
-            }
-        ),
-        required=True
-    )
-    inf_attach = forms.FileField(
-        label='',
-        widget=forms.FileInput(
-            attrs={
-                'class': 'form-control-file',
-            }
-        ),
-        required=False,
-    )
-    inf_comment = forms.CharField(
-        label='Комментарий',
-        widget=forms.TextInput(
-            attrs={
-                'type': 'text',
-                'class': 'form-control',
-                'placeholder': 'Оставить комментарий',
-            }
-        ),
-        required=False,
-    )
-    notify_method = forms.ChoiceField(
-        choices=METHOD_CHOICES,
-        label='Информирования работодателя центром занятости о необходимости предоставления информации о наличии '
-              'свободных рабочих мест и вакантных должностей',
-        initial=1,
-        widget=forms.Select(
-            attrs={
-                'class': 'custom-select',
-                'placeholder': 'Выберите метод уведомления',
-            }
-        ),
-        required=True
-    )
-    notify_date = forms.DateField(
-        label='',
-        widget=forms.widgets.DateInput(
-            attrs={
-                'type': 'date',
-            }
-        ),
-        input_formats=('%d.%m.%Y', '%d/%m/%Y', '%d-%m-%Y', ),
-        initial=date.today().__format__('%d.%m.%Y'),
-        required=False,
-    )
-    notify_attach = forms.FileField(
-        label='',
-        widget=forms.FileInput(
-            attrs={
-                'class': 'form-control-file',
-            }
-        ),
-        required=False,
-    )
-    notify_comment = forms.CharField(
-        label='Комментарий',
-        widget=forms.TextInput(
-            attrs={
-                'type': 'text',
-                'class': 'form-control',
-                'placeholder': 'Оставить комментарий',
-            }
-        ),
-        required=False,
-    )
+
+
+######################################################################################################################
+
+
+class FormNotify(forms.ModelForm):
+    class Meta:
+        model = Notify
+        fields = [
+            'Method',
+            'NotifyDate',
+            'Comment',
+            'Attache',
+        ]
+        labels = {
+            'Method': 'Способ направления информирования',
+            'NotifyDate': 'Дата направления информирования',
+            'Comment': 'Комментарий',
+            'Attache': 'Прикрепленный файл',
+        }
+        widgets = {
+            'Method': forms.Select(
+                attrs={
+                    'class': 'form-control',
+                }
+            ),
+            'NotifyDate': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                }
+            ),
+            'Comment': forms.TextInput(
+                attrs={
+                    'type': 'text',
+                    'class': 'form-control',
+                    'placeholder': 'Оставить комментарий',
+                }
+            ),
+            'Attache': forms.FileInput(),
+        }
+
+
+######################################################################################################################
+
+
+class FormInformation(forms.ModelForm):
+    class Meta:
+        model = Info
+        fields = [
+            'Name',
+            'Comment',
+            'Attache',
+        ]
+        labels = {
+            'Name': 'Наименование непредставленной информации',
+            'Comment': 'Комментарий',
+            'Attache': 'Прикрепленный файл',
+        }
+        widgets = {
+            'Name': forms.Select(
+                attrs={
+                    'class': 'form-control',
+                }
+            ),
+            'Comment': forms.TextInput(
+                attrs={
+                    'type': 'text',
+                    'class': 'form-control',
+                    'placeholder': 'Оставить комментарий',
+                }
+            ),
+            'Attache': forms.FileInput(),
+        }
 
 
 ######################################################################################################################

@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.conf import settings
 from Main.models import UserProfile
-from Main.tools import get_emp_count
+from Main.tools import get_employer_count
 
 ######################################################################################################################
 
@@ -24,14 +24,14 @@ def index(request) -> HttpResponse:
     context = {
         'profile': profile,
         'title': 'Главная',
-        'count_all': get_emp_count(search='', czn='0', list_status=['20']),
-        'count_my': get_emp_count(search='', czn=profile.id, list_status=['20']),
-        'count_edit': get_emp_count(search='', czn=profile.id, list_status=['1']),
-        'count_draft': get_emp_count(search='', czn=czn, list_status=['0', '1']),
-        'count_check': get_emp_count(search='', czn=czn, list_status=['2']),
-        'count_work': get_emp_count(search='', czn=czn, list_status=['3', '4', '5', '6', '7', '11']),
-        'count_ready': get_emp_count(search='', czn=czn, list_status=['9']),
-        'count_closed': get_emp_count(search='', czn=czn, list_status=['12']),
+        'count_all': get_employer_count(search='', czn='0', list_status=['20']),
+        'count_my': get_employer_count(search='', czn=profile.id, list_status=['20']),
+        'count_edit': get_employer_count(search='', czn=profile.id, list_status=['1']),
+        'count_draft': get_employer_count(search='', czn=czn, list_status=['0', '1']),
+        'count_check': get_employer_count(search='', czn=czn, list_status=['2']),
+        'count_work': get_employer_count(search='', czn=czn, list_status=['3', '4', '5', '6', '7', '11']),
+        'count_ready': get_employer_count(search='', czn=czn, list_status=['9']),
+        'count_closed': get_employer_count(search='', czn=czn, list_status=['12']),
     }
     return render(request, 'index.html', context)
 

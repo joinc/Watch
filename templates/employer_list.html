@@ -23,7 +23,7 @@
                         <h4>{{ title }}:</h4>
                     </div>
                     <div class="col-auto mr-0 text-right">
-                        <a href="{% url 'export' %}" class="btn btn-outline-secondary" title="Скачать данные"><i class="fas fa-download"></i> Скачать данные</a>
+                        <a href="{% url 'employer_export' %}" class="btn btn-outline-secondary" title="Скачать данные"><i class="fas fa-download"></i> Скачать данные</a>
                     </div>
                 </div>
             </div>
@@ -34,15 +34,15 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form method='post' action='{% url 'find' %}'>
+                <form method='post' action='{% url 'employer_find' %}'>
                     {% csrf_token %}
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Поиск карточек</span>
                         </div>
-                        {{ search_form }}
-                        {{ filter_czn_form }}
-                        {{ filter_status_form }}
+                        {{ form_search }}
+                        {{ form_filter_czn }}
+                        {{ form_filter_status }}
                         <div class="input-group-append">
                             <button class="btn btn-info" type="submit" name="search">Поиск</button>
                         </div>
@@ -66,9 +66,15 @@
     <script>
         let page_count = {{ page_count }};
         let per_page = {{ per_page }};
-        let emp_count = {{ emp_count }};
+        let employer_count = {{ employer_count }};
         let page_number = 1;
         let pathname = $(location).attr('href');
+
+        function get_slice_employer() {
+            $.get(pathname, {page: page_number, {% if emp_find %} emp_find: '{{ emp_find }}',{% endif %} {% if emp_czn %}emp_czn: {{emp_czn}},{% endif %} {% if emp_status %}emp_status: {{ emp_status }}{% endif %} }, function(data) {
+                $('.find-result').append(data);
+            });
+        }
 
         $(document).ready(function() {
             $('select[name=czn]').select2({
@@ -85,26 +91,17 @@
                 theme: "bootstrap4",
                 language: "ru"
             });
-            $.get(pathname, {page: page_number, emp_find: '{{ emp_find }}', emp_czn: '{{emp_czn}}', emp_status: '{{ emp_status }}'}, function(data) {
-                console.log(data);
-                console.log(pathname);
-            });
-
-            $.get(pathname, {page: page_number, {% if emp_find %} emp_find: '{{ emp_find }}',{% endif %} {% if emp_czn %}emp_czn: {{emp_czn}},{% endif %} {% if emp_status %}emp_status: {{ emp_status }}{% endif %} }, function(data) {
-                $('.find-result').append(data);
-            });
+            get_slice_employer();
             page_number = page_number + 1;
             if (page_count > 1) {
-                $('.count_all').html(emp_count);
+                $('.count_all').html(employer_count);
                 $('.count_view').html((page_number - 1) * per_page);
                 $('.button-next').html('<button class="btn btn-light btn-block" id="button-next" type="submit">Показать больше записей</button>');
                 $('#button-next').click(function () {
-                    $.get(pathname, {page: page_number, {% if emp_find %} emp_find: '{{ emp_find }}',{% endif %} {% if emp_czn %}emp_czn: {{emp_czn}},{% endif %} {% if emp_status %}emp_status: {{ emp_status }}{% endif %} }, function(data) {
-                        $('.find-result').append(data);
-                    });
+                    get_slice_employer();
                     if (page_number >= page_count) {
                         $('.button-next').hide();
-                        $('.count_view').html(emp_count);
+                        $('.count_view').html(employer_count);
                     } else {
                         $('.count_view').html(page_number * per_page);
                         page_number = page_number + 1;
@@ -112,8 +109,8 @@
                 });
             } else {
                 $('.button-next').hide();
-                $('.count_all').html(emp_count);
-                $('.count_view').html(emp_count);
+                $('.count_all').html(employer_count);
+                $('.count_view').html(employer_count);
             }
         });
     </script>

@@ -174,11 +174,13 @@ class Info(models.Model):
         verbose_name='Комментарий',
         max_length=1024,
         default='',
+        blank=True,
     )
     Attache = models.FileField(
         verbose_name='Прикрепленный файл',
         upload_to='attache/%Y/%m/%d',
         null=True,
+        blank=True,
     )
     CreateDate = models.DateTimeField(
         verbose_name='Дата создания',
@@ -307,7 +309,7 @@ class ConfigWatch(models.Model):
         return '{0}'.format(self.UploadDate)
 
     class Meta:
-        ordering = 'UploadDate',
+        ordering = '-UploadDate',
         verbose_name = 'Дата загрузки'
         verbose_name_plural = 'Даты загрузки'
         managed = True
@@ -396,11 +398,13 @@ class Notify(models.Model):
         verbose_name='Комментарий',
         max_length=1024,
         default='',
+        blank=True,
     )
     Attache = models.FileField(
         verbose_name='Прикрепленный файл',
         upload_to='attache/%Y/%m/%d',
         null=True,
+        blank=True,
     )
     CreateDate = models.DateTimeField(
         verbose_name='Дата создания',
