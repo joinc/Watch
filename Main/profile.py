@@ -3,9 +3,10 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect, reverse
-from .forms import FormRole
-from .models import UserProfile
-from .tools import admin_only
+from django.contrib import messages
+from Main.forms import FormRole
+from Main.models import UserProfile
+from Main.tools import admin_only
 
 ######################################################################################################################
 
@@ -18,6 +19,28 @@ def profile_list(request):
     :param request:
     :return:
     """
+    if request.POST:
+        profile = get_object_or_404(UserProfile, id=request.POST.get('id_profile'))
+        formset = FormRole(request.POST, instance=profile)
+        new_role = formset['new_role'].value()
+        if formset.is_valid() and new_role:
+            formset.save()
+            messages.success(
+                request,
+                'Пользователю {0} установлена роль - {1}.'.format(profile, profile.new_role)
+            )
+        else:
+            if new_role:
+                messages.warning(
+                    request,
+                    'Роль пользователя {1} не изменена на "{1}"'.format(profile, new_role)
+                )
+            else:
+                messages.warning(
+                    request,
+                    'Не указана новая роль пользователя {0}'.format(profile)
+                )
+
     for user in User.objects.all():
         user_profile, created = UserProfile.objects.get_or_create(user=user, )
         if created:

@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from datetime import datetime, date
 from Main import tools, message
-from Main.models import UserProfile, Employer, Event, Info, Notify, TempEmployer, ConfigWatch
+from Main.models import UserProfile, Employer, Event, Info, Notify, TempEmployer, ConfigWatch, StatusEmployer, Status
 from Main.forms import FormReturn, FormResult, FormEmployer, FormNotice, FormProtocol, FormClose, FormResponse, \
     FormSearch, FormFilterCzn, FormFilterStatus, FormInformation, FormNotify
 from Main.tools import get_employer_count, get_list_employer, get_page_count, admin_only, emp_export_ods, \
@@ -14,6 +14,21 @@ from Main.message import message_create
 from Main.choices import RETURN_CHOICES, RESULT_CHOICES
 import xlrd
 import os
+
+######################################################################################################################
+
+
+def employer_status_sync(request):
+    list_employer = Employer.objects.all()
+    for employer in list_employer:
+        old_status = Status.objects.filter(status=employer.Status).first()
+        if old_status:
+            status_employer, created = StatusEmployer.objects.get_or_create(employer=employer)
+            if created:
+                status_employer.status = old_status
+                status_employer.save()
+    return redirect(reverse('index'))
+
 
 ######################################################################################################################
 
@@ -60,7 +75,7 @@ def employer_list(request, list_status, title):
             'employer_count': employer_count,
             'page_count': get_page_count(emp_count=employer_count),
         }
-        return render(request, 'employer_list.html', context)
+        return render(request=request, template_name='employer_list.html', context=context)
 
 
 ######################################################################################################################
@@ -132,7 +147,7 @@ def emp_load(request):
         'profile': get_object_or_404(UserProfile, user=request.user),
         'title': 'Загрузить работодателей',
     }
-    return render(request, 'load.html', context)
+    return render(request=request, template_name='load.html', context=context)
 
 
 ######################################################################################################################
@@ -234,7 +249,7 @@ def employer_view(request, employer_id):
         context['form_protocol'] = FormProtocol()
         if profile.role != 3:
             context['form_return'] = FormReturn()
-    return render(request, 'employer_view.html', context)
+    return render(request=request, template_name='employer_view.html', context=context)
 
 
 ######################################################################################################################
@@ -318,7 +333,7 @@ def employer_edit(request, employer_id):
         'list_notify': Notify.objects.filter(EmpNotifyID=employer),
         'pemp': tools.p_emp_list(employer.INN),
     }
-    return render(request, 'employer_edit.html', context)
+    return render(request=request, template_name='employer_edit.html', context=context)
 
 
 ######################################################################################################################
@@ -340,7 +355,7 @@ def employer_print(request, employer_id):
         'infolist': Info.objects.filter(EmpInfoID=employer),
         'notifylist': Notify.objects.filter(EmpNotifyID=employer),
     }
-    return render(request, 'employer_print.html', context)
+    return render(request=request, template_name='employer_print.html', context=context)
 
 
 ######################################################################################################################

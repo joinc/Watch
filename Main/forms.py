@@ -4,26 +4,29 @@ from django import forms
 from django.conf import settings
 from datetime import date, datetime, timedelta
 from Main.models import UserProfile, Info, Notify
-from Main.choices import ROLE_CHOICES, EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, STATUS_CHOICES, \
-    RESULT_CHOICES
+from Main.choices import EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, STATUS_CHOICES, RESULT_CHOICES
 import locale
 import calendar
 
 ######################################################################################################################
 
 
-class FormRole(forms.Form):
-    role = forms.ChoiceField(
-        choices=ROLE_CHOICES,
-        label='',
-        initial=0,
-        widget=forms.Select(
-            attrs={
-                'class': 'custom-select',
-            }
-        ),
-        required=True
-    )
+class FormRole(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = [
+            'new_role',
+        ]
+        widgets = {
+            'new_role': forms.Select(
+                attrs={
+                    'class': 'custom-select',
+                }
+            ),
+        }
+        labels = {
+            'new_role': 'Выберите новую роль:',
+        }
 
 
 ######################################################################################################################
@@ -359,7 +362,7 @@ class FormProtocol(forms.Form):
 
 
 class FormFilterCzn(forms.Form):
-    list_czn = UserProfile.objects.filter(role=1).order_by('user')
+    list_czn = UserProfile.objects.filter(role=1)
     CZN_CHOICES = [[0, 'Все ЦЗН']]
     for i in list_czn:
         CZN_CHOICES.append([i.id, i.user.get_full_name()])
@@ -382,7 +385,7 @@ class FormFilterCzn(forms.Form):
 
 class FormResponse(forms.Form):
     RESPONSE_CHOICES = []
-    list_response = UserProfile.objects.filter(role=3).order_by('user')
+    list_response = UserProfile.objects.filter(role=3)
     for i in list_response:
         RESPONSE_CHOICES.append([i.id, i.user.get_full_name()])
 

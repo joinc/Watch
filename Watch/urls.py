@@ -37,6 +37,7 @@ urlpatterns = [
     path('employer/upload/', employer.emp_upload, name='employer_upload', ),
     path('employer/export/', employer.export_to_spreadsheet, name='employer_export', ),
     path('employer/find/', employer.employer_find, name='employer_find', ),
+    path('employer/status_check', employer.employer_status_sync, name='employer_status_check', ),
     path('employer/<int:employer_id>/view/', employer.employer_view, name='employer_view', ),
     path('employer/<int:employer_id>/audit/', employer.employer_audit, name='employer_audit', ),
     path('employer/<int:employer_id>/print/', employer.employer_print, name='employer_print', ),

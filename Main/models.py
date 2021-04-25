@@ -6,7 +6,74 @@ from django.utils.html import format_html
 ######################################################################################################################
 
 
+class Role(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
+    title = models.CharField(
+        verbose_name='Название роли',
+        max_length=64,
+        default='',
+    )
+    name = models.CharField(
+        verbose_name='Обозначение роли',
+        max_length=64,
+        default='',
+    )
+
+    def __str__(self):
+        return '{0}'.format(self.title)
+
+    class Meta:
+        ordering = 'title',
+        verbose_name = 'Роль'
+        verbose_name_plural = 'Роли'
+        managed = True
+
+
+######################################################################################################################
+
+
+class Status(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
+    title = models.CharField(
+        verbose_name='Название статуса',
+        max_length=64,
+        default='',
+    )
+    order = models.SmallIntegerField(
+        verbose_name='Порядок в списке статусов',
+        default=0,
+    )
+    is_filtered = models.BooleanField(
+        verbose_name='Используется в фильтрах',
+        default=False,
+    )
+    status = models.SmallIntegerField(
+        verbose_name='Старый статус',
+        choices=STATUS_CHOICES,
+        default=0,
+    )
+
+    def __str__(self):
+        return '{0}'.format(self.title)
+
+    class Meta:
+        ordering = 'order', 'title',
+        verbose_name = 'Статус'
+        verbose_name_plural = 'Статусы'
+        managed = True
+
+
+######################################################################################################################
+
+
 class UserProfile(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -17,6 +84,15 @@ class UserProfile(models.Model):
         default=0,
         null=False,
         blank=False,
+    )
+    new_role = models.ForeignKey(
+        Role,
+        verbose_name='Роль new',
+        null=True,
+        blank=True,
+        default=None,
+        related_name='Role',
+        on_delete=models.SET_NULL,
     )
     blocked = models.BooleanField(
         verbose_name='Учетная запись заблокирована',
@@ -45,6 +121,9 @@ class UserProfile(models.Model):
 
 
 class Employer(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
     Owner = models.ForeignKey(
         UserProfile,
         verbose_name='Автор карточки',
@@ -157,7 +236,42 @@ class Employer(models.Model):
 ######################################################################################################################
 
 
+class StatusEmployer(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
+    status = models.ForeignKey(
+        Status,
+        verbose_name='Статус карточки нарушителя',
+        null=True,
+        related_name='StatusEmployer',
+        on_delete=models.CASCADE,
+    )
+    employer = models.ForeignKey(
+        Employer,
+        verbose_name='Карточка нарушителя',
+        null=True,
+        related_name='EmployerStatus',
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self):
+        return '{0} - {1}'.format(self.employer, self.status)
+
+    class Meta:
+        ordering = 'employer',
+        verbose_name = 'Статус нарушителя'
+        verbose_name_plural = 'Статусы нарушителей'
+        managed = True
+
+
+######################################################################################################################
+
+
 class Info(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
     EmpInfoID = models.ForeignKey(
         Employer,
         verbose_name='Карточка предприятия',
@@ -202,6 +316,9 @@ class Info(models.Model):
 
 
 class TempEmployer(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
     Number = models.CharField(
         verbose_name='Учётный номер',
         max_length=128,
@@ -256,6 +373,9 @@ class TempEmployer(models.Model):
 
 
 class Event(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
     EmpEventID = models.ForeignKey(
         Employer,
         verbose_name='Карточка предприятия',
@@ -300,6 +420,9 @@ class Event(models.Model):
 
 
 class ConfigWatch(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
     UploadDate = models.DateField(
         verbose_name='Дата загрузки работодателей из Катарсиса',
         null=True,
@@ -319,6 +442,9 @@ class ConfigWatch(models.Model):
 
 
 class Message(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
     EmpMessageID = models.ForeignKey(
         Employer,
         verbose_name='Карточка предприятия',
@@ -369,6 +495,9 @@ class Message(models.Model):
 
 
 class Notify(models.Model):
+    id = models.AutoField(
+        primary_key=True
+    )
     EmpNotifyID = models.ForeignKey(
         Employer,
         verbose_name='Карточка предприятия',

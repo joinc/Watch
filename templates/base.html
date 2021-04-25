@@ -24,6 +24,7 @@
                                     <div class="dropdown-divider"></div>
                                     <a href="{% url 'profile_list' %}" class="dropdown-item bg-danger text-white">Список пользователей</a>
                                     <a href="{% url 'employer_load' %}" class="dropdown-item bg-danger text-white">Загрузка работодателей</a>
+                                    <a href="{% url 'employer_status_check' %}" class="dropdown-item bg-danger text-white">Синхронизировать статусы</a>
                                     <a href="{% url 'send' %}" class="dropdown-item bg-danger text-white">Отправить почту</a>
                                 {% endif %}
                                 {% ifequal profile.role 1 %}

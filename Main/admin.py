@@ -1,7 +1,11 @@
 from django.contrib import admin
-from Main.models import UserProfile, TempEmployer, Employer, Event, Info, Notify, Message, ConfigWatch
+from Main.models import Role, Status, UserProfile, TempEmployer, Employer, StatusEmployer,Event, Info, Notify, \
+    Message, ConfigWatch
 
+admin.site.register(Role)
+admin.site.register(Status)
 admin.site.register(Employer)
+admin.site.register(StatusEmployer)
 admin.site.register(UserProfile)
 admin.site.register(TempEmployer)
 admin.site.register(Event)
