@@ -1,0 +1,87 @@
+{% extends "base.html" %}{% load static %}
+
+{% block html_top_breadcrumb %}
+        <li class="nav-item">
+            <span class="navbar-text">/</span>
+        </li>
+        <li class="nav-item">
+            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
+        </li>
+{% endblock %}
+{% block html_body %}
+    <main role="main" class="container-fluid">
+        <div class="shadow card border-dark mb-3">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-auto mr-auto">
+                        <h4>{{ title }}:</h4>
+                    </div>
+                    <div class="col-auto mr-0 text-right small">
+                        Всего работодателей из Катарсиса - <strong>{{ count_total_employer }}</strong>
+                        <span class="d-block">Загружены {{ upload_date }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method='post' action=''>
+                    <div class="input-group mb-3">
+                        {{ search_form }}
+                        {% csrf_token %}
+                        <div class="input-group-append">
+                            <button class="btn btn-info" type="submit">Поиск</button>
+                        </div>
+                    </div>
+                </form>
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+                <div class="list-group list-group-flush">
+                    {% for employer in list_employer %}
+                        <div class="list-group-item">
+                            <h5 class="mb-0"><a href="#" onclick="ShowEmployer('{{ employer.0 }}')">{{ employer.1 }}</a></h5>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div id="accordion" role="tablist">
+                    {% for emp in aEmp %}
+                        <div class="card">
+                            <div id="collapse{{ emp.id }}" class="collapse" role="tabpanel" aria-labelledby="heading{{ emp.id }}" data-parent="#accordion">
+                                <div class="card-body">
+                                    {% for i in pemp %}
+                                        {% ifequal i.INN emp.INN %}
+                                            <div class="alert {% ifequal i.Status 9 %}alert-success{% else %}alert-danger{% endifequal %} small" role="alert">
+                                                Карточка предприятия с таким же ИНН существует. <a href="{% url 'employer_view' i.id %}" class="alert-link">{{ i.Title }}</a> {{ i.get_Status_display }}
+                                            </div>
+                                        {% endifequal %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Окно информации о работодателе из Катарсиса -->
+    <div class="modal fade" id="ModalShowEmployer" tabindex="-1" role="dialog" aria-labelledby="ModalShowEmployerTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+    <!-- /Окно информации о работодателе из Катарсиса -->
+    <script type="text/javascript">
+        let pathname = $(location).attr('href');
+
+        function ShowEmployer(employer_id) {
+            $.get(pathname, {id: employer_id }, function(data) {
+                $('.modal-content').html(data);
+            });
+            $('#ModalShowEmployer').modal('show');
+        }
+    </script>
+{% endblock %}

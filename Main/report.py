@@ -23,7 +23,7 @@ def report_list(request):
         'profile': get_object_or_404(UserProfile, user=request.user),
         'title': 'Список отчетов',
     }
-    return render(request, 'report_list.html', context)
+    return render(request, 'report/list.html', context)
 
 
 ######################################################################################################################
@@ -62,7 +62,7 @@ def report_month(request):
         'ar': ar,
         'emp_all': emp_all,
     }
-    return render(request, 'report_month.html', context)
+    return render(request, 'report/month.html', context)
 
 
 ######################################################################################################################
@@ -100,7 +100,7 @@ def report_date(request):
         context['emp_all'] = emp_all
     else:
         context['date_form'] = FormReportDates()
-    return render(request, 'report_date.html', context)
+    return render(request, 'report/date.html', context)
 
 
 ######################################################################################################################

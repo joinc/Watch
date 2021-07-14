@@ -1,14 +1,13 @@
 {% extends "base.html" %}{% load static %}
 
 {% block html_body %}
-    <br />
     <div class="container-fluid">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'emp' emp.id %}">Карточка учета работодателя</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'employer_view' emp.id %}">Карточка учета работодателя</a></li>
             <li class="breadcrumb-item active">Редактирование карточки предприятия</li>
         </ol>
-        <form method='post' action='{% url 'archsave' emp.id %}' enctype="multipart/form-data">
+        <form method='post' action='{% url 'archive_save' emp.id %}' enctype="multipart/form-data">
             {% csrf_token %}
             <table class="table table-borderless table-sm table-condensed table-striped">
                 <tbody>
@@ -55,13 +54,13 @@
                     <button type="submit" class="btn btn-success">Сохранить архивную карточку предприятия</button>
                 </div>
                 <div class="input-group-append">
-                    <a class="btn btn-danger mb-0" href="{% url 'delete' emp.id %}" role="button">Удалить черновик</a>
+                    <a class="btn btn-danger mb-0" href="{% url 'employer_delete' emp.id %}" role="button">Удалить черновик</a>
                 </div>
             </div>
         </form>
         {% for i in pemp %}
             {% ifnotequal i.id emp.id %}
-                <div class="alert {% ifequal i.Status 9 %}alert-success{% else %}alert-danger{% endifequal %} small" role="alert">Карточка предприятия с таким же ИНН существует. <a href="{% url 'emp' i.id %}" class="alert-link">{{ i.Title }}</a> {{ i.get_Status_display }}</div>
+                <div class="alert {% ifequal i.Status 9 %}alert-success{% else %}alert-danger{% endifequal %} small" role="alert">Карточка предприятия с таким же ИНН существует. <a href="{% url 'employer_view' i.id %}" class="alert-link">{{ i.Title }}</a> {{ i.get_Status_display }}</div>
             {% endifnotequal %}
         {% endfor %}
         {% for event in eventlist %}

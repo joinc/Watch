@@ -10,14 +10,14 @@
                 <a href="{% url 'employer_all' %}">
                     <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mPccev/fwAIdQOSaxKbGgAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
                 </a>
-                <h1>{{ count_all }}{% ifnotequal count_my 0 %}<span class="badge badge-primary" title="Всего ваших карточек">{{ count_my }}</span>{% endifnotequal %}</h1>
+                <h1>{{ count_all }}{% if count_my %}<span class="badge badge-primary" title="Всего ваших карточек">{{ count_my }}</span>{% endif %}</h1>
                 <div class="text-muted">Всего карточек</div>
             </div>
             <div class="col-6 col-md-2 col-sm-4 placeholder">
                 <a href="{% url 'employer_draft' %}">
                     <img src="data:image/gif;base64,{% ifequal count_draft 0 %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mO8e//RfwAI3gOf4zSm2AAAAABJRU5ErkJggg=={% else %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8euz0fwAIxQOHBltBDwAAAABJRU5ErkJggg=={% endifequal %}" width="300" height="300" class="img-fluid rounded-circle">
                 </a>
-                <h1>{{ count_draft }}{% ifnotequal count_edit 0 %}<span class="badge badge-danger" title="Карточки возвращенные для редактирования">{{ count_edit }}</span>{% endifnotequal %}</h1>
+                <h1>{{ count_draft }}{% if count_edit %}<span class="badge badge-danger" title="Карточки возвращенные для редактирования">{{ count_edit }}</span>{% endif %}</h1>
                 <span class="text-muted">Карточек в черновиках</span>
             </div>
             <div class="col-6 col-md-2 col-sm-4 placeholder">

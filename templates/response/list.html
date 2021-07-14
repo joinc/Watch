@@ -20,7 +20,7 @@
                     {% for i in list_emp %}
                         <tr>
                             <td class="small">
-                                <strong class="text-gray-dark"><a href="{% url 'emp' i.id %}">{{ i.Title }}</a></strong>
+                                <strong class="text-gray-dark"><a href="{% url 'employer_view' i.id %}">{{ i.Title }}</a></strong>
                                 <span class="d-block">{{ i.Owner.user.get_full_name }}</span>
                             </td>
                             <td>
@@ -33,5 +33,5 @@
             </div>
         </div>
     </main>
-    {% include 'modal_response.html' %}
+    {% include 'response/modal.html' %}
 {% endblock %}

@@ -12,7 +12,12 @@
                 <h1 class="h3 mb-3 font-weight-normal">Реестр работодателей по нарушению ст. 25 Закона РФ от 19.04.1991 №1032-1 "О занятости населения в Российской Федерации"</h1>
                 <h4>Пожалуйста войдите:</h4>
                 {% for message in messages %}
-                    <div class="alert alert-danger" role="alert">{{ message }}</div>
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
                 {% endfor %}
             </div>
             {% csrf_token %}

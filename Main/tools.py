@@ -16,25 +16,7 @@ import os
 ######################################################################################################################
 
 
-def admin_only(function):
-    """
-    Декоратор, проверят, что-бы пользователь обладал правами суперпользователя
-    :param function:
-    :return:
-    """
-    def _inner(request, *args, **kwargs):
-        if not request.user.is_superuser:
-            return redirect(reverse('index'))
-        else:
-            return function(request, *args, **kwargs)
-
-    return _inner
-
-
-######################################################################################################################
-
-
-def event_create(employer_id, profile, comment, attache):
+def create_event(employer_id, profile, comment, attache):
     """
 
     :param employer_id:
@@ -65,23 +47,6 @@ def e_date(emp_date):
         return_date = emp_date.__format__('%Y-%m-%d')
 
     return return_date
-
-
-######################################################################################################################
-
-
-def p_emp_list(inn):
-    """
-
-    :param inn:
-    :return:
-    """
-    pemp = []
-    emps = Employer.objects.filter(INN__exact=inn)
-    for emp in emps:
-        pemp.append(emp)
-
-    return pemp
 
 
 ######################################################################################################################
@@ -119,23 +84,32 @@ def report_filter(emps):
 
 ######################################################################################################################
 
-
-def get_page_count(emp_count) -> int:
+def get_list_existing_employer(employer):
     """
-    Возвращает количество страниц
-    :param emp_count:
+
+    :param employer:
     :return:
     """
-    page_count = emp_count // settings.COUNT_LIST
-    if emp_count % settings.COUNT_LIST > 0:
-        page_count += 1
-    return page_count
+    result = list(Employer.objects.filter(INN__exact=employer.INN).exclude(id=employer.id))
+    return result
+
+def get_count_page(count_employer) -> int:
+    """
+    Возвращает количество страниц
+    :param count_employer:
+    :return:
+    """
+
+    count_page = count_employer // settings.COUNT_LIST
+    if count_employer % settings.COUNT_LIST > 0:
+        count_page += 1
+    return count_page
 
 
 ######################################################################################################################
 
 
-def get_employer_count(search, czn, list_status) -> int:
+def get_count_employer(search, czn, list_status) -> int:
     """
     Возвращает количество карточек нарушителей по заданным критериям
     :param search:
@@ -188,7 +162,7 @@ def get_list_employer(search, czn, list_status, start, stop) -> list:
     :param stop:
     :return:
     """
-    class EmployerList:
+    class ListEmployer:
         """
         Класс списка организаций
         """
@@ -220,7 +194,7 @@ def get_list_employer(search, czn, list_status, start, stop) -> list:
             """
             return self.list_employer
 
-    list_employer = EmployerList()
+    list_employer = ListEmployer()
     for status in list_status:
         if status == '20' or status == '':
             if czn == '0':

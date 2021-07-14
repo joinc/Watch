@@ -27,39 +27,15 @@
                                     <a href="{% url 'employer_status_check' %}" class="dropdown-item bg-danger text-white">Синхронизировать статусы</a>
                                     <a href="{% url 'send' %}" class="dropdown-item bg-danger text-white">Отправить почту</a>
                                 {% endif %}
-                                {% ifequal profile.role 1 %}
-                                    <div class="dropdown-divider"></div>
-                                    <a href="{% url 'emps' %}" class="dropdown-item">Создать карточку из Катарсиса</a>
-                                    <a href="{% url 'employer_new' %}" class="dropdown-item">Создать карточку вручную</a>
-                                {% endifequal %}
-                                {% ifequal profile.role 3 %}
-                                    <div class="dropdown-divider"></div>
-                                    <a href="{% url 'emps' %}" class="dropdown-item">Создать архивную карточку из Катарсиса</a>
-                                    <a href="{% url 'archive' %}" class="dropdown-item">Создать архивную карточку вручную</a>
-                                {% endifequal %}
-                                {% ifequal profile.role 4 %}
-                                    <div class="dropdown-divider"></div>
-                                    <a href="{% url 'response_list' %}" class="dropdown-item">Назначение ответственного</a>
-                                {% endifequal %}
                                 <div class="dropdown-divider"></div>
-                                <a href="{% url 'report_list' %}" class="dropdown-item">
-                                    <div class="row">
-                                        <div class="col-auto mr-auto">Отчеты</div>
-                                        <div class="col-auto mt-1 text-right"><i class="fas fa-chart-bar"></i></div>
-                                    </div>
-                                </a>
-                                <a href="{% url 'employer_export' %}" class="dropdown-item">
-                                    <div class="row">
-                                        <div class="col-auto mr-auto">Скачать данные</div>
-                                        <div class="col-auto mt-1 text-right"><i class="fas fa-download"></i></div>
-                                    </div>
-                                </a>
-                                <a href="{% url 'message_list' %}" class="dropdown-item">
-                                    <div class="row">
-                                        <div class="col-auto mr-auto">Уведомления</div>
-                                        <div class="col-auto mt-1 text-right"><i class="far fa-comment-alt"></i></div>
-                                    </div>
-                                </a>
+                                {% for item in current_profile.get_menu %}
+                                    <a href="{% url item.1 %}" class="dropdown-item">
+                                        <div class="row">
+                                            <div class="col-auto mr-auto">{{ item.2 }}</div>
+                                            <div class="col-auto mt-1 text-right"><i class="{{ item.3 }}"></i></div>
+                                        </div>
+                                    </a>
+                                {% endfor %}
                                 <div class="dropdown-divider"></div>
                                 <a href="{% url 'logout' %}" class="dropdown-item">Выход</a>
                             </div>

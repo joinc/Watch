@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.contrib import messages
 from Main.forms import FormRole
 from Main.models import UserProfile
-from Main.tools import admin_only
+from Main.decorators import admin_only
 
 ######################################################################################################################
 
 
-@login_required
 @admin_only
 def profile_list(request):
     """
@@ -22,18 +20,18 @@ def profile_list(request):
     if request.POST:
         profile = get_object_or_404(UserProfile, id=request.POST.get('id_profile'))
         formset = FormRole(request.POST, instance=profile)
-        new_role = formset['new_role'].value()
-        if formset.is_valid() and new_role:
+        super_role = formset['super_role'].value()
+        if formset.is_valid() and super_role:
             formset.save()
             messages.success(
                 request,
-                'Пользователю {0} установлена роль - {1}.'.format(profile, profile.new_role)
+                'Пользователю {0} установлена роль - {1}.'.format(profile, profile.get_super_role_display())
             )
         else:
-            if new_role:
+            if super_role:
                 messages.warning(
                     request,
-                    'Роль пользователя {1} не изменена на "{1}"'.format(profile, new_role)
+                    'Роль пользователя {1} не изменена на "{1}"'.format(profile, super_role)
                 )
             else:
                 messages.warning(
@@ -46,63 +44,39 @@ def profile_list(request):
         if created:
             user_profile.save()
     context = {
-        'profile': get_object_or_404(UserProfile, user=request.user),
+        'current_profile': get_object_or_404(UserProfile, user=request.user),
         'title': 'Список пользователей',
         'role_form': FormRole(),
         'list_profile': UserProfile.objects.all(),
     }
-    return render(request, 'profile_list.html', context)
+    return render(request, 'profile/list.html', context)
 
 
 ######################################################################################################################
 
 
-@login_required
 @admin_only
-def profile_block(request):
+def profile_change_blocked(request, profile_id):
     """
-    Заблокировать пользователя
+    Функция по блокировке или разблокировки профиля пользователя в зависимости от состояния
     :param request:
+    :param profile_id:
     :return:
     """
-    if request.POST:
-        profile = get_object_or_404(UserProfile, id=request.POST['profile_id'])
-        profile.block()
-    return redirect(reverse('profile_list'))
-
-
-######################################################################################################################
-
-
-@login_required
-@admin_only
-def profile_unblock(request):
-    """
-    Разблокироваь пользователя
-    :param request:
-    :return:
-    """
-    if request.POST:
-        profile = get_object_or_404(UserProfile, id=request.POST['profile_id'])
+    profile = get_object_or_404(UserProfile, id=profile_id)
+    print(profile.get_menu())
+    if profile.blocked:
         profile.unblock()
-    return redirect(reverse('profile_list'))
-
-
-######################################################################################################################
-
-
-@login_required
-@admin_only
-def profile_role(request):
-    """
-    Смена роли пользователю
-    :param request:
-    :return:
-    """
-    if request.POST:
-        profile = get_object_or_404(UserProfile, id=request.POST['profile_id'], )
-        profile.role = request.POST['role']
-        profile.save()
+        messages.info(
+            request,
+            'Пользователь {0} разблокирован'.format(profile)
+        )
+    else:
+        profile.block()
+        messages.warning(
+            request,
+            'Пользователь {0} заблокирован'.format(profile)
+        )
     return redirect(reverse('profile_list'))
 
 

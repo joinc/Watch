@@ -1,35 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from .choices import ROLE_CHOICES, STATUS_CHOICES, INFO_CHOICES, METHOD_CHOICES, RESULT_CHOICES
+from .choices import ROLE_CHOICES, STATUS_CHOICES, INFO_CHOICES, METHOD_CHOICES, RESULT_CHOICES, ROLES_CHOICES, FULL_MENU
 from django.utils.html import format_html
-
-######################################################################################################################
-
-
-class Role(models.Model):
-    id = models.AutoField(
-        primary_key=True
-    )
-    title = models.CharField(
-        verbose_name='Название роли',
-        max_length=64,
-        default='',
-    )
-    name = models.CharField(
-        verbose_name='Обозначение роли',
-        max_length=64,
-        default='',
-    )
-
-    def __str__(self):
-        return '{0}'.format(self.title)
-
-    class Meta:
-        ordering = 'title',
-        verbose_name = 'Роль'
-        verbose_name_plural = 'Роли'
-        managed = True
-
 
 ######################################################################################################################
 
@@ -54,7 +26,7 @@ class Status(models.Model):
     status = models.SmallIntegerField(
         verbose_name='Старый статус',
         choices=STATUS_CHOICES,
-        default=0,
+        blank=True,
     )
 
     def __str__(self):
@@ -85,14 +57,13 @@ class UserProfile(models.Model):
         null=False,
         blank=False,
     )
-    new_role = models.ForeignKey(
-        Role,
-        verbose_name='Роль new',
+    super_role = models.CharField(
+        verbose_name='Роль new new',
+        max_length=16,
+        choices=ROLES_CHOICES,
         null=True,
         blank=True,
         default=None,
-        related_name='Role',
-        on_delete=models.SET_NULL,
     )
     blocked = models.BooleanField(
         verbose_name='Учетная запись заблокирована',
@@ -100,12 +71,42 @@ class UserProfile(models.Model):
     )
 
     def block(self):
+        """
+        Отмечает пользователя как заблокированного
+        :return:
+        """
         self.blocked = True
         self.save()
 
     def unblock(self):
+        """
+        Отмечает пользователя как действующего
+        :return:
+        """
         self.blocked = False
         self.save()
+
+    def is_allowed(self, list_permission):
+        """
+        Возвращает значение, есть или нет у пользователя права из списка
+        :param list_permission:
+        :return:
+        """
+        for permission in list_permission:
+            if self.super_role == permission:
+                return True
+        return False
+
+    def get_menu(self):
+        """
+        Формирует доступные элементы меню в зависимости от прав
+        :return:
+        """
+        menu = []
+        for item in FULL_MENU:
+            if self.is_allowed(list_permission=item[0]):
+                menu.append(item)
+        return menu
 
     def __str__(self):
         return '{0}'.format(self.user.get_full_name())
@@ -150,6 +151,8 @@ class Employer(models.Model):
         verbose_name='ОГРН',
         max_length=20,
         default='',
+        blank=True,
+        null=True,
     )
     JurAddress = models.CharField(
         verbose_name='Адрес юридический',
@@ -164,20 +167,24 @@ class Employer(models.Model):
     VacancyDate = models.DateField(
         verbose_name='Дата размещения вакансии',
         null=True,
+        blank=True,
     )
     VacancyComment = models.CharField(
         verbose_name='Комментарий даты размещения вакансии',
         max_length=512,
         default='',
+        blank=True,
     )
     EventDate = models.DateField(
         verbose_name='Дата взаимодействия',
         null=True,
+        blank=True,
     )
     EventComment = models.CharField(
         verbose_name='Комментарий даты взаимодействия',
         max_length=512,
         default='',
+        blank=True,
     )
     Contact = models.CharField(
         verbose_name='Контакт основной',
@@ -357,6 +364,7 @@ class TempEmployer(models.Model):
     EventDate = models.DateField(
         verbose_name='Дата взаимодействия',
         null=True,
+        blank=True,
     )
 
     def __str__(self):
@@ -419,20 +427,30 @@ class Event(models.Model):
 ######################################################################################################################
 
 
-class ConfigWatch(models.Model):
+class UpdateEmployer(models.Model):
     id = models.AutoField(
         primary_key=True
     )
-    UploadDate = models.DateField(
+    upload_date = models.DateField(
         verbose_name='Дата загрузки работодателей из Катарсиса',
         null=True,
     )
+    count_employer = models.CharField(
+        verbose_name='Количество загруженных организаций из Катарсиса',
+        max_length=16,
+        default='',
+    )
+    time_spent = models.CharField(
+        verbose_name='Длительность загрузки работодателей из Катарсиса в секундах',
+        max_length=8,
+        default='',
+    )
 
     def __str__(self):
-        return '{0}'.format(self.UploadDate)
+        return '{0}'.format(self.upload_date)
 
     class Meta:
-        ordering = '-UploadDate',
+        ordering = '-upload_date',
         verbose_name = 'Дата загрузки'
         verbose_name_plural = 'Даты загрузки'
         managed = True

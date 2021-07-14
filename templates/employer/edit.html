@@ -27,48 +27,49 @@
                 <h4>{{ title }}:</h4>
             </div>
             <div class="card-body">
-                <form method='post' action='{% url 'employer_save' employer.id %}' enctype="multipart/form-data">
+{#                <form method='post' action='{% url 'employer_save' employer.id %}' enctype="multipart/form-data">#}
+                <form method='post' action=''>
                     {% csrf_token %}
                     <table class="table table-borderless table-sm table-condensed table-striped">
                         <tbody>
                         <tr>
-                            <th class="w-25">{{ form.title.label }}:</th>
-                            <td>{{ form.title }}</td>
+                            <th class="w-25">{{ form_employer.Title.label }}</th>
+                            <td>{{ form_employer.Title }}</td>
                         </tr>
                         <tr>
-                            <th scope="row">{{ form.legal_address.label }}:</th>
-                            <td>{{ form.legal_address }}</td>
+                            <th>{{ form_employer.JurAddress.label }}</th>
+                            <td>{{ form_employer.JurAddress }}</td>
                         </tr>
                         <tr>
-                            <th scope="row">{{ form.actual_address.label }}:</th>
-                            <td>{{ form.actual_address }}</td>
+                            <th>{{ form_employer.FactAddress.label }}</th>
+                            <td>{{ form_employer.FactAddress }}</td>
                         </tr>
                         <tr>
-                            <th scope="row">{{ form.inn.label }}:</th>
-                            <td>{{ form.inn }}</td>
+                            <th>{{ form_employer.INN.label }}</th>
+                            <td>{{ form_employer.INN }}</td>
                         </tr>
                         <tr>
-                            <td>{{ form.ogrn.label }}:</td>
-                            <td>{{ form.ogrn }}</td>
+                            <td>{{ form_employer.OGRN.label }}</td>
+                            <td>{{ form_employer.OGRN }}</td>
                         </tr>
                         <tr>
-                            <td title='Указывается для работодателей, разместивших сведения о вакансиях в информационно-телекоммуникационой сети "Интернет", включая информационно-аналитическую систему Общероссийская база вакансий "Работа в России", а также на сйтах организаций, предоставляющих услуги по подбору работников, в средствах массовой информации Омской области, в том числе периодических печатных изданиях'>{{ form.vacancy_date.label }}*:</td>
+                            <td title='Указывается для работодателей, разместивших сведения о вакансиях в информационно-телекоммуникационой сети "Интернет", включая информационно-аналитическую систему Общероссийская база вакансий "Работа в России", а также на сйтах организаций, предоставляющих услуги по подбору работников, в средствах массовой информации Омской области, в том числе периодических печатных изданиях'>{{ form_employer.VacancyDate.label }}*</td>
                             <td>
                                 <div class="card card-body">
                                     <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">{{ form.vacancy_date }}</li>
-                                        <li class="list-group-item">{{ form.vacancy_comment }}</li>
+                                        <li class="list-group-item">{{ form_employer.VacancyDate }}</li>
+                                        <li class="list-group-item">{{ form_employer.VacancyComment }}</li>
                                     </ul>
                                 </div>
                             </td>
                         </tr>
                         <tr>
-                            <td>{{ form.event_date.label }}:</td>
+                            <td>{{ form_employer.EventDate.label }}</td>
                             <td>
                                 <div class="card card-body">
                                     <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">{{ form.event_date }}</li>
-                                        <li class="list-group-item">{{ form.event_comment }}</li>
+                                        <li class="list-group-item">{{ form_employer.EventDate }}</li>
+                                        <li class="list-group-item">{{ form_employer.EventComment }}</li>
                                     </ul>
                                 </div>
                             </td>
@@ -114,8 +115,8 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>{{ form.contact.label }}:</td>
-                            <td>{{ form.contact }}</td>
+                            <td>{{ form_employer.Contact.label }}</td>
+                            <td>{{ form_employer.Contact }}</td>
                         </tr>
                         </tbody>
                     </table>
@@ -125,13 +126,14 @@
                         <button type="submit" class="btn btn-success">Сохранить карточку предприятия и отправить на проверку</button>
                     {% endif %}
                     {% ifequal employer.Status 0 %}
+                        <button type="submit" class="btn btn-primary">Сохранить черновик</button>
                         <button type="button" class="btn btn-danger" onclick="DeleteModal('Удаление черновика карточки предприятия', '{{ form.title.value }}', '{% url 'employer_delete' employer.id %}')" title="Удалить черновик">Удалить черновик</button>
                     {% endifequal %}
                 </form>
-                {% for i in pemp %}
-                    {% ifnotequal i.id employer.id %}
-                        <div class="alert {% ifequal i.Status 9 %}alert-success{% else %}alert-danger{% endifequal %} small" role="alert">Карточка предприятия с таким же ИНН существует. <a href="{% url 'emp' i.id %}" class="alert-link">{{ i.Title }}</a> {{ i.get_Status_display }}</div>
-                    {% endifnotequal %}
+                {% for ex_employer in list_existing_employer %}
+                    <div class="alert {% if ex_employer.Status == 9 %}alert-success{% else %}alert-danger{% endif %} small" role="alert">
+                        Карточка предприятия с таким же ИНН существует. <a href="{% url 'employer_view' ex_employer.id %}" class="alert-link">{{ ex_employer.Title }}</a> - {{ ex_employer.get_Status_display }}
+                    </div>
                 {% endfor %}
                 {% for event in list_event %}
                     <div class="alert alert-dark small" role="alert">
