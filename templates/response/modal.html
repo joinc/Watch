@@ -1,6 +1,6 @@
     <!-- Окно запроса назначениея ответственного лица -->
     <div class="modal fade" id="ModalResponse" tabindex="-1" role="dialog" aria-labelledby="ModalResponseTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="ModalResponseTitle">Назначение ответственного лица</h5>
@@ -12,8 +12,12 @@
                     {% csrf_token %}
                     <input type="hidden" name="employer" id="EmployerID" value="">
                     <div class="modal-body">
-                        Назначить для карточки предприятия <strong id="EmployerTitle"></strong> ответственное лицо:
-                        {{ response_form.response }}
+                        <div class="form-group">
+                            <label>
+                                Назначить для карточки предприятия <strong id="EmployerTitle"></strong> ответственное лицо:
+                            </label>
+                            {{ response_form }}
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary">Назначить</button>

@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% load static %}
+
+{% block html_body %}
+    <main role="main" class="container-fluid">
+        {% include "messages.html" %}
+        <div class="shadow card border-dark mb-3">
+            <div class="card-header">
+                <h4>{{ title }}:</h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover table-sm table-borderless">
+                    <tbody>
+                    {% for config in list_config %}
+                        <tr>
+                            <td class="small">
+                                <strong class="h3">{{ config.title }}</strong>
+                                <span class="d-block">{{ config.description }}</span>
+                            </td>
+                            <td class="text-right">
+                                <a href="{% url config.url %}" class="btn btn-lg btn-info" title="Перейти">Перейти</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+{% endblock %}

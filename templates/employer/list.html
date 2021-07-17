@@ -6,14 +6,6 @@
     <script src='{% static "js/select2.min.js" %}'></script>
     <script src='{% static "js/locales/select2.ru.js" %}'></script>
 {% endblock %}
-{% block html_top_breadcrumb %}
-        <li class="nav-item">
-            <span class="navbar-text">/</span>
-        </li>
-        <li class="nav-item">
-            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
-        </li>
-{% endblock %}
 {% block html_body %}
     <main role="main" class="container-fluid">
         <div class="shadow card border-dark mb-3">
@@ -23,17 +15,13 @@
                         <h4>{{ title }}:</h4>
                     </div>
                     <div class="col-auto mr-0 text-right">
-                        <a href="{% url 'employer_export' %}" class="btn btn-outline-secondary" title="Скачать данные"><i class="fas fa-download"></i> Скачать данные</a>
+                        <a href="{% url 'employer_export' %}" class="btn btn-outline-secondary" title="Скачать данные">
+                            <i class="fas fa-download"></i> Скачать данные
+                        </a>
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    Найдено карточек - <span class="count_all"></span>. Отображается - <span class="count_view"></span>.
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
                 <form method='post' action='{% url 'employer_find' %}'>
                     {% csrf_token %}
                     <div class="input-group">
@@ -48,6 +36,12 @@
                         </div>
                     </div>
                 </form>
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    Найдено карточек - <span class="count_all"></span>. Отображается - <span class="count_view"></span>.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
                 <table class="table table-hover table-sm table-borderless">
                     <thead>
                     <tr>
@@ -64,14 +58,14 @@
         </div>
     </main>
     <script>
-        let page_count = {{ page_count }};
+        let count_page = {{ count_page }};
         let per_page = {{ per_page }};
-        let employer_count = {{ employer_count }};
-        let page_number = 1;
+        let count_employer = {{ count_employer }};
+        let number_page = 1;
         let pathname = $(location).attr('href');
 
         function get_slice_employer() {
-            $.get(pathname, {page: page_number, {% if emp_find %} emp_find: '{{ emp_find }}',{% endif %} {% if emp_czn %}emp_czn: {{emp_czn}},{% endif %} {% if emp_status %}emp_status: {{ emp_status }}{% endif %} }, function(data) {
+            $.get(pathname, {page: number_page, {% if emp_find %} emp_find: '{{ emp_find }}',{% endif %} {% if emp_czn %}emp_czn: {{emp_czn}},{% endif %} {% if emp_status %}emp_status: {{ emp_status }}{% endif %} }, function(data) {
                 $('.find-result').append(data);
             });
         }
@@ -92,25 +86,25 @@
                 language: "ru"
             });
             get_slice_employer();
-            page_number = page_number + 1;
-            if (page_count > 1) {
-                $('.count_all').html(employer_count);
-                $('.count_view').html((page_number - 1) * per_page);
+            number_page = number_page + 1;
+            if (count_page > 1) {
+                $('.count_all').html(count_employer);
+                $('.count_view').html((number_page - 1) * per_page);
                 $('.button-next').html('<button class="btn btn-light btn-block" id="button-next" type="submit">Показать больше записей</button>');
                 $('#button-next').click(function () {
                     get_slice_employer();
-                    if (page_number >= page_count) {
+                    if (number_page >= count_page) {
                         $('.button-next').hide();
-                        $('.count_view').html(employer_count);
+                        $('.count_view').html(count_employer);
                     } else {
-                        $('.count_view').html(page_number * per_page);
-                        page_number = page_number + 1;
+                        $('.count_view').html(number_page * per_page);
+                        number_page = number_page + 1;
                     }
                 });
             } else {
                 $('.button-next').hide();
-                $('.count_all').html(employer_count);
-                $('.count_view').html(employer_count);
+                $('.count_all').html(count_employer);
+                $('.count_view').html(count_employer);
             }
         });
     </script>

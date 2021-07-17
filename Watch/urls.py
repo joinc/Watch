@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 from django.contrib import admin
-from Main import views, employer, message, profile, response, report, tools, information, notify
+from Main import views, employer, message, response, report, information, notify, config
 # from django.conf.urls.static import static
 # from django.conf import settings
 
@@ -24,17 +24,19 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', views.login, name='login', ),
     path('logout/', views.logout, name='logout', ),
-    path('send/', tools.send_email, name='send', ),
-    path('employer/temp/list/', employer.employer_temp_list, name='emps', ),
-    path('employer/new/', employer.employer_create, name='employer_new', ),
-    path('employer/load/', employer.emp_load, name='employer_load', ),
+    path('config/', config.config_show, name='config_show', ),
+    path('config/employer/load/', config.employer_load, name='employer_load', ),
+    path('config/email/send/', config.send_email, name='send_email', ),
+    path('config/profile/list/', config.profile_list, name='profile_list', ),
+    path('config/profile/<int:profile_id>/blocked/', config.profile_change_blocked, name='profile_change_blocked', ),
+    path('employer/temp/list/', employer.employer_temp_list, name='employer_temp_list', ),
+    path('employer/create/', employer.employer_create, name='employer_create', ),
     path('employer/all/', employer.employer_all, name='employer_all', ),
     path('employer/draft/', employer.employer_draft, name='employer_draft', ),
     path('employer/check/', employer.employer_check, name='employer_check', ),
     path('employer/work/', employer.employer_work, name='employer_work', ),
     path('employer/ready/', employer.employer_ready, name='employer_ready', ),
     path('employer/closed/', employer.employer_closed, name='employer_closed', ),
-    path('employer/upload/', employer.emp_upload, name='employer_upload', ),
     path('employer/export/', employer.export_to_spreadsheet, name='employer_export', ),
     path('employer/find/', employer.employer_find, name='employer_find', ),
     path('employer/status_check', employer.employer_status_sync, name='employer_status_check', ),
@@ -54,11 +56,7 @@ urlpatterns = [
     path('information/<int:information_id>/delete/', information.information_delete, name='information_delete', ),
     path('notify/<int:employer_id>/create/', notify.notify_create, name='notify_create', ),
     path('notify/<int:notify_id>/delete/', notify.notify_delete, name='notify_delete', ),
-    path('create/<int:temp_employer_id>/', employer.create_temp_emp, name='create', ),
-    path('profile/list/', profile.profile_list, name='profile_list', ),
-    path('profile/block/', profile.profile_block, name='profile_block', ),
-    path('profile/unblock/', profile.profile_unblock, name='profile_unblock', ),
-    path('profile/role/', profile.profile_role, name='profile_role', ),
+    path('create/<int:temp_employer_id>/', employer.employer_temp_create, name='create', ),
     path('message/list/', message.message_list, name='message_list', ),
     path('message/<int:message_id>/read/', message.message_read, name='message_read', ),
     path('report/list/', report.report_list, name='report_list', ),

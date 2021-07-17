@@ -1,0 +1,11 @@
+asgiref==3.3.4
+Django==3.2
+lml==0.1.0
+lxml==4.6.3
+pyexcel-ezodf==0.3.4
+pyexcel-io==0.6.4
+pyexcel-ods3==0.6.0
+pytz==2021.1
+sqlparse==0.4.1
+xlrd==2.0.1
+openpyxl~=3.0.7

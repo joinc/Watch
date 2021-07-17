@@ -1,13 +1,5 @@
 {% extends "base.html" %}{% load static %}
 
-{% block html_top_breadcrumb %}
-        <li class="nav-item">
-            <span class="navbar-text">/</span>
-        </li>
-        <li class="nav-item">
-            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
-        </li>
-{% endblock %}
 {% block html_body %}
     <main role="main" class="container-fluid">
         <div class="shadow card border-dark mb-3">
@@ -20,11 +12,11 @@
                     {% for i in list_emp %}
                         <tr>
                             <td class="small">
-                                <strong class="text-gray-dark"><a href="{% url 'emp' i.id %}">{{ i.Title }}</a></strong>
+                                <strong class="text-gray-dark"><a href="{% url 'employer_view' i.id %}">{{ i.Title }}</a></strong>
                                 <span class="d-block">{{ i.Owner.user.get_full_name }}</span>
                             </td>
-                            <td>
-                                <button type="button" class="btn btn-primary" onclick="SetResponse('{{ i.Title }}', '{{ i.id }}')" title="Назначить ответственное лицо">Назначить ответственного</button>
+                            <td class="text-right">
+                                <button type="button" class="btn btn-info" onclick="SetResponse('{{ i.Title }}', '{{ i.id }}')" title="Назначить ответственное лицо">Назначить ответственного</button>
                             </td>
                         </tr>
                     {% endfor %}
@@ -33,5 +25,5 @@
             </div>
         </div>
     </main>
-    {% include 'modal_response.html' %}
+    {% include 'response/modal.html' %}
 {% endblock %}

@@ -3,7 +3,7 @@
 from django import forms
 from django.conf import settings
 from datetime import date, datetime, timedelta
-from Main.models import UserProfile, Info, Notify
+from Main.models import UserProfile, Info, Notify, Employer, Status
 from Main.choices import EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, STATUS_CHOICES, RESULT_CHOICES
 import locale
 import calendar
@@ -15,17 +15,17 @@ class FormRole(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = [
-            'new_role',
+            'super_role',
         ]
         widgets = {
-            'new_role': forms.Select(
+            'super_role': forms.Select(
                 attrs={
                     'class': 'custom-select',
                 }
             ),
         }
         labels = {
-            'new_role': 'Выберите новую роль:',
+            'super_role': 'Выберите новую роль:',
         }
 
 
@@ -107,6 +107,101 @@ class FormSearch(forms.Form):
         ),
         required=False,
     )
+
+
+######################################################################################################################
+
+
+class FormEmployerNew(forms.ModelForm):
+    class Meta:
+        model = Employer
+        fields = [
+            'Title',
+            'JurAddress',
+            'FactAddress',
+            'INN',
+            'OGRN',
+            'VacancyDate',
+            'VacancyComment',
+            'EventDate',
+            'EventComment',
+            'Contact',
+        ]
+        labels = {
+            'Title': 'Наименование работодателя:',
+            'JurAddress': 'Юридический адрес:',
+            'FactAddress': 'Фактический адрес:',
+            'INN': 'ИНН:',
+            'OGRN': 'ОГРН:',
+            'VacancyDate': 'Дата размещения вакансии:',
+            'VacancyComment': '',
+            'EventDate': 'Дата последнего взаимодействия работодателя и центра занятости:',
+            'EventComment': '',
+            'Contact': 'Контакт основной:',
+        }
+        widgets = {
+            'Title': forms.TextInput(
+                attrs={
+                    'type': 'text',
+                    'class': 'form-control',
+                }
+            ),
+            'JurAddress': forms.TextInput(
+                attrs={
+                    'type': 'text',
+                    'class': 'form-control',
+                }
+            ),
+            'FactAddress': forms.TextInput(
+                attrs={
+                    'type': 'text',
+                    'class': 'form-control',
+                }
+            ),
+            'INN': forms.TextInput(
+                attrs={
+                    'type': 'text',
+                    'class': 'form-control',
+                }
+            ),
+            'OGRN': forms.TextInput(
+                attrs={
+                    'type': 'text',
+                    'class': 'form-control',
+                }
+            ),
+            'VacancyDate': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={
+                    'type': 'date',
+                }
+            ),
+            'VacancyComment': forms.TextInput(
+                attrs={
+                    'type': 'text',
+                    'class': 'form-control',
+                }
+            ),
+            'EventDate': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={
+                    'format': '%d.%m.%Y',
+                    'type': 'date',
+                },
+            ),
+            'EventComment': forms.TextInput(
+                attrs={
+                    'type': 'text',
+                    'class': 'form-control',
+                }
+            ),
+            'Contact': forms.TextInput(
+                attrs={
+                    'type': 'text',
+                    'class': 'form-control',
+                }
+            ),
+        }
 
 
 ######################################################################################################################
@@ -362,13 +457,11 @@ class FormProtocol(forms.Form):
 
 
 class FormFilterCzn(forms.Form):
-    list_czn = UserProfile.objects.filter(role=1)
-    CZN_CHOICES = [[0, 'Все ЦЗН']]
-    for i in list_czn:
-        CZN_CHOICES.append([i.id, i.user.get_full_name()])
+    list_czn = [(0, 'Все ЦЗН')]
+    list_czn.extend(list(UserProfile.objects.filter(super_role='czn').values_list('id', 'user__first_name')))
 
     czn = forms.ChoiceField(
-        choices=CZN_CHOICES,
+        choices=list_czn,
         label='',
         initial=0,
         widget=forms.Select(
@@ -384,13 +477,10 @@ class FormFilterCzn(forms.Form):
 
 
 class FormResponse(forms.Form):
-    RESPONSE_CHOICES = []
-    list_response = UserProfile.objects.filter(role=3)
-    for i in list_response:
-        RESPONSE_CHOICES.append([i.id, i.user.get_full_name()])
+    list_response = list(UserProfile.objects.filter(super_role='control').values_list('id', 'user__last_name'))
 
     response = forms.ChoiceField(
-        choices=RESPONSE_CHOICES,
+        choices=list_response,
         label='',
         widget=forms.Select(
             attrs={
@@ -405,17 +495,44 @@ class FormResponse(forms.Form):
 
 
 class FormFilterStatus(forms.Form):
+    # status = forms.ChoiceField(
+    #     choices=STATUS_CHOICES,
+    #     label='',
+    #     initial=20,
+    #     widget=forms.Select(
+    #         attrs={
+    #             'class': 'custom-select',
+    #         }
+    #     ),
+    #     required=True
+    # )
+    list_status = [(0, 'Все статусы')]
+    list_status.extend(list(Status.objects.filter(is_filtered=True).values_list('id', 'title')))
     status = forms.ChoiceField(
-        choices=STATUS_CHOICES,
+        choices=list_status,
         label='',
-        initial=20,
+        initial=0,
         widget=forms.Select(
             attrs={
                 'class': 'custom-select',
             }
         ),
-        required=True
+        required=True,
     )
+    # list_czn = [(0, 'Все ЦЗН')]
+    # list_czn.extend(list(UserProfile.objects.filter(super_role='czn').values_list('id', 'user__first_name')))
+    #
+    # czn = forms.ChoiceField(
+    #     choices=list_czn,
+    #     label='',
+    #     initial=0,
+    #     widget=forms.Select(
+    #         attrs={
+    #             'class': 'custom-select',
+    #         }
+    #     ),
+    #     required=True
+    # )
 
 
 ######################################################################################################################

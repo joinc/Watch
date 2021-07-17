@@ -35,7 +35,7 @@ def message_list(request):
     """
     profile = get_object_or_404(UserProfile, user=request.user)
     context = {
-        'profile': profile,
+        'current_profile': profile,
         'title': 'Уведомления',
         'message_list': Message.objects.filter(Recipient=profile)[settings.START_LIST:settings.STOP_LIST],
         'message_all': Message.objects.filter(Recipient=profile).count(),

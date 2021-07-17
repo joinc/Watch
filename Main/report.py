@@ -19,11 +19,24 @@ def report_list(request):
     :param request:
     :return:
     """
+    list_report = (
+        (
+            'Карточки за месяц.',
+            'Количество карточек направленых в отдел трудоустройства и специальных программ за выбранный месяц.',
+            'report_month',
+        ),
+        (
+            'Карточки за период.',
+            'Количество карточек направленых в отдел трудоустройства и специальных программ за выбранный период.',
+            'report_date',
+        ),
+    )
     context = {
-        'profile': get_object_or_404(UserProfile, user=request.user),
+        'current_profile': get_object_or_404(UserProfile, user=request.user),
         'title': 'Список отчетов',
+        'list_report': list_report,
     }
-    return render(request, 'report_list.html', context)
+    return render(request, 'report/list.html', context)
 
 
 ######################################################################################################################
@@ -53,8 +66,9 @@ def report_month(request):
     emps = Employer.objects.filter(SendDate__month=curr_date.month)
     elist, aw, ac, ar, emp_all = report_filter(emps)
     context = {
-        'profile': get_object_or_404(UserProfile, user=request.user),
+        'current_profile': get_object_or_404(UserProfile, user=request.user),
         'title': 'Отчет за месяц',
+        'list_breadcrumb': (('report_list', 'Список отчетов'),),
         'month_form': FormMonth(initial={'month': month}),
         'elist': elist,
         'aw': aw,
@@ -62,7 +76,7 @@ def report_month(request):
         'ar': ar,
         'emp_all': emp_all,
     }
-    return render(request, 'report_month.html', context)
+    return render(request, 'report/month.html', context)
 
 
 ######################################################################################################################
@@ -76,8 +90,9 @@ def report_date(request):
     :return:
     """
     context = {
-        'profile': get_object_or_404(UserProfile, user=request.user),
+        'current_profile': get_object_or_404(UserProfile, user=request.user),
         'title': 'Отчет за выбранный период',
+        'list_breadcrumb': (('report_list', 'Список отчетов'),),
     }
     if request.POST:
         date_form = FormReportDates(request.POST)
@@ -100,7 +115,7 @@ def report_date(request):
         context['emp_all'] = emp_all
     else:
         context['date_form'] = FormReportDates()
-    return render(request, 'report_date.html', context)
+    return render(request, 'report/date.html', context)
 
 
 ######################################################################################################################
