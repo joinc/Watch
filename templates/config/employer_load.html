@@ -1,28 +1,13 @@
 {% extends "base.html" %}{% load static %}
 
-{% block html_top_breadcrumb %}
-        <li class="nav-item">
-            <span class="navbar-text">/</span>
-        </li>
-        <li class="nav-item">
-            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
-        </li>
-{% endblock %}
 {% block html_body %}
     <main role="main" class="container-fluid">
+        {% include "messages.html" %}
         <div class="shadow card border-dark mb-3">
             <div class="card-header">
                 <h4>{{ title }}:</h4>
             </div>
             <div class="card-body">
-                {% for message in messages %}
-                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                {% endfor %}
                 <div class="input-group">
                     <form method="post" action='' enctype="multipart/form-data">
                         {% csrf_token %}

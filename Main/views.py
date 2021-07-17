@@ -6,8 +6,9 @@ from django.contrib.auth.models import auth
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.conf import settings
-from Main.models import UserProfile
+from Main.models import UserProfile, Config
 from Main.tools import get_count_employer
+from Main.decorators import admin_only
 
 ######################################################################################################################
 
@@ -33,7 +34,7 @@ def index(request) -> HttpResponse:
         'count_ready': get_count_employer(search='', czn=czn, list_status=['9']),
         'count_closed': get_count_employer(search='', czn=czn, list_status=['12']),
     }
-    return render(request, 'index.html', context)
+    return render(request=request, template_name='index.html', context=context)
 
 
 ######################################################################################################################
@@ -60,7 +61,7 @@ def login(request) -> HttpResponse:
             'title': 'Авторизация',
             'next': request.GET.get('next') if request.GET.get('next') else settings.SUCCESS_URL,
         }
-        return render(request, 'login.html', context)
+        return render(request=request, template_name='login.html', context=context)
 
 
 ######################################################################################################################
@@ -75,6 +76,24 @@ def logout(request) -> HttpResponse:
     """
     auth.logout(request)
     return redirect(reverse('login'))
+
+
+######################################################################################################################
+
+
+@admin_only
+def config_show(request) -> HttpResponse:
+    """
+    Отображение конфигураций для настроки и обслуживанию информационной системы
+    :param request:
+    :return:
+    """
+    context = {
+        'current_profile': get_object_or_404(UserProfile, user=request.user),
+        'title': 'Настройки',
+        'list_config': Config.objects.all(),
+    }
+    return render(request=request, template_name='config/config_show.html', context=context)
 
 
 ######################################################################################################################

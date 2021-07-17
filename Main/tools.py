@@ -2,10 +2,7 @@
 
 from datetime import date, datetime
 from django.http import HttpResponse
-from django.shortcuts import redirect, reverse
-from django.core.mail import send_mail
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from pyexcel_ods3 import save_data
 from collections import OrderedDict
 from Main.choices import STATUS_CHOICES
@@ -282,30 +279,6 @@ def emp_export_ods(czn, fields):
     response['Content-Disposition'] = "attachment; filename=" + file_name
     os.remove(file)
     return response
-
-
-######################################################################################################################
-
-
-@login_required
-def send_email(request):
-    """
-    Тестирование отправки сообщения на электронную почту
-    :param request:
-    :return:
-    """
-    if not request.user.is_superuser:
-        return redirect(reverse('index'))
-
-    email = ['yubelyakov@mtsr.omskportal.ru']
-    data = """
-    Привет.
-    Это тестовое письмо.
-    ---
-    С Уважением Робот.
-    """
-    send_mail('Заголовок', data, settings.DEFAULT_FROM_EMAIL, email, fail_silently=False)
-    return redirect(reverse('index'))
 
 
 ######################################################################################################################

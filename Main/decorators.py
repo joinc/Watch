@@ -10,7 +10,8 @@ from Main.models import UserProfile
 
 def permission_required(list_permission):
     """
-
+    Декорато позволяет выполнять функции, если пользователь находится в определенных группах доступа, которым разешено
+    выполнение данной функции
     :param list_permission:
     :return:
     """

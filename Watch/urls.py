@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 from django.contrib import admin
-from Main import views, employer, message, profile, response, report, tools, information, notify
+from Main import views, employer, message, response, report, information, notify, config
 # from django.conf.urls.static import static
 # from django.conf import settings
 
@@ -24,10 +24,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', views.login, name='login', ),
     path('logout/', views.logout, name='logout', ),
-    path('send/', tools.send_email, name='send', ),
+    path('config/', config.config_show, name='config_show', ),
+    path('config/employer/load/', config.employer_load, name='employer_load', ),
+    path('config/email/send/', config.send_email, name='send_email', ),
+    path('config/profile/list/', config.profile_list, name='profile_list', ),
+    path('config/profile/<int:profile_id>/blocked/', config.profile_change_blocked, name='profile_change_blocked', ),
     path('employer/temp/list/', employer.employer_temp_list, name='employer_temp_list', ),
     path('employer/create/', employer.employer_create, name='employer_create', ),
-    path('employer/load/', employer.employer_load, name='employer_load', ),
     path('employer/all/', employer.employer_all, name='employer_all', ),
     path('employer/draft/', employer.employer_draft, name='employer_draft', ),
     path('employer/check/', employer.employer_check, name='employer_check', ),
@@ -54,8 +57,6 @@ urlpatterns = [
     path('notify/<int:employer_id>/create/', notify.notify_create, name='notify_create', ),
     path('notify/<int:notify_id>/delete/', notify.notify_delete, name='notify_delete', ),
     path('create/<int:temp_employer_id>/', employer.employer_temp_create, name='create', ),
-    path('profile/list/', profile.profile_list, name='profile_list', ),
-    path('profile/<int:profile_id>/change_blocked/', profile.profile_change_blocked, name='profile_change_blocked', ),
     path('message/list/', message.message_list, name='message_list', ),
     path('message/<int:message_id>/read/', message.message_read, name='message_read', ),
     path('report/list/', report.report_list, name='report_list', ),

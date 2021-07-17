@@ -22,10 +22,7 @@
                                 <span class="dropdown-item"><strong>{% firstof user.get_full_name user.get_short_name user.get_username %}</strong></span>
                                 {% if request.user.is_superuser %}
                                     <div class="dropdown-divider"></div>
-                                    <a href="{% url 'profile_list' %}" class="dropdown-item bg-danger text-white">Список пользователей</a>
-                                    <a href="{% url 'employer_load' %}" class="dropdown-item bg-danger text-white">Загрузка работодателей</a>
-                                    <a href="{% url 'employer_status_check' %}" class="dropdown-item bg-danger text-white">Синхронизировать статусы</a>
-                                    <a href="{% url 'send' %}" class="dropdown-item bg-danger text-white">Отправить почту</a>
+                                    <a href="{% url 'config_show' %}" class="dropdown-item">Настройки</a>
                                 {% endif %}
                                 <div class="dropdown-divider"></div>
                                 {% for item in current_profile.get_menu %}
@@ -47,6 +44,22 @@
                 <li class="nav-item active">
                     <a href="{% url 'index' %}" class="nav-link">Главная</a>
                 </li>
+                {% if not request.get_full_path == '/' %}
+                    <li class="nav-item">
+                        <span class="navbar-text">/</span>
+                    </li>
+                    {% for breadcrumb in list_breadcrumb %}
+                        <li class="nav-item active">
+                            <a href="{% url breadcrumb.0 %}" class="nav-link">{{ breadcrumb.1 }}</a>
+                        </li>
+                        <li class="nav-item">
+                            <span class="navbar-text">/</span>
+                        </li>
+                    {% endfor %}
+                    <li class="nav-item">
+                        <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
+                    </li>
+                {% endif %}
                 {% block html_top_breadcrumb %}{% endblock %}
             </ul>
         </nav>

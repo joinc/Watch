@@ -12,8 +12,6 @@ from Main.tools import get_count_employer, get_list_employer, get_count_page, em
     get_list_existing_employer
 from Main.message import message_create
 from Main.choices import RETURN_CHOICES, RESULT_CHOICES
-from openpyxl import load_workbook
-import os
 
 ######################################################################################################################
 
@@ -132,88 +130,6 @@ def employer_find(request):
         context['emp_czn'] = '0'
         context['emp_status'] = '20'
     return render(request, 'employer/list.html', context)
-
-
-######################################################################################################################
-
-
-@admin_only
-def employer_load(request):
-    """
-    Загрузка информации об организациях из подготовленного файла в Катарсисе
-    :param request:
-    :return:
-    """
-
-    if request.POST:
-
-        def send_blank(value):
-            if value:
-                return value
-            else:
-                return ''
-
-        start_time = datetime.now()
-        TempEmployer.objects.all().delete()
-        for count, x in enumerate(request.FILES.getlist('files')):
-            file = settings.UPLOAD_FILE + str(count) + '.xlsx'
-
-            def process(f):
-                with open(file, 'wb+') as destination:
-                    for chunk in f.chunks():
-                        destination.write(chunk)
-
-            process(x)
-            workbook = load_workbook(filename=file)
-            sheet = workbook.active
-            if sheet.max_row > 2:
-                list_temp_employer = []
-                for row in range(3, sheet.max_row + 1):
-                    temp_employer = TempEmployer(
-                        Number=send_blank(sheet.cell(row=row, column=1).value),
-                        Title=send_blank(sheet.cell(row=row, column=2).value),
-                        INN=send_blank(sheet.cell(row=row, column=3).value),
-                        OGRN=send_blank(sheet.cell(row=row, column=4).value),
-                        JurAddress=send_blank(sheet.cell(row=row, column=5).value),
-                        FactAddress=send_blank(sheet.cell(row=row, column=6).value),
-                        Contact=send_blank(sheet.cell(row=row, column=7).value),
-                    )
-                    event_date = send_blank(sheet.cell(row=row, column=8).value)
-                    if isinstance(event_date, datetime):
-                        temp_employer.EventDate = event_date.strftime("%Y-%m-%d")
-                    list_temp_employer.append(temp_employer)
-                TempEmployer.objects.bulk_create(list_temp_employer)
-
-                messages.info(
-                    request,
-                    'Файл {0} содержит записей организаций - {1}.'.format(x.name, sheet.max_row - 2)
-                )
-            else:
-                messages.error(
-                    request,
-                    'Файл {0} не содержит данные.'.format(x.name)
-                )
-            workbook.close()
-            os.remove(file)
-        update_employer = UpdateEmployer(
-            upload_date=datetime.now(),
-            count_employer=TempEmployer.objects.all().count(),
-            time_spent=(datetime.now() - start_time).seconds,
-        )
-        update_employer.save()
-        messages.success(
-            request,
-            'Успешно загружено {0} записей организаций из Катарсис за {1} секунд.'.format(
-                update_employer.count_employer,
-                update_employer.time_spent,
-            )
-        )
-
-    context = {
-        'current_profile': get_object_or_404(UserProfile, user=request.user),
-        'title': 'Загрузить работодателей',
-    }
-    return render(request=request, template_name='employer/load.html', context=context)
 
 
 ######################################################################################################################
@@ -753,13 +669,13 @@ def temp_arch_new(request):
     :return:
     """
     profile = get_object_or_404(UserProfile, user=request.user)
-    emp = Employer(Status=0, Owner=profile, RegKatharsis=False, Archive=True)
-    emp.save()
-    create_event(emp, emp.Owner, 'Создана карточка предприятия', None)
+    employer = Employer(Status=0, Owner=profile, RegKatharsis=False, Archive=True)
+    employer.save()
+    create_event(employer, employer.Owner, 'Создана карточка предприятия', None)
     if profile.role == 3:
-        return redirect(reverse('archedit', args=(emp.id,)))
+        return redirect(reverse('archive_edit', args=(employer.id,)))
     else:
-        return redirect(reverse('delete', args=(emp.id,)))
+        return redirect(reverse('employer_delete', args=(employer.id,)))
 
 
 ######################################################################################################################

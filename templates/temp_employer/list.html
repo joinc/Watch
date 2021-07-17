@@ -1,15 +1,8 @@
 {% extends "base.html" %}{% load static %}
 
-{% block html_top_breadcrumb %}
-        <li class="nav-item">
-            <span class="navbar-text">/</span>
-        </li>
-        <li class="nav-item">
-            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
-        </li>
-{% endblock %}
 {% block html_body %}
     <main role="main" class="container-fluid">
+        {% include "messages.html" %}
         <div class="shadow card border-dark mb-3">
             <div class="card-header">
                 <div class="row">
@@ -32,14 +25,6 @@
                         </div>
                     </div>
                 </form>
-                {% for message in messages %}
-                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                {% endfor %}
                 <div class="list-group list-group-flush">
                     {% for employer in list_employer %}
                         <div class="list-group-item">

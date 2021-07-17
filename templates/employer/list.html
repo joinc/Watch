@@ -6,14 +6,6 @@
     <script src='{% static "js/select2.min.js" %}'></script>
     <script src='{% static "js/locales/select2.ru.js" %}'></script>
 {% endblock %}
-{% block html_top_breadcrumb %}
-        <li class="nav-item">
-            <span class="navbar-text">/</span>
-        </li>
-        <li class="nav-item">
-            <a href="{{ request.get_full_path }}" class="nav-link">{{ title }}</a>
-        </li>
-{% endblock %}
 {% block html_body %}
     <main role="main" class="container-fluid">
         <div class="shadow card border-dark mb-3">
