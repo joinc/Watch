@@ -1,5 +1,5 @@
 asgiref==3.3.4
-Django==3.2
+Django==3.2.4
 lml==0.1.0
 lxml==4.6.3
 pyexcel-ezodf==0.3.4
