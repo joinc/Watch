@@ -496,6 +496,23 @@ class FormResponse(forms.Form):
 
 class FormFilterStatus(forms.Form):
     # status = forms.ChoiceField(
+    #     label='',
+    #     widget=forms.Select(
+    #         attrs={
+    #             'class': 'custom-select',
+    #         }
+    #     ),
+    #     choices=list(
+    #         map(
+    #             lambda x: [x['id'], x['title']],
+    #             list(Status.objects.values('id', 'title').filter(is_filtered=True))
+    #         )
+    #     ),
+    #     required=True,
+    # )
+
+
+    # status = forms.ChoiceField(
     #     choices=STATUS_CHOICES,
     #     label='',
     #     initial=20,
@@ -508,6 +525,14 @@ class FormFilterStatus(forms.Form):
     # )
     list_status = [(0, 'Все статусы')]
     list_status.extend(list(Status.objects.filter(is_filtered=True).values_list('id', 'title')))
+    # list_status.extend(
+    #     list(
+    #         map(
+    #             lambda x: (x['id'], x['title']),
+    #             list(Status.objects.values_list('id', 'title').filter(is_filtered=True))
+    #         )
+    #     )
+    # )
     status = forms.ChoiceField(
         choices=list_status,
         label='',
@@ -519,20 +544,6 @@ class FormFilterStatus(forms.Form):
         ),
         required=True,
     )
-    # list_czn = [(0, 'Все ЦЗН')]
-    # list_czn.extend(list(UserProfile.objects.filter(super_role='czn').values_list('id', 'user__first_name')))
-    #
-    # czn = forms.ChoiceField(
-    #     choices=list_czn,
-    #     label='',
-    #     initial=0,
-    #     widget=forms.Select(
-    #         attrs={
-    #             'class': 'custom-select',
-    #         }
-    #     ),
-    #     required=True
-    # )
 
 
 ######################################################################################################################

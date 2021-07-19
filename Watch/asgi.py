@@ -1,5 +1,5 @@
 """
-ASGI config for Watch project.
+ASGI configure for Watch project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

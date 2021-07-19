@@ -1,5 +1,5 @@
 """
-WSGI config for Watch project.
+WSGI configure for Watch project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

@@ -5,6 +5,17 @@
 {% endblock %}
 {% block html_body %}
     <div class="container-fluid">
+        <div class="row text-center">
+            {% for widget in list_widget %}
+                <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 mb-4">
+                    <a href="{% url widget.url %}">
+                        <img src="{{ widget.color_primary }}" width="300" height="300" class="img-fluid rounded-circle">
+                    </a>
+                    <h1>{{ count_all }}{% if count_my %}<span class="badge badge-primary" title="Всего ваших карточек">{{ count_my }}</span>{% endif %}</h1>
+                    <div class="text-muted">{{ widget.title }}</div>
+                </div>
+            {% endfor %}
+        </div>
         <section class="row text-center placeholders">
             <div class="col-6 col-md-2 col-sm-4 placeholder">
                 <a href="{% url 'employer_all' %}">
@@ -49,6 +60,5 @@
                 <span class="text-muted">Вынесено постановлений</span>
             </div>
         </section>
-        <br />
     </div>
 {% endblock %}

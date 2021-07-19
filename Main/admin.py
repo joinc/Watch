@@ -1,6 +1,6 @@
 from django.contrib import admin
 from Main.models import Status, UserProfile, TempEmployer, Employer, StatusEmployer, Event, Info, Notify, \
-    Message, UpdateEmployer, StatusRoute, Config
+    Message, UpdateEmployer, StatusRoute, Configure, Widget, WidgetFilter
 
 admin.site.register(Status)
 admin.site.register(Employer)
@@ -13,4 +13,6 @@ admin.site.register(Notify)
 admin.site.register(Message)
 admin.site.register(UpdateEmployer)
 admin.site.register(StatusRoute)
-admin.site.register(Config)
+admin.site.register(Configure)
+admin.site.register(Widget)
+admin.site.register(WidgetFilter)

@@ -32,23 +32,6 @@
                         </div>
                     {% endfor %}
                 </div>
-                <div id="accordion" role="tablist">
-                    {% for emp in aEmp %}
-                        <div class="card">
-                            <div id="collapse{{ emp.id }}" class="collapse" role="tabpanel" aria-labelledby="heading{{ emp.id }}" data-parent="#accordion">
-                                <div class="card-body">
-                                    {% for i in pemp %}
-                                        {% ifequal i.INN emp.INN %}
-                                            <div class="alert {% ifequal i.Status 9 %}alert-success{% else %}alert-danger{% endifequal %} small" role="alert">
-                                                Карточка предприятия с таким же ИНН существует. <a href="{% url 'employer_view' i.id %}" class="alert-link">{{ i.Title }}</a> {{ i.get_Status_display }}
-                                            </div>
-                                        {% endifequal %}
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
             </div>
         </div>
     </main>

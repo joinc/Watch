@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from datetime import datetime
 from openpyxl import load_workbook
-from Main.models import UserProfile, Config, TempEmployer, UpdateEmployer
+from Main.models import UserProfile, Configure, TempEmployer, UpdateEmployer, Widget, Status
 from Main.decorators import admin_only
 from Main.forms import FormRole
 import os
@@ -17,7 +17,7 @@ import os
 
 
 @admin_only
-def config_show(request) -> HttpResponse:
+def configure_list(request) -> HttpResponse:
     """
     Отображение конфигураций для настроки и обслуживанию информационной системы
     :param request:
@@ -25,10 +25,10 @@ def config_show(request) -> HttpResponse:
     """
     context = {
         'current_profile': get_object_or_404(UserProfile, user=request.user),
-        'title': 'Настройки',
-        'list_config': Config.objects.all(),
+        'title': 'Список конфигураций',
+        'list_configure': Configure.objects.all(),
     }
-    return render(request=request, template_name='config/config_show.html', context=context)
+    return render(request=request, template_name='configure/configure_list.html', context=context)
 
 
 ######################################################################################################################
@@ -57,7 +57,7 @@ def send_email(request):
         'Отправлено тестовое электронное письмо на адрес {0}.'.format(email)
     )
 
-    return redirect(reverse('config_show'))
+    return redirect(reverse('configure_list'))
 
 
 ######################################################################################################################
@@ -138,9 +138,9 @@ def employer_load(request):
     context = {
         'current_profile': get_object_or_404(UserProfile, user=request.user),
         'title': 'Загрузить работодателей',
-        'list_breadcrumb': (('config_show', 'Настройки'),),
+        'list_breadcrumb': (('configure_list', 'Список конфигураций'),),
     }
-    return render(request=request, template_name='config/employer_load.html', context=context)
+    return render(request=request, template_name='configure/employer_load.html', context=context)
 
 
 ######################################################################################################################
@@ -182,11 +182,11 @@ def profile_list(request):
     context = {
         'current_profile': get_object_or_404(UserProfile, user=request.user),
         'title': 'Список пользователей',
-        'list_breadcrumb': (('config_show', 'Настройки'),),
+        'list_breadcrumb': (('configure_list', 'Список конфигураций'),),
         'role_form': FormRole(),
         'list_profile': UserProfile.objects.all(),
     }
-    return render(request, 'config/profile_list.html', context)
+    return render(request, 'configure/profile_list.html', context)
 
 
 ######################################################################################################################
@@ -218,3 +218,55 @@ def profile_change_blocked(request, profile_id):
 
 
 ######################################################################################################################
+
+
+@admin_only
+def filter_list(request):
+    """
+    Список фильтров статусов
+    :param request:
+    :return:
+    """
+    list_widget = Widget.objects.all()
+    list_status = Status.objects.all()
+    # list_filter_status = []
+    # for filter in list_filter:
+    #     for status in list_status:
+    #         a1, created = FilterStatus.objects.get_or_create(filter=filter, status=status)
+    #         print(a1)
+
+    # if request.POST:
+    #     profile = get_object_or_404(UserProfile, id=request.POST.get('id_profile'))
+    #     formset = FormRole(request.POST, instance=profile)
+    #     super_role = formset['super_role'].value()
+    #     if formset.is_valid() and super_role:
+    #         formset.save()
+    #         messages.success(
+    #             request,
+    #             'Пользователю {0} установлена роль - {1}.'.format(profile, profile.get_super_role_display())
+    #         )
+    #     else:
+    #         if super_role:
+    #             messages.warning(
+    #                 request,
+    #                 'Роль пользователя {1} не изменена на "{1}"'.format(profile, super_role)
+    #             )
+    #         else:
+    #             messages.warning(
+    #                 request,
+    #                 'Не указана новая роль пользователя {0}'.format(profile)
+    #             )
+    #
+    # for user in User.objects.all():
+    #     user_profile, created = UserProfile.objects.get_or_create(user=user, )
+    #     if created:
+    #         user_profile.save()
+    context = {
+        'current_profile': get_object_or_404(UserProfile, user=request.user),
+        'title': 'Список фильтров',
+        'list_breadcrumb': (('configure_list', 'Список конфигураций'),),
+        # 'role_form': FormRole(),
+        'list_widget': list_widget,
+        'list_status': list_status,
+    }
+    return render(request, 'configure/filter_list.html', context)

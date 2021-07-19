@@ -6,9 +6,8 @@ from django.contrib.auth.models import auth
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.conf import settings
-from Main.models import UserProfile, Config
+from Main.models import UserProfile, Widget
 from Main.tools import get_count_employer
-from Main.decorators import admin_only
 
 ######################################################################################################################
 
@@ -25,6 +24,7 @@ def index(request) -> HttpResponse:
     context = {
         'current_profile': current_profile,
         'title': 'Главная',
+        'list_widget': Widget.objects.all(),
         'count_all': get_count_employer(search='', czn='0', list_status=['20']),
         'count_my': get_count_employer(search='', czn=current_profile.id, list_status=['20']),
         'count_edit': get_count_employer(search='', czn=current_profile.id, list_status=['1']),
@@ -76,24 +76,6 @@ def logout(request) -> HttpResponse:
     """
     auth.logout(request)
     return redirect(reverse('login'))
-
-
-######################################################################################################################
-
-
-@admin_only
-def config_show(request) -> HttpResponse:
-    """
-    Отображение конфигураций для настроки и обслуживанию информационной системы
-    :param request:
-    :return:
-    """
-    context = {
-        'current_profile': get_object_or_404(UserProfile, user=request.user),
-        'title': 'Настройки',
-        'list_config': Config.objects.all(),
-    }
-    return render(request=request, template_name='config/config_show.html', context=context)
 
 
 ######################################################################################################################

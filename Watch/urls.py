@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.urls import path
 from django.contrib import admin
-from Main import views, employer, message, response, report, information, notify, config
+from Main import views, employer, message, response, report, information, notify, configure
 # from django.conf.urls.static import static
 # from django.conf import settings
 
@@ -24,11 +24,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', views.login, name='login', ),
     path('logout/', views.logout, name='logout', ),
-    path('config/', config.config_show, name='config_show', ),
-    path('config/employer/load/', config.employer_load, name='employer_load', ),
-    path('config/email/send/', config.send_email, name='send_email', ),
-    path('config/profile/list/', config.profile_list, name='profile_list', ),
-    path('config/profile/<int:profile_id>/blocked/', config.profile_change_blocked, name='profile_change_blocked', ),
+    path('configure/list/', configure.configure_list, name='configure_list', ),
+    path('configure/employer/load/', configure.employer_load, name='employer_load', ),
+    path('configure/filter/list/', configure.filter_list, name='filter_list', ),
+    path('configure/email/send/', configure.send_email, name='send_email', ),
+    path('configure/profile/list/', configure.profile_list, name='profile_list', ),
+    path('configure/profile/<int:profile_id>/blocked/', configure.profile_change_blocked, name='profile_change_blocked', ),
     path('employer/temp/list/', employer.employer_temp_list, name='employer_temp_list', ),
     path('employer/create/', employer.employer_create, name='employer_create', ),
     path('employer/all/', employer.employer_all, name='employer_all', ),

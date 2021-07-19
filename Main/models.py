@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from .choices import ROLE_CHOICES, STATUS_CHOICES, INFO_CHOICES, METHOD_CHOICES, RESULT_CHOICES, ROLES_CHOICES, FULL_MENU
+from .choices import ROLE_CHOICES, STATUS_CHOICES, INFO_CHOICES, METHOD_CHOICES, RESULT_CHOICES, ROLES_CHOICES, \
+    FULL_MENU
 from django.utils.html import format_html
 
 ######################################################################################################################
@@ -235,8 +236,8 @@ class Employer(models.Model):
 
     class Meta:
         ordering = 'Status', 'Title',
-        verbose_name = 'Работодатель'
-        verbose_name_plural = 'Работодатели'
+        verbose_name = 'Карточка работодателя-нарушителя'
+        verbose_name_plural = 'Карточки работодателей-нарушителей'
         managed = True
 
 
@@ -612,7 +613,7 @@ class Notify(models.Model):
 ######################################################################################################################
 
 
-class Config(models.Model):
+class Configure(models.Model):
     id = models.AutoField(
         primary_key=True,
     )
@@ -642,6 +643,85 @@ class Config(models.Model):
         ordering = 'title',
         verbose_name = 'Настройка'
         verbose_name_plural = 'Настройки'
+        managed = True
+
+
+######################################################################################################################
+
+
+class Widget(models.Model):
+    id = models.AutoField(
+        primary_key=True,
+    )
+    title = models.CharField(
+        verbose_name='Название виджета',
+        max_length=64,
+        default='',
+    )
+    order = models.SmallIntegerField(
+        verbose_name='Порядок в списке виджетов',
+        default=0,
+    )
+    color_primary = models.CharField(
+        verbose_name='Основной цвет',
+        max_length=124,
+        default='',
+    )
+    color_secondary = models.CharField(
+        verbose_name='Альтернативный цвет',
+        max_length=124,
+        default='',
+    )
+    url = models.CharField(
+        verbose_name='Ссылка виджета',
+        max_length=128,
+        default='',
+        blank=True,
+    )
+
+    def __str__(self):
+        return '{0}'.format(self.title)
+
+    class Meta:
+        ordering = 'order', 'title',
+        verbose_name = 'Виджет'
+        verbose_name_plural = 'Виджеты'
+        managed = True
+
+
+######################################################################################################################
+
+
+class WidgetFilter(models.Model):
+    id = models.AutoField(
+        primary_key=True,
+    )
+    widget = models.ForeignKey(
+        Widget,
+        verbose_name='Виджет фильтра',
+        null=True,
+        related_name='WidgetFilter',
+        on_delete=models.CASCADE,
+    )
+    status = models.ForeignKey(
+        Status,
+        verbose_name='Статус фильтра',
+        null=True,
+        related_name='StatusWidget',
+        on_delete=models.CASCADE,
+    )
+    checked = models.BooleanField(
+        verbose_name='Статус включен в фильтр',
+        default=False,
+    )
+
+    def __str__(self):
+        return '{0} - {1}'.format(self.widget, self.status)
+
+    class Meta:
+        ordering = 'widget', 'status',
+        verbose_name = 'Фильтр статуса'
+        verbose_name_plural = 'Фильтры стасусов'
         managed = True
 
 
