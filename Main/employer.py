@@ -4,35 +4,14 @@ from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.contrib import messages
 from django.conf import settings
 from datetime import datetime
-from Main.decorators import admin_only, permission_required
-from Main.models import UserProfile, Employer, Event, Info, Notify, TempEmployer, UpdateEmployer, StatusEmployer, Status
+from Main.decorators import permission_required
+from Main.models import UserProfile, Employer, Event, Info, Notify, TempEmployer, UpdateEmployer
 from Main.forms import FormReturn, FormResult, FormEmployer, FormNotice, FormProtocol, FormClose, FormResponse, \
     FormSearch, FormFilterCzn, FormFilterStatus, FormInformation, FormNotify, FormEmployerNew
 from Main.tools import get_count_employer, get_list_employer, get_count_page, emp_export_ods, create_event, e_date, \
     get_list_existing_employer
 from Main.message import message_create
 from Main.choices import RETURN_CHOICES, RESULT_CHOICES
-
-######################################################################################################################
-
-
-@admin_only
-def employer_status_sync(request):
-    """
-
-    :param request:
-    :return:
-    """
-    list_employer = Employer.objects.all()
-    for employer in list_employer:
-        old_status = Status.objects.filter(status=employer.Status).first()
-        if old_status:
-            status_employer, created = StatusEmployer.objects.get_or_create(employer=employer)
-            if created:
-                status_employer.status = old_status
-                status_employer.save()
-    return redirect(reverse('index'))
-
 
 ######################################################################################################################
 
@@ -59,7 +38,10 @@ def employer_list(request, list_status, title):
             start=start_count,
             stop=stop_count,
         )
-        return render(request=request, template_name='employer/slice.html', context={'list_employer': list_employer, })
+        context = {
+            'list_employer': list_employer,
+        }
+        return render(request=request, template_name='employer/slice.html', context=context, )
     else:
         count_employer = get_count_employer(
             search='',
@@ -76,7 +58,7 @@ def employer_list(request, list_status, title):
             'count_employer': count_employer,
             'count_page': get_count_page(count_employer=count_employer),
         }
-        return render(request=request, template_name='employer/list.html', context=context)
+        return render(request=request, template_name='employer/list.html', context=context, )
 
 ######################################################################################################################
 
@@ -88,29 +70,7 @@ def employer_find(request):
     :param request:
     :return:
     """
-    context = {
-        'current_profile': get_object_or_404(UserProfile, user=request.user),
-        'title': 'Поиск карточек',
-        'per_page': settings.COUNT_LIST,
-    }
-    if request.POST:
-        search_form = FormSearch(request.POST)
-        if search_form.is_valid():
-            search = request.POST.get('find', '')
-            czn = request.POST.get('czn', '0')
-            status = request.POST.get('status', '20')
-            context['form_search'] = search_form
-            count_employer = get_count_employer(search=search, czn=czn, list_status=[status])
-            context['employer_count'] = count_employer
-            context['page_count'] = get_count_page(count_employer=count_employer)
-            context['emp_find'] = search
-            context['emp_czn'] = czn
-            context['emp_status'] = status
-            context['form_filter_czn'] = FormFilterCzn(request.POST)
-            context['form_filter_status'] = FormFilterStatus(request.POST)
-        else:
-            return redirect(reverse('all'))
-    elif request.GET:
+    if request.GET:
         search = request.GET.get('emp_find', '')
         czn = request.GET.get('emp_czn', '0')
         status = request.GET.get('emp_status', '20')
@@ -118,18 +78,44 @@ def employer_find(request):
         start = (page_number - 1) * settings.COUNT_LIST
         stop = start + settings.COUNT_LIST
         list_employer = get_list_employer(search=search, czn=czn, list_status=[status], start=start, stop=stop)
-        return render(request, 'employer/slice.html', {'list_employer': list_employer, })
+        context = {
+            'list_employer': list_employer,
+        }
+        return render(request=request, template_name='employer/slice.html', context=context, )
     else:
-        count_employer = Employer.objects.all().count()
-        context['form_search'] = FormSearch()
-        context['form_filter_czn'] = FormFilterCzn()
-        context['form_filter_status'] = FormFilterStatus()
-        context['employer_count'] = count_employer
-        context['page_count'] = get_count_page(count_employer=count_employer)
-        context['emp_find'] = ''
-        context['emp_czn'] = '0'
-        context['emp_status'] = '20'
-    return render(request, 'employer/list.html', context)
+        context = {
+            'current_profile': get_object_or_404(UserProfile, user=request.user),
+            'title': 'Поиск карточек',
+            'per_page': settings.COUNT_LIST,
+        }
+        if request.POST:
+            search_form = FormSearch(request.POST)
+            if search_form.is_valid():
+                search = request.POST.get('find', '')
+                czn = request.POST.get('czn', '0')
+                status = request.POST.get('status', '20')
+                context['form_search'] = search_form
+                count_employer = get_count_employer(search=search, czn=czn, list_status=[status])
+                context['employer_count'] = count_employer
+                context['page_count'] = get_count_page(count_employer=count_employer)
+                context['emp_find'] = search
+                context['emp_czn'] = czn
+                context['emp_status'] = status
+                context['form_filter_czn'] = FormFilterCzn(request.POST)
+                context['form_filter_status'] = FormFilterStatus(request.POST)
+            else:
+                return redirect(reverse('all'))
+        else:
+            count_employer = Employer.objects.all().count()
+            context['form_search'] = FormSearch()
+            context['form_filter_czn'] = FormFilterCzn()
+            context['form_filter_status'] = FormFilterStatus()
+            context['employer_count'] = count_employer
+            context['page_count'] = get_count_page(count_employer=count_employer)
+            context['emp_find'] = ''
+            context['emp_czn'] = '0'
+            context['emp_status'] = '20'
+        return render(request=request, template_name='employer/list.html', context=context, )
 
 
 ######################################################################################################################
@@ -183,7 +169,7 @@ def employer_view(request, employer_id):
         context['form_protocol'] = FormProtocol()
         if current_profile.role != 3:
             context['form_return'] = FormReturn()
-    return render(request=request, template_name='employer/view.html', context=context)
+    return render(request=request, template_name='employer/view.html', context=context, )
 
 
 ######################################################################################################################
@@ -276,7 +262,7 @@ def employer_edit(request, employer_id):
         'list_notify': Notify.objects.filter(EmpNotifyID=employer),
         'list_existing_employer': Employer.objects.filter(INN__exact=employer.INN).exclude(id=employer.id),
     }
-    return render(request=request, template_name='employer/edit.html', context=context)
+    return render(request=request, template_name='employer/edit.html', context=context, )
 
 
 ######################################################################################################################
@@ -298,7 +284,7 @@ def employer_print(request, employer_id):
         'list_info': Info.objects.filter(EmpInfoID=employer),
         'list_notify': Notify.objects.filter(EmpNotifyID=employer),
     }
-    return render(request=request, template_name='employer/print.html', context=context)
+    return render(request=request, template_name='employer/print.html', context=context, )
 
 
 ######################################################################################################################
@@ -469,50 +455,51 @@ def employer_temp_list(request):
     :param request:
     :return:
     """
-    if request.POST:
-        search_form = FormSearch(request.POST)
-        if search_form.is_valid():
-            search_query = request.POST['find']
-            list_temp_employer = list(
-                TempEmployer.objects.filter(INN__startswith=search_query).values_list('id', 'Title')
-            )
-            list_temp_employer.extend(
-                list(
-                    TempEmployer.objects.filter(Title__icontains=search_query).values_list('id', 'Title')
-                )
-            )
-            list_employer = list_temp_employer[settings.START_LIST:settings.STOP_LIST]
-            messages.info(
-                request,
-                'Найдено работодателей из Катарсиса - {0}. Отображается - {1}.'.format(
-                    len(list_temp_employer),
-                    len(list_employer),
-                )
-            )
-        else:
-            return redirect(reverse('employer_temp_list'))
-    elif request.GET:
+    if request.GET:
         id_temp_employer = int(request.GET.get('id', 0))
         temp_employer = get_object_or_404(TempEmployer, id=id_temp_employer)
         list_existent_employer = Employer.objects.filter(INN=temp_employer.INN)
-        return render(
-            request=request,
-            template_name='temp_employer/modal.html',
-            context={'temp_employer': temp_employer, 'list_existent_employer': list_existent_employer, }
-        )
+        context = {
+            'temp_employer': temp_employer,
+            'list_existent_employer': list_existent_employer,
+        }
+        return render(request=request, template_name='temp_employer/modal.html', context=context, )
     else:
-        search_form = FormSearch()
-        list_employer = []
+        if request.POST:
+            search_form = FormSearch(request.POST)
+            if search_form.is_valid():
+                search_query = request.POST['find']
+                list_temp_employer = list(
+                    TempEmployer.objects.filter(INN__startswith=search_query).values_list('id', 'Title')
+                )
+                list_temp_employer.extend(
+                    list(
+                        TempEmployer.objects.filter(Title__icontains=search_query).values_list('id', 'Title')
+                    )
+                )
+                list_employer = list_temp_employer[settings.START_LIST:settings.STOP_LIST]
+                messages.info(
+                    request,
+                    'Найдено работодателей из Катарсиса - {0}. Отображается - {1}.'.format(
+                        len(list_temp_employer),
+                        len(list_employer),
+                    )
+                )
+            else:
+                return redirect(reverse('employer_temp_list'))
+        else:
+            search_form = FormSearch()
+            list_employer = []
 
-    context = {
-        'current_profile': get_object_or_404(UserProfile, user=request.user),
-        'title': 'Работодатели из Катарсиса',
-        'count_total_employer': TempEmployer.objects.all().count(),
-        'upload_date': UpdateEmployer.objects.first().upload_date,
-        'search_form': search_form,
-        'list_employer': list_employer,
-    }
-    return render(request=request, template_name='temp_employer/list.html', context=context)
+        context = {
+            'current_profile': get_object_or_404(UserProfile, user=request.user),
+            'title': 'Работодатели из Катарсиса',
+            'count_total_employer': TempEmployer.objects.all().count(),
+            'upload_date': UpdateEmployer.objects.first().upload_date,
+            'search_form': search_form,
+            'list_employer': list_employer,
+        }
+        return render(request=request, template_name='temp_employer/list.html', context=context, )
 
 
 ######################################################################################################################
@@ -557,7 +544,7 @@ def export_to_spreadsheet(request):
                 else:
                     fields.append([field.name, field.verbose_name, False])
         context['fields'] = fields
-        return render(request, 'export.html', context)
+        return render(request=request, template_name='export.html', context=context, )
 
 
 ######################################################################################################################
@@ -722,7 +709,7 @@ def employer_arch_edit(request, employer_id):
         'result_form': result_form,
         'list_existing_employer': Employer.objects.filter(INN__exact=employer.INN).exclude(id=employer.id),
     }
-    return render(request, 'arch.html', context)
+    return render(request=request, template_name='arch.html', context=context, )
 
 
 ######################################################################################################################
@@ -761,7 +748,6 @@ def employer_arch_save(request, employer_id):
         create_event(emp, profile, comment, myfile)
         message_create(emp.id, 0, comment, profile)
         return redirect(reverse('emp', args=(emp.id,)))
-
     return redirect(reverse('index'))
 
 

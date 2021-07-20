@@ -8,7 +8,8 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from datetime import datetime
 from openpyxl import load_workbook
-from Main.models import UserProfile, Configure, TempEmployer, UpdateEmployer, Widget, Status
+from Main.models import UserProfile, Configure, TempEmployer, UpdateEmployer, Widget, Status, WidgetFilter, Employer, \
+    StatusEmployer
 from Main.decorators import admin_only
 from Main.forms import FormRole
 import os
@@ -28,7 +29,28 @@ def configure_list(request) -> HttpResponse:
         'title': 'Список конфигураций',
         'list_configure': Configure.objects.all(),
     }
-    return render(request=request, template_name='configure/configure_list.html', context=context)
+    return render(request=request, template_name='configure/configure_list.html', context=context, )
+
+
+######################################################################################################################
+
+
+@admin_only
+def employer_status_sync(request):
+    """
+    Синхронизация статуса карточек работодателей для перевода их на новую версию информационной системы.
+    :param request:
+    :return:
+    """
+    list_employer = Employer.objects.all()
+    for employer in list_employer:
+        old_status = Status.objects.filter(status=employer.Status).first()
+        if old_status:
+            status_employer, created = StatusEmployer.objects.get_or_create(employer=employer)
+            if created:
+                status_employer.status = old_status
+                status_employer.save()
+    return redirect(reverse('configure_list'))
 
 
 ######################################################################################################################
@@ -44,7 +66,7 @@ def send_email(request):
     if not request.user.is_superuser:
         return redirect(reverse('index'))
 
-    email = ['yubelyakov@mtsr.omskportal.ru']
+    email = ['postmaster@webmail.omskzan.ru']
     data = """
     Привет.
     Это тестовое письмо.
@@ -134,13 +156,12 @@ def employer_load(request):
                 update_employer.time_spent,
             )
         )
-
     context = {
         'current_profile': get_object_or_404(UserProfile, user=request.user),
         'title': 'Загрузить работодателей',
         'list_breadcrumb': (('configure_list', 'Список конфигураций'),),
     }
-    return render(request=request, template_name='configure/employer_load.html', context=context)
+    return render(request=request, template_name='configure/employer_load.html', context=context, )
 
 
 ######################################################################################################################
@@ -186,7 +207,7 @@ def profile_list(request):
         'role_form': FormRole(),
         'list_profile': UserProfile.objects.all(),
     }
-    return render(request, 'configure/profile_list.html', context)
+    return render(request=request, template_name='configure/profile_list.html', context=context, )
 
 
 ######################################################################################################################
@@ -201,7 +222,6 @@ def profile_change_blocked(request, profile_id):
     :return:
     """
     profile = get_object_or_404(UserProfile, id=profile_id)
-    print(profile.get_menu())
     if profile.blocked:
         profile.unblock()
         messages.info(
@@ -227,46 +247,31 @@ def filter_list(request):
     :param request:
     :return:
     """
-    list_widget = Widget.objects.all()
-    list_status = Status.objects.all()
-    # list_filter_status = []
-    # for filter in list_filter:
-    #     for status in list_status:
-    #         a1, created = FilterStatus.objects.get_or_create(filter=filter, status=status)
-    #         print(a1)
-
-    # if request.POST:
-    #     profile = get_object_or_404(UserProfile, id=request.POST.get('id_profile'))
-    #     formset = FormRole(request.POST, instance=profile)
-    #     super_role = formset['super_role'].value()
-    #     if formset.is_valid() and super_role:
-    #         formset.save()
-    #         messages.success(
-    #             request,
-    #             'Пользователю {0} установлена роль - {1}.'.format(profile, profile.get_super_role_display())
-    #         )
-    #     else:
-    #         if super_role:
-    #             messages.warning(
-    #                 request,
-    #                 'Роль пользователя {1} не изменена на "{1}"'.format(profile, super_role)
-    #             )
-    #         else:
-    #             messages.warning(
-    #                 request,
-    #                 'Не указана новая роль пользователя {0}'.format(profile)
-    #             )
-    #
-    # for user in User.objects.all():
-    #     user_profile, created = UserProfile.objects.get_or_create(user=user, )
-    #     if created:
-    #         user_profile.save()
-    context = {
-        'current_profile': get_object_or_404(UserProfile, user=request.user),
-        'title': 'Список фильтров',
-        'list_breadcrumb': (('configure_list', 'Список конфигураций'),),
-        # 'role_form': FormRole(),
-        'list_widget': list_widget,
-        'list_status': list_status,
-    }
-    return render(request, 'configure/filter_list.html', context)
+    if request.GET:
+        id_widget = int(request.GET.get('id', 0))
+        widget = get_object_or_404(Widget, id=id_widget)
+        list_filter = WidgetFilter.objects.filter(widget=widget)
+        context = {
+            'widget': widget,
+            'list_filter': list_filter,
+        }
+        return render(request=request, template_name='configure/filter_modal.html', context=context, )
+    else:
+        if request.POST:
+            id_widget = request.POST.get('id_widget', 0)
+            selected_filter = request.POST.getlist('selected_filter')
+            WidgetFilter.objects.filter(widget__id=id_widget).exclude(id__in=selected_filter).update(checked=False)
+            WidgetFilter.objects.filter(id__in=selected_filter).update(checked=True)
+        list_widget = []
+        list_status = Status.objects.all()
+        for widget in Widget.objects.all():
+            for status in list_status:
+                widget_filter, created = WidgetFilter.objects.get_or_create(widget=widget, status=status)
+            list_widget.append([widget, WidgetFilter.objects.filter(widget=widget)])
+        context = {
+            'current_profile': get_object_or_404(UserProfile, user=request.user),
+            'title': 'Список фильтров',
+            'list_breadcrumb': (('configure_list', 'Список конфигураций'),),
+            'list_widget': list_widget,
+        }
+        return render(request=request, template_name='configure/filter_list.html', context=context, )

@@ -115,7 +115,7 @@ def report_date(request):
         context['emp_all'] = emp_all
     else:
         context['date_form'] = FormReportDates()
-    return render(request, 'report/date.html', context)
+    return render(request=request, template_name='report/date.html', context=context, )
 
 
 ######################################################################################################################

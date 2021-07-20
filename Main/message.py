@@ -41,7 +41,7 @@ def message_list(request):
         'message_all': Message.objects.filter(Recipient=profile).count(),
         'message_new': Message.objects.filter(Recipient=profile).exclude(Reading=True).count(),
     }
-    return render(request, 'message_list.html', context)
+    return render(request=request, template_name='message_list.html', context=context, )
 
 
 ######################################################################################################################

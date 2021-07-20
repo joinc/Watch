@@ -9,35 +9,47 @@
             </div>
             <div class="card-body">
                 <div class="card-columns">
-                    {% for widget in list_widget %}
+                    {% for widget, list_filter in list_widget %}
                         <div class="card mb-3">
                             <div class="card-body">
-                                <h5 class="card-title">{{ widget.title }}</h5>
-                                {% for status in list_status %}
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="{{ status.id }}" id="defaultCheck1">
-                                        <label class="form-check-label" for="defaultCheck1">{{ status.title }}</label>
+                                <div class="row mb-2">
+                                    <div class="col-9 h4">
+                                        {{ widget.title }}
+                                    </div>
+                                    <div class="col-3 text-right">
+                                        <button type="button" class="btn btn-outline-info" onclick="ShowFilter('{{ widget.id }}')">Изменить</button>
+                                    </div>
+                                </div>
+                                {% for filter in list_filter %}
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="custom-control-input" type="checkbox" {% if filter.checked %}checked{% endif %} disabled>
+                                        <label class="custom-control-label">{{ filter.status }}</label>
                                     </div>
                                 {% endfor %}
-                                <a href="/reports" class="btn btn-warning">Перейти</a>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
-                <table class="table table-hover table-sm table-borderless">
-                    <tbody>
-                    {% for filter in list_filter %}
-                        <tr>
-                            <td>
-                                <strong class="h3">{{ filter.title }}</strong>
-                            </td>
-                            <td class="text-right">
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
             </div>
         </div>
     </main>
+    <!-- Окно информации о работодателе из Катарсиса -->
+    <div class="modal fade" id="ModalShowFilter" tabindex="-1" role="dialog" aria-labelledby="ModalShowFilterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content"></div>
+        </div>
+    </div>
+    <!-- /Окно информации о работодателе из Катарсиса -->
+    <script type="text/javascript">
+        let pathname = $(location).attr('href');
+
+        function ShowFilter(widget_id) {
+            $.get(pathname, {id: widget_id }, function(data) {
+                $('.modal-content').html(data);
+                console.log(data)
+            });
+            $('#ModalShowFilter').modal('show');
+        }
+    </script>
+
 {% endblock %}

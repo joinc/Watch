@@ -34,7 +34,7 @@ def index(request) -> HttpResponse:
         'count_ready': get_count_employer(search='', czn=czn, list_status=['9']),
         'count_closed': get_count_employer(search='', czn=czn, list_status=['12']),
     }
-    return render(request=request, template_name='index.html', context=context)
+    return render(request=request, template_name='index.html', context=context, )
 
 
 ######################################################################################################################
@@ -61,7 +61,7 @@ def login(request) -> HttpResponse:
             'title': 'Авторизация',
             'next': request.GET.get('next') if request.GET.get('next') else settings.SUCCESS_URL,
         }
-        return render(request=request, template_name='login.html', context=context)
+        return render(request=request, template_name='login.html', context=context, )
 
 
 ######################################################################################################################

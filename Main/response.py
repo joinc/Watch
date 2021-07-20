@@ -23,7 +23,7 @@ def response_list(request):
         'list_emp': Employer.objects.filter(Response__isnull=True)[:settings.STOP_LIST],
         'response_form': FormResponse(),
     }
-    return render(request, 'response/list.html', context)
+    return render(request=request, template_name='response/list.html', context=context, )
 
 
 ######################################################################################################################

@@ -81,6 +81,7 @@ def report_filter(emps):
 
 ######################################################################################################################
 
+
 def get_list_existing_employer(employer):
     """
 
@@ -89,6 +90,10 @@ def get_list_existing_employer(employer):
     """
     result = list(Employer.objects.filter(INN__exact=employer.INN).exclude(id=employer.id))
     return result
+
+
+######################################################################################################################
+
 
 def get_count_page(count_employer) -> int:
     """
