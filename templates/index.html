@@ -6,59 +6,19 @@
 {% block html_body %}
     <div class="container-fluid">
         <div class="row text-center">
-            {% for widget in list_widget %}
+            {% for widget, count in list_widget %}
                 <div class="col-xl-2 col-lg-4 col-md-6 col-sm-6 mb-4">
-                    <a href="{% url widget.url %}">
-                        <img src="{{ widget.color_primary }}" width="300" height="300" class="img-fluid rounded-circle">
+                    <a href="{% url 'employer_widget_show' widget.id %}">
+                        {% if count %}
+                            <img src="{{ widget.color }}" width="300" height="300" class="img-fluid rounded-circle">
+                        {% else %}
+                            <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mO8e//RfwAI3gOf4zSm2AAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
+                        {% endif %}
                     </a>
-                    <h1>{{ count_all }}{% if count_my %}<span class="badge badge-primary" title="Всего ваших карточек">{{ count_my }}</span>{% endif %}</h1>
+                    <h1>{{ count }}</h1>
                     <div class="text-muted">{{ widget.title }}</div>
                 </div>
             {% endfor %}
         </div>
-        <section class="row text-center placeholders">
-            <div class="col-6 col-md-2 col-sm-4 placeholder">
-                <a href="{% url 'employer_all' %}">
-                    <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mPccev/fwAIdQOSaxKbGgAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
-                </a>
-                <h1>{{ count_all }}{% if count_my %}<span class="badge badge-primary" title="Всего ваших карточек">{{ count_my }}</span>{% endif %}</h1>
-                <div class="text-muted">Всего карточек</div>
-            </div>
-            <div class="col-6 col-md-2 col-sm-4 placeholder">
-                <a href="{% url 'employer_draft' %}">
-                    <img src="data:image/gif;base64,{% ifequal count_draft 0 %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mO8e//RfwAI3gOf4zSm2AAAAABJRU5ErkJggg=={% else %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8euz0fwAIxQOHBltBDwAAAABJRU5ErkJggg=={% endifequal %}" width="300" height="300" class="img-fluid rounded-circle">
-                </a>
-                <h1>{{ count_draft }}{% if count_edit %}<span class="badge badge-danger" title="Карточки возвращенные для редактирования">{{ count_edit }}</span>{% endif %}</h1>
-                <span class="text-muted">Карточек в черновиках</span>
-            </div>
-            <div class="col-6 col-md-2 col-sm-4 placeholder">
-                <a href="{% url 'employer_check' %}">
-                    <img src="data:image/gif;base64,{% ifequal count_check 0 %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mO8e//RfwAI3gOf4zSm2AAAAABJRU5ErkJggg=={% else %}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8euz0fwAIxQOHBltBDwAAAABJRU5ErkJggg=={% endifequal %}" width="300" height="300" class="img-fluid rounded-circle">
-                </a>
-                <h1>{{ count_check }}</h1>
-                <span class="text-muted">Карточек на проверке</span>
-            </div>
-            <div class="col-6 col-md-2 col-sm-4 placeholder">
-                <a href="{% url 'employer_work' %}">
-                    <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8//nsfwAJeAPA13E3/AAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
-                </a>
-                <h1>{{ count_work }}</h1>
-                <span class="text-muted">Карточек в работе</span>
-            </div>
-            <div class="col-6 col-md-2 col-sm-4 placeholder">
-                <a href="{% url 'employer_closed' %}">
-                    <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mM8/Oz0fwAIXQN1yxhMEwAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
-                </a>
-                <h1>{{ count_closed }}</h1>
-                <span class="text-muted">Закрыто карточек</span>
-            </div>
-            <div class="col-6 col-md-2 col-sm-4 placeholder">
-                <a href="{% url 'employer_ready' %}">
-                    <img src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mM8/Oz0fwAIXQN1yxhMEwAAAABJRU5ErkJggg==" width="300" height="300" class="img-fluid rounded-circle">
-                </a>
-                <h1>{{ count_ready }}</h1>
-                <span class="text-muted">Вынесено постановлений</span>
-            </div>
-        </section>
     </div>
 {% endblock %}

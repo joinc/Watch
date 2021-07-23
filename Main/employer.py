@@ -5,11 +5,11 @@ from django.contrib import messages
 from django.conf import settings
 from datetime import datetime
 from Main.decorators import permission_required
-from Main.models import UserProfile, Employer, Event, Info, Notify, TempEmployer, UpdateEmployer
+from Main.models import UserProfile, Employer, Event, Info, Notify, TempEmployer, UpdateEmployer, WidgetStatus
 from Main.forms import FormReturn, FormResult, FormEmployer, FormNotice, FormProtocol, FormClose, FormResponse, \
     FormSearch, FormFilterCzn, FormFilterStatus, FormInformation, FormNotify, FormEmployerNew
 from Main.tools import get_count_employer, get_list_employer, get_count_page, emp_export_ods, create_event, e_date, \
-    get_list_existing_employer
+    get_list_existing_employer, get_list_status, get_list_widget
 from Main.message import message_create
 from Main.choices import RETURN_CHOICES, RESULT_CHOICES
 
@@ -371,84 +371,6 @@ def employer_close(request, employer_id):
 
 
 @permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
-def employer_all(request):
-    """
-    Вывод списка всех карточек
-    :param request:
-    :return:
-    """
-    return employer_list(request, [0], 'Все карточки')
-
-
-######################################################################################################################
-
-
-@permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
-def employer_draft(request):
-    """
-    Вывод списка карточек в статусе Черновик
-    :param request:
-    :return:
-    """
-    return employer_list(request, ['0', '1'], 'Черновики карточек')
-
-
-######################################################################################################################
-
-
-@permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
-def employer_check(request):
-    """
-    Вывод списка карточек в статусе Карточки на проверке
-    :param request:
-    :return:
-    """
-    return employer_list(request, ['2'], 'Карточки на проверке')
-
-
-######################################################################################################################
-
-
-@permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
-def employer_work(request):
-    """
-    Вывод списка карточек в статусе В работе
-    :param request:
-    :return:
-    """
-    return employer_list(request, ['3', '4', '5', '6', '7', '11'], 'Карточки в работе')
-
-
-######################################################################################################################
-
-
-@permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
-def employer_ready(request):
-    """
-    Вывод списка карточек в статусе Вынесено постановлений
-    :param request:
-    :return:
-    """
-    return employer_list(request, ['9'], 'Вынесено постановлений')
-
-
-######################################################################################################################
-
-
-@permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
-def employer_closed(request):
-    """
-    Вывод списка карточек в статусе Закрытые карточки
-    :param request:
-    :return:
-    """
-    return employer_list(request, ['12'], 'Закрытые карточки')
-
-
-######################################################################################################################
-
-
-@permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
 def employer_temp_list(request):
     """
 
@@ -788,5 +710,61 @@ def employer_temp_create(request, temp_employer_id):
         return redirect(reverse('archive_edit', args=(employer.id,)))
     return redirect(reverse('employer_delete', args=(employer.id,)))
 
+
+######################################################################################################################
+
+
+@permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
+def employer_widget_show(request, widget_id):
+    current_profile = get_object_or_404(UserProfile, user=request.user)
+    list_filter = get_list_status(widget_id=widget_id)
+    czn = current_profile.id if current_profile.is_allowed(['czn']) else None
+    if czn:
+        counter = Employer.objects.filter(EmployerStatus__status__StatusWidget__in=list_filter, Owner__id=czn).count()
+    else:
+        counter = Employer.objects.filter(EmployerStatus__status__StatusWidget__in=list_filter).count()
+    return redirect(reverse('index'))
+
+    # """
+    # Отображение списка карточек нарушителей в зависимости от статуса
+    # :param request:
+    # :param list_status:
+    # :param title:
+    # :return:
+    # """
+    # current_profile = get_object_or_404(UserProfile, user=request.user)
+    # czn = current_profile.id if current_profile.is_allowed(['czn']) else '0'
+    # if request.GET:
+    #     number_page = int(request.GET.get('page', 1))
+    #     start_count = (number_page - 1) * settings.COUNT_LIST
+    #     stop_count = start_count + settings.COUNT_LIST
+    #     list_employer = get_list_employer(
+    #         search='',
+    #         czn=czn,
+    #         list_status=list_status,
+    #         start=start_count,
+    #         stop=stop_count,
+    #     )
+    #     context = {
+    #         'list_employer': list_employer,
+    #     }
+    #     return render(request=request, template_name='employer/slice.html', context=context, )
+    # else:
+    #     count_employer = get_count_employer(
+    #         search='',
+    #         czn=czn,
+    #         list_status=list_status,
+    #     )
+    #     context = {
+    #         'current_profile': current_profile,
+    #         'title': title,
+    #         'per_page': settings.COUNT_LIST,
+    #         'form_search': FormSearch(),
+    #         'form_filter_czn': FormFilterCzn({'czn': czn}),
+    #         'form_filter_status': FormFilterStatus({'status': list_status[0]}),
+    #         'count_employer': count_employer,
+    #         'count_page': get_count_page(count_employer=count_employer),
+    #     }
+    #     return render(request=request, template_name='employer/list.html', context=context, )
 
 ######################################################################################################################

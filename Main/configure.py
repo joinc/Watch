@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from datetime import datetime
 from openpyxl import load_workbook
-from Main.models import UserProfile, Configure, TempEmployer, UpdateEmployer, Widget, Status, WidgetFilter, Employer, \
+from Main.models import UserProfile, Configure, TempEmployer, UpdateEmployer, Widget, Status, WidgetStatus, Employer, \
     StatusEmployer
 from Main.decorators import admin_only
 from Main.forms import FormRole
@@ -241,16 +241,16 @@ def profile_change_blocked(request, profile_id):
 
 
 @admin_only
-def filter_list(request):
+def widget_list(request):
     """
-    Список фильтров статусов
+    Настройка виджетов, отображение текущих фильтров и их изменение
     :param request:
     :return:
     """
     if request.GET:
         id_widget = int(request.GET.get('id', 0))
         widget = get_object_or_404(Widget, id=id_widget)
-        list_filter = WidgetFilter.objects.filter(widget=widget)
+        list_filter = WidgetStatus.objects.filter(widget=widget)
         context = {
             'widget': widget,
             'list_filter': list_filter,
@@ -260,18 +260,28 @@ def filter_list(request):
         if request.POST:
             id_widget = request.POST.get('id_widget', 0)
             selected_filter = request.POST.getlist('selected_filter')
-            WidgetFilter.objects.filter(widget__id=id_widget).exclude(id__in=selected_filter).update(checked=False)
-            WidgetFilter.objects.filter(id__in=selected_filter).update(checked=True)
-        list_widget = []
-        list_status = Status.objects.all()
-        for widget in Widget.objects.all():
-            for status in list_status:
-                widget_filter, created = WidgetFilter.objects.get_or_create(widget=widget, status=status)
-            list_widget.append([widget, WidgetFilter.objects.filter(widget=widget)])
-        context = {
-            'current_profile': get_object_or_404(UserProfile, user=request.user),
-            'title': 'Список фильтров',
-            'list_breadcrumb': (('configure_list', 'Список конфигураций'),),
-            'list_widget': list_widget,
-        }
-        return render(request=request, template_name='configure/filter_list.html', context=context, )
+            widget = get_object_or_404(Widget, id=id_widget)
+            WidgetStatus.objects.filter(widget__id=id_widget).exclude(id__in=selected_filter).update(checked=False)
+            WidgetStatus.objects.filter(id__in=selected_filter).update(checked=True)
+            messages.info(
+                request,
+                'Обновление настроек виджета "{0}" завершено.'.format(widget.title)
+            )
+            return redirect(reverse('widget_list'))
+        else:
+            list_widget = []
+            list_status = Status.objects.all()
+            for widget in Widget.objects.all():
+                for status in list_status:
+                    widget_filter, created = WidgetStatus.objects.get_or_create(widget=widget, status=status)
+                list_widget.append([widget, WidgetStatus.objects.filter(widget=widget)])
+            context = {
+                'current_profile': get_object_or_404(UserProfile, user=request.user),
+                'title': 'Список фильтров',
+                'list_breadcrumb': (('configure_list', 'Список конфигураций'),),
+                'list_widget': list_widget,
+            }
+            return render(request=request, template_name='configure/filter_list.html', context=context, )
+
+
+######################################################################################################################

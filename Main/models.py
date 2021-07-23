@@ -662,13 +662,8 @@ class Widget(models.Model):
         verbose_name='Порядок в списке виджетов',
         default=0,
     )
-    color_primary = models.CharField(
+    color = models.CharField(
         verbose_name='Основной цвет',
-        max_length=124,
-        default='',
-    )
-    color_secondary = models.CharField(
-        verbose_name='Альтернативный цвет',
         max_length=124,
         default='',
     )
@@ -692,7 +687,7 @@ class Widget(models.Model):
 ######################################################################################################################
 
 
-class WidgetFilter(models.Model):
+class WidgetStatus(models.Model):
     id = models.AutoField(
         primary_key=True,
     )

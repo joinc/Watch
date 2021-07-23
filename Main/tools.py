@@ -6,7 +6,7 @@ from django.conf import settings
 from pyexcel_ods3 import save_data
 from collections import OrderedDict
 from Main.choices import STATUS_CHOICES
-from Main.models import UserProfile, Employer, Event
+from Main.models import UserProfile, Employer, Event, WidgetStatus, Widget, StatusEmployer
 import mimetypes
 import os
 
@@ -284,6 +284,48 @@ def emp_export_ods(czn, fields):
     response['Content-Disposition'] = "attachment; filename=" + file_name
     os.remove(file)
     return response
+
+
+######################################################################################################################
+
+
+def get_list_status(widget_id):
+    list_filter = WidgetStatus.objects.filter(widget__id=widget_id, checked=True, )
+    return list_filter
+
+
+######################################################################################################################
+
+
+def get_count_widget(czn, widget_id):
+    list_status = get_list_status(widget_id=widget_id)
+    if czn:
+        count = Employer.objects.filter(
+            EmployerStatus__status__StatusWidget__in=list_status,
+            Owner__id=czn,
+        ).count()
+    else:
+        count = Employer.objects.filter(
+            EmployerStatus__status__StatusWidget__in=list_status
+        ).count()
+    return count
+
+
+######################################################################################################################
+
+
+def get_list_widget(profile):
+    """
+    Функция возвращает объект Widget и количество карточек подходящих
+    :param profile:
+    :return:
+    """
+    list_widget = []
+    czn = profile.id if profile.is_allowed(['czn']) else None
+    for widget in Widget.objects.all():
+        count = get_count_widget(czn=czn, widget_id=widget.id)
+        list_widget.append((widget, count))
+    return list_widget
 
 
 ######################################################################################################################
