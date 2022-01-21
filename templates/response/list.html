@@ -7,16 +7,16 @@
                 <h4>{{ title }}:</h4>
             </div>
             <div class="card-body">
-                <table class="table table-hover table-sm table-borderless">
+                <table class="table table-hover table-sm">
                     <tbody>
                     {% for i in list_emp %}
                         <tr>
                             <td class="small">
-                                <strong class="text-gray-dark"><a href="{% url 'employer_view' i.id %}">{{ i.Title }}</a></strong>
+                                <strong class="h5"><a href="{% url 'employer_view' i.id %}">{{ i.Title }}</a></strong>
                                 <span class="d-block">{{ i.Owner.user.get_full_name }}</span>
                             </td>
                             <td class="text-right">
-                                <button type="button" class="btn btn-info" onclick="SetResponse('{{ i.Title }}', '{{ i.id }}')" title="Назначить ответственное лицо">Назначить ответственного</button>
+                                <button type="button" class="btn btn-outline-info" onclick="SetResponse('{{ i.Title }}', '{{ i.id }}')" title="Назначить ответственное лицо">Назначить ответственного</button>
                             </td>
                         </tr>
                     {% endfor %}

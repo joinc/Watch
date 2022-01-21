@@ -101,7 +101,6 @@ def get_count_page(count_employer) -> int:
     :param count_employer:
     :return:
     """
-
     count_page = count_employer // settings.COUNT_LIST
     if count_employer % settings.COUNT_LIST > 0:
         count_page += 1
@@ -290,14 +289,27 @@ def emp_export_ods(czn, fields):
 
 
 def get_list_status(widget_id):
-    list_filter = WidgetStatus.objects.filter(widget__id=widget_id, checked=True, )
-    return list_filter
+    """
+    Получение списка статусов включенных для отображения выбранного виджета по его id
+    :param widget_id:
+    :return:
+    """
+    list_status = WidgetStatus.objects.filter(widget__id=widget_id, checked=True, )
+    return list_status
 
 
 ######################################################################################################################
 
 
 def get_count_widget(czn, widget_id):
+    """
+    Получение количества карточек нарушителя для выбранного виджета, по его id, и с фильтрацие по роли - если роль ЦЗН,
+    то считаются только карточки принадлежащие данному ЦЗН, остальным отправляется общее количество карточек
+    нарушителей в выбранном виджете.
+    :param czn:
+    :param widget_id:
+    :return:
+    """
     list_status = get_list_status(widget_id=widget_id)
     if czn:
         count = Employer.objects.filter(

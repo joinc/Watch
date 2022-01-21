@@ -61,7 +61,9 @@
                             </td>
                         </tr>
                         <tr>
-                            <th scope="row">Наименование непредставленной, представленной с нарушением сроков или не в полном объеме информации в центре занятости в соответствии с законодательством о занятости:</th>
+                            <th scope="row">
+                                Вид административного правонарушения:
+                            </th>
                             <td>
                                 {% for information in list_information %}
                                     <div class="alert alert-warning small" role="alert">
@@ -81,7 +83,9 @@
                             </td>
                         </tr>
                         <tr>
-                            <th scope="row">Информирования работодателя центром занятости о необходимости предоставления информации о наличии свободных рабочих мест и вакантных должностей:</th>
+                            <th scope="row">
+                                Информирования работодателя центром занятости о необходимости предоставления информации о наличии свободных рабочих мест и вакантных должностей:
+                            </th>
                             <td>
                                 {% for notify in list_notify %}
                                     <div class="alert alert-info small" role="alert">
@@ -101,8 +105,12 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>{{ form_employer.Contact.label }}</td>
-                            <td>{{ form_employer.Contact }}</td>
+                            <td>
+                                {{ form_employer.Contact.label }}
+                            </td>
+                            <td>
+                                {{ form_employer.Contact }}
+                            </td>
                         </tr>
                         </tbody>
                     </table>

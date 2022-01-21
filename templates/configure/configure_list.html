@@ -8,27 +8,21 @@
                 <h4>{{ title }}:</h4>
             </div>
             <div class="card-body">
-                <div class="card-columns">
+                <table class="table table-hover table-sm">
+                    <tbody>
                     {% for configure in list_configure %}
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-9 h4">
-                                        {{ configure.title }}
-                                    </div>
-                                    <div class="col-3 text-right">
-                                        <a href="{% url configure.url %}" class="btn btn-outline-info" title="{{ configure.title }}">Перейти</a>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col">
-                                        {{ configure.description }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <tr>
+                            <td class="small">
+                                <strong class="h5">{{ configure.title }}</strong>
+                                <span class="d-block">{{ configure.description }}</span>
+                            </td>
+                            <td class="text-right">
+                                <a href="{% url configure.url %}" class="btn btn-outline-info" title="{{ configure.title }}">Перейти</a>
+                            </td>
+                        </tr>
                     {% endfor %}
-                </div>
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>

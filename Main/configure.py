@@ -261,7 +261,7 @@ def widget_list(request):
             id_widget = request.POST.get('id_widget', 0)
             selected_filter = request.POST.getlist('selected_filter')
             widget = get_object_or_404(Widget, id=id_widget)
-            WidgetStatus.objects.filter(widget__id=id_widget).exclude(id__in=selected_filter).update(checked=False)
+            WidgetStatus.objects.filter(widget=widget).exclude(id__in=selected_filter).update(checked=False)
             WidgetStatus.objects.filter(id__in=selected_filter).update(checked=True)
             messages.info(
                 request,

@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect, reverse
 from django.conf import settings
 from Main.models import UserProfile
-from Main.tools import get_count_employer, get_list_widget
+from Main.tools import get_list_widget
 
 ######################################################################################################################
 
