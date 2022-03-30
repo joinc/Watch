@@ -5,11 +5,11 @@ from django.contrib import messages
 from django.conf import settings
 from datetime import datetime
 from Main.decorators import permission_required
-from Main.models import UserProfile, Employer, Event, Info, Notify, TempEmployer, UpdateEmployer, WidgetStatus
+from Main.models import UserProfile, Employer, Event, Info, Notify, TempEmployer, UpdateEmployer
 from Main.forms import FormReturn, FormResult, FormEmployer, FormNotice, FormProtocol, FormClose, FormResponse, \
     FormSearch, FormFilterCzn, FormFilterStatus, FormInformation, FormNotify, FormEmployerNew
 from Main.tools import get_count_employer, get_list_employer, get_count_page, emp_export_ods, create_event, e_date, \
-    get_list_existing_employer, get_list_status, get_list_widget
+    get_list_existing_employer, get_list_status
 from Main.message import message_create
 from Main.choices import RETURN_CHOICES, RESULT_CHOICES
 

@@ -17,19 +17,23 @@
                 {% if request.user.is_authenticated %}
                     <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
                         <div class="btn-group mr-2" role="group" aria-label="First group">
-                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">☰</button>
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                ☰
+                            </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                <span class="dropdown-item"><strong>{% firstof user.get_full_name user.get_short_name user.get_username %}</strong></span>
+                                 <a href="{% url 'profile_show' current_profile.id %}" class="dropdown-item">
+                                     <strong>{% firstof user.get_full_name user.get_short_name user.get_username %}</strong>
+                                 </a>
                                 {% if request.user.is_superuser %}
                                     <div class="dropdown-divider"></div>
                                     <a href="{% url 'configure_list' %}" class="dropdown-item">Список конфигураций</a>
                                 {% endif %}
                                 <div class="dropdown-divider"></div>
-                                {% for item in current_profile.get_menu %}
-                                    <a href="{% url item.1 %}" class="dropdown-item">
+                                {% for menu in current_profile.get_menu %}
+                                    <a href="{% url menu.1 %}" class="dropdown-item">
                                         <div class="row">
-                                            <div class="col-auto mr-auto">{{ item.2 }}</div>
-                                            <div class="col-auto mt-1 text-right"><i class="{{ item.3 }}"></i></div>
+                                            <div class="col-auto mr-auto">{{ menu.2 }}</div>
+                                            <div class="col-auto mt-1 text-right"><i class="{{ menu.3 }}"></i></div>
                                         </div>
                                     </a>
                                 {% endfor %}
@@ -50,7 +54,7 @@
                     </li>
                     {% for breadcrumb in list_breadcrumb %}
                         <li class="nav-item active">
-                            <a href="{% url breadcrumb.0 %}" class="nav-link">{{ breadcrumb.1 }}</a>
+                            <a href="{{ breadcrumb.0 }}" class="nav-link">{{ breadcrumb.1 }}</a>
                         </li>
                         <li class="nav-item">
                             <span class="navbar-text">/</span>

@@ -1,0 +1,59 @@
+{% extends "base.html" %}{% load static %}
+
+{% block html_body %}
+    <main role="main" class="container-fluid">
+        {% include "messages.html" %}
+        <div class="shadow card border-dark mb-3">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-auto mr-auto">
+                        <h4>{{ title }}:</h4>
+                    </div>
+                    <div class="col-auto mr-0 text-right">
+                        {% if profile_edit %}
+                            <a href="{% url 'profile_create' %}" class="btn btn-outline-primary" title="Добавить нового пользователя">
+                                <i class="fas fa-user-plus"></i> Добавить пользователя
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover table-sm table-borderless">
+                    <tbody>
+                    {% for profile in list_profile %}
+                        <tr>
+                            <td class="small">
+                                <strong class="text-gray-dark">{{ profile.user.get_full_name }}</strong>
+                                <span class="d-block">@{{ profile.user.get_username }}</span>
+                            </td>
+                            <td class="align-middle">
+                                {% if profile.department %}
+                                    {{ profile.department }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="text-right align-middle">
+                                {% if profile.blocked %}
+                                    <i class="fas fa-times" title="Заблокированный пользователь"></i>
+                                {% else %}
+                                    <i class="fas fa-check" title="Активный пользователь"></i>
+                                {% endif %}
+                            </td>
+                            <td class="text-right ">
+                                <a href="{% url 'profile_show' profile.id %}" class="btn btn-outline-secondary" title="Перейти в профиль пользователя">
+                                    Перейти в профиль
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer">
+                Всего пользователей - <strong>{{ list_profile.count }}</strong>
+            </div>
+        </div>
+    </main>
+{% endblock %}

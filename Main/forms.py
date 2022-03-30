@@ -3,8 +3,8 @@
 from django import forms
 from django.conf import settings
 from datetime import date, datetime, timedelta
-from Main.models import UserProfile, Info, Notify, Employer, Status
-from Main.choices import EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, STATUS_CHOICES, RESULT_CHOICES
+from Main.models import User, UserProfile, Info, Notify, Employer, Status
+from Main.choices import EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, RESULT_CHOICES
 import locale
 import calendar
 

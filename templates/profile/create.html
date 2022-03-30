@@ -1,0 +1,72 @@
+{% extends "base.html" %}{% load static %}
+
+{% block html_head %}
+    <link rel='stylesheet' href='{% static "css/select2.min.css" %}' type='text/css' />
+    <link rel='stylesheet' href='{% static "css/select2-bootstrap4.min.css" %}' type='text/css' />
+    <script src='{% static "js/select2.min.js" %}'></script>
+    <script src='{% static "js/locales/select2.ru.js" %}'></script>
+{% endblock %}
+{% block html_body %}
+    <main role="main" class="container-fluid">
+        <div class="shadow card border-dark mb-3">
+            <div class="card-header">
+                <h4>{{ title }}:</h4>
+            </div>
+            <form method='post' action='' class="mb-0">
+                {% csrf_token %}
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <h6>{{ form_profile.first_name.label }}:</h6>
+                            {{ form_profile.first_name }}
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <h6>{{ form_department.department.label }}:</h6>
+                            {{ form_department.department }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <h6>{{ form_profile.username.label }}:</h6>
+                            <div class="input-group">
+                                <div class="input-group-prepend"><span class="input-group-text">@</span></div>
+                                {{ form_profile.username }}
+                            </div>
+                            <small class="form-text text-muted">{{ form_profile.username.help_text }}</small>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <h6>{{ form_profile.email.label }}:</h6>
+                            {{ form_profile.email }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <h6>{{ form_password.password.label}}:</h6>
+                            {{ form_password.password }}
+                            <small class="form-text text-muted">{{ form_password.password.help_text }}</small>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <h6>{{ form_password.password2.label }}:</h6>
+                            {{ form_password.password2 }}
+                            <small class="form-text text-muted">{{ form_password.password2.help_text }}</small>
+                        </div>
+                    </div>
+                    {% include "messages.html" %}
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary" type="submit">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script>
+        $(document).ready(function() {
+            $('select[name=department]').select2({
+                allowClear: true,
+                placeholder: "Выберите организацию или отдел",
+                theme: "bootstrap4",
+                language: "ru"
+            });
+        });
+    </script>
+{% endblock %}

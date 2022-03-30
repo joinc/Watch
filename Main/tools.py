@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from datetime import date, datetime
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from pyexcel_ods3 import save_data
 from collections import OrderedDict
 from Main.choices import STATUS_CHOICES
-from Main.models import UserProfile, Employer, Event, WidgetStatus, Widget, StatusEmployer
+from Main.models import UserProfile, Employer, Event, WidgetStatus, Widget
 import mimetypes
 import os
 
@@ -42,7 +43,6 @@ def e_date(emp_date):
     return_date = None
     if emp_date is not None:
         return_date = emp_date.__format__('%Y-%m-%d')
-
     return return_date
 
 
@@ -338,6 +338,23 @@ def get_list_widget(profile):
         count = get_count_widget(czn=czn, widget_id=widget.id)
         list_widget.append((widget, count))
     return list_widget
+
+
+######################################################################################################################
+
+
+def get_profile(profile=None, user=None) -> UserProfile:
+    """
+    ПОлучение профиля пользователя
+    :param profile:
+    :param user:
+    :return: UserProfile
+    """
+    if profile:
+        return get_object_or_404(UserProfile, id=profile)
+    if user:
+        return get_object_or_404(UserProfile, user=user)
+    return HttpResponseNotFound()
 
 
 ######################################################################################################################

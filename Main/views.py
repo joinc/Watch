@@ -4,10 +4,9 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.models import auth
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404, redirect, reverse
+from django.shortcuts import render, redirect, reverse
 from django.conf import settings
-from Main.models import UserProfile
-from Main.tools import get_list_widget
+from Main.tools import get_list_widget, get_profile
 
 ######################################################################################################################
 
@@ -19,7 +18,7 @@ def index(request) -> HttpResponse:
     :param request:
     :return: HttpResponse
     """
-    current_profile = get_object_or_404(UserProfile, user=request.user)
+    current_profile = get_profile(user=request.user)
     context = {
         'current_profile': current_profile,
         'title': 'Главная',

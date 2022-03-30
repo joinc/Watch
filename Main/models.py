@@ -43,6 +43,42 @@ class Status(models.Model):
 ######################################################################################################################
 
 
+class Department(models.Model):
+    id = models.AutoField(
+        primary_key=True,
+    )
+    title = models.CharField(
+        verbose_name='Отдел',
+        max_length=124,
+        default='',
+    )
+    role = models.CharField(
+        verbose_name='Роль',
+        max_length=16,
+        choices=ROLES_CHOICES,
+        null=True,
+        blank=True,
+        default=None,
+    )
+    create_date = models.DateTimeField(
+        verbose_name='Дата создания отдела',
+        auto_now_add=True,
+        null=True,
+    )
+
+    def __str__(self):
+        return '{0}'.format(self.title)
+
+    class Meta:
+        ordering = 'title',
+        verbose_name = 'Отдел'
+        verbose_name_plural = 'Отделы'
+        managed = True
+
+
+######################################################################################################################
+
+
 class UserProfile(models.Model):
     id = models.AutoField(
         primary_key=True,
@@ -65,6 +101,13 @@ class UserProfile(models.Model):
         null=True,
         blank=True,
         default=None,
+    )
+    department = models.ForeignKey(
+        Department,
+        verbose_name='Организация или отдел',
+        null=True,
+        related_name='Department',
+        on_delete=models.SET_NULL,
     )
     blocked = models.BooleanField(
         verbose_name='Учетная запись заблокирована',
@@ -93,10 +136,10 @@ class UserProfile(models.Model):
         :param list_permission:
         :return:
         """
-        for permission in list_permission:
-            if self.super_role == permission:
-                return True
-        return False
+        if self.department.role in list_permission:
+            return True
+        else:
+            return False
 
     def get_menu(self):
         """

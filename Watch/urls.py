@@ -16,6 +16,7 @@ Including another URLconf
 from django.urls import path
 from django.contrib import admin
 from Main import views, employer, message, response, report, information, notify, configure
+from Main.profile import views as profile
 # from django.conf.urls.static import static
 # from django.conf import settings
 
@@ -28,8 +29,11 @@ urlpatterns = [
     path('configure/employer/load/', configure.employer_load, name='employer_load', ),
     path('configure/widget/list/', configure.widget_list, name='widget_list', ),
     path('configure/email/send/', configure.send_email, name='send_email', ),
-    path('configure/profile/list/', configure.profile_list, name='profile_list', ),
-    path('configure/profile/<int:profile_id>/blocked/', configure.profile_change_blocked, name='profile_change_blocked', ),
+    path('profile/list/', profile.profile_list, name='profile_list', ),
+    path('profile/create/', profile.profile_create, name='profile_create', ),
+    path('profile/<int:profile_id>/show/', profile.profile_show, name='profile_show', ),
+    path('profile/<int:profile_id>/edit/', profile.profile_edit, name='profile_edit', ),
+    path('profile/<int:profile_id>/blocked/', profile.profile_blocked, name='profile_blocked', ),
     path('configure/employer/status_check', configure.employer_status_sync, name='employer_status_check', ),
     path('employer/temp/list/', employer.employer_temp_list, name='employer_temp_list', ),
     path('employer/create/', employer.employer_create, name='employer_create', ),
