@@ -3,7 +3,7 @@
 from django import forms
 from django.conf import settings
 from datetime import date, datetime, timedelta
-from Main.models import User, UserProfile, Info, Notify, Employer, Status
+from Main.models import User, UserProfile, Info, Notify, Employer, StatusEmployer
 from Main.choices import EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, RESULT_CHOICES
 import locale
 import calendar
@@ -476,63 +476,27 @@ class FormFilterCzn(forms.Form):
 ######################################################################################################################
 
 
-class FormResponse(forms.Form):
-    list_response = list(UserProfile.objects.filter(super_role='control').values_list('id', 'user__last_name'))
-
-    response = forms.ChoiceField(
-        choices=list_response,
-        label='',
-        widget=forms.Select(
-            attrs={
-                'class': 'custom-select',
-            }
-        ),
-        required=True
-    )
+# class FormResponse(forms.Form):
+#     list_response = list(UserProfile.objects.filter(super_role='control').values_list('id', 'user__last_name'))
+#
+#     response = forms.ChoiceField(
+#         choices=list_response,
+#         label='',
+#         widget=forms.Select(
+#             attrs={
+#                 'class': 'custom-select',
+#             }
+#         ),
+#         required=True
+#     )
 
 
 ######################################################################################################################
 
 
 class FormFilterStatus(forms.Form):
-    # status = forms.ChoiceField(
-    #     label='',
-    #     widget=forms.Select(
-    #         attrs={
-    #             'class': 'custom-select',
-    #         }
-    #     ),
-    #     choices=list(
-    #         map(
-    #             lambda x: [x['id'], x['title']],
-    #             list(Status.objects.values('id', 'title').filter(is_filtered=True))
-    #         )
-    #     ),
-    #     required=True,
-    # )
-
-
-    # status = forms.ChoiceField(
-    #     choices=STATUS_CHOICES,
-    #     label='',
-    #     initial=20,
-    #     widget=forms.Select(
-    #         attrs={
-    #             'class': 'custom-select',
-    #         }
-    #     ),
-    #     required=True
-    # )
     list_status = [(0, 'Все статусы')]
-    list_status.extend(list(Status.objects.filter(is_filtered=True).values_list('id', 'title')))
-    # list_status.extend(
-    #     list(
-    #         map(
-    #             lambda x: (x['id'], x['title']),
-    #             list(Status.objects.values_list('id', 'title').filter(is_filtered=True))
-    #         )
-    #     )
-    # )
+    list_status.extend(list(StatusEmployer.objects.filter(is_filtered=True).values_list('id', 'title')))
     status = forms.ChoiceField(
         choices=list_status,
         label='',

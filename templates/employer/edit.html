@@ -119,10 +119,10 @@
                     {% else %}
                         <button type="submit" class="btn btn-success">Сохранить карточку предприятия и отправить на проверку</button>
                     {% endif %}
-                    {% ifequal employer.Status 0 %}
+                    {% if employer.Status == 0 %}
                         <button type="submit" class="btn btn-primary">Сохранить черновик</button>
                         <button type="button" class="btn btn-danger" onclick="DeleteModal('Удаление черновика карточки предприятия', '{{ form.title.value }}', '{% url 'employer_delete' employer.id %}')" title="Удалить черновик">Удалить черновик</button>
-                    {% endifequal %}
+                    {% endif %}
                 </form>
                 {% for ex_employer in list_existing_employer %}
                     <div class="alert {% if ex_employer.Status == 9 %}alert-success{% else %}alert-danger{% endif %} small" role="alert">

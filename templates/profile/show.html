@@ -25,32 +25,30 @@
                 </div>
             </div>
             <div class="card-body">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <h5>{{ profile }}</h5>
-                            <small class="form-text text-muted border-top">Имя</small>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <h5>
-                                {% if profile.department %}
-                                    {{ profile.department }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </h5>
-                            <small class="form-text text-muted border-top">Организация или отдел</small>
-                        </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h5>{{ profile }}</h5>
+                        <small class="form-text text-muted border-top">Имя</small>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <h5>{{ profile.user.username }}</h5>
-                            <small class="form-text text-muted border-top">Логин</small>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <h5>{{ profile.user.email }}</h5>
-                            <small class="form-text text-muted border-top">Адрес электронной почты</small>
-                        </div>
+                    <div class="col-md-6 mb-3">
+                        <h5>
+                            {% if profile.department %}
+                                {{ profile.department }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </h5>
+                        <small class="form-text text-muted border-top">Организация или отдел</small>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h5>{{ profile.user.username }}</h5>
+                        <small class="form-text text-muted border-top">Логин</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h5>{{ profile.user.email }}</h5>
+                        <small class="form-text text-muted border-top">Адрес электронной почты</small>
                     </div>
                 </div>
             </div>

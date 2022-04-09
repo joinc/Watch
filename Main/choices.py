@@ -26,12 +26,6 @@ FULL_MENU = (
         '',
     ),
     (
-        ('admin',),
-        'response_list',
-        'Назначить ответственного',
-        '',
-    ),
-    (
         ('control', 'assist', 'job', 'admin', 'czn', ),
         'report_list',
         'Отчеты',

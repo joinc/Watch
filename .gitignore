@@ -1,4 +1,5 @@
 .idea
+__pycache__/
 venv/
 Main/migrations/
 Main/static/
@@ -6,6 +7,8 @@ Main/__pycache__/
 Main/__init__.py
 Main/profile/__pycache__/
 Main/profile/__init__.py
+Main/employer/__pycache__/
+Main/employer/__init__.py
 upload/
 db.sqlite3
 Watch/__pycache__/

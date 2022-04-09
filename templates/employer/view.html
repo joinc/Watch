@@ -6,7 +6,7 @@
             <div class="card-header">
                 <div class="row">
                     <div class="col-auto mr-auto">
-                        <h4>{{ title }}:</h4>
+                        <h4>Сведения о работодателе нарушившим статью 25 Закона Российской Федерации "О занятости населения в Российской Федерации"</h4>
                     </div>
                     <div class="col-auto mr-0 text-right">
                         <a class="btn btn-outline-dark" href="{% url 'employer_print' employer.id %}" role="button" target="_blank">Печать</a>
@@ -14,22 +14,13 @@
                             <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#ModalClose">Закрыть</button>
                             <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#ModalDelete">Удалить</button>
                         {% endif %}
-                        {% if profile.role == 4 and employer.Response == None %}
-                            <button type="button" class="btn btn-primary" onclick="SetResponse('{{ employer.Title }}', '{{ employer.id }}')" title="Назначить ответственное лицо">Назначить ответственного</button>
-                        {% endif %}
-                        {% if employer.Response %}
-                            <span title="Ответственное лицо" class="p-2">{{ employer.Response }}</span>
-                        {% endif %}
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <div class="alert alert-info" role="alert">
-                    <h5>Сведения о работодателе нарушившим статью 25 Закона Российской Федерации "О занятости населения в Российской Федерации"</h5>
-                </div>
-                <div class="card bg-light">
-                    <div class="card-header {% if employer.Status == 8 %}bg-danger{% endif %}{% if employer.Status == 9 %}bg-success{% endif %}{% if employer.Status == 12 %}bg-success{% endif %}">
-                        <h4 class="card-title">{{ employer.Title }}</h4>
+                <div class="card">
+                    <div class="card-header alert-{{ employer.status_new.color }}">
+                        <h4>{{ employer.Title }}</h4>
                     </div>
                     <div class="card-body">
                         <dl class="row">
@@ -73,7 +64,7 @@
                                     <ul class="list-group list-group-flush">
                                         {% for inf in list_information %}
                                             <li class="list-group-item bg-light">
-                                                {{ inf.get_Name_display }} {% ifnotequal inf.Comment '' %}(Комментарий: {{ inf.Comment }}){% endifnotequal %}{% if inf.Attache %} <a href="{{ inf.Attache.url }}">Скачать приложение</a> {% endif %}
+                                                {{ inf.get_Name_display }} {% if inf.Comment != '' %}(Комментарий: {{ inf.Comment }}){% endif %}{% if inf.Attache %} <a href="{{ inf.Attache.url }}">Скачать приложение</a> {% endif %}
                                             </li>
                                         {% endfor %}
                                     </ul>
@@ -88,7 +79,12 @@
                                     <ul class="list-group list-group-flush">
                                         {% for notify in list_notify %}
                                             <li class="list-group-item bg-light">
-                                                {% if notify.NotifyDate %}{{ notify.NotifyDate }}{% else %}Дата не указана{% endif %}, {{ notify.get_Method_display }} {% ifnotequal notify.Comment '' %}(Комментарий: {{ notify.Comment }}){% endifnotequal %}{% if notify.Attache %} <a href="{{ notify.Attache.url }}">Скачать приложение</a> {% endif %} - {{ notify.CreateDate }}, {% firstof notify.Owner.user.get_full_name notify.Owner.user %}
+                                                {% if notify.NotifyDate %}
+                                                    {{ notify.NotifyDate }}
+                                                {% else %}
+                                                    Дата не указана
+                                                {% endif %}
+                                                , {{ notify.get_Method_display }} {% if notify.Comment != '' %}(Комментарий: {{ notify.Comment }}){% endif %}{% if notify.Attache %} <a href="{{ notify.Attache.url }}">Скачать приложение</a> {% endif %} - {{ notify.CreateDate }}, {% firstof notify.Owner.user.get_full_name notify.Owner.user %}
                                             </li>
                                         {% endfor %}
                                     </ul>
@@ -118,17 +114,17 @@
                         </dl>
                     </div>
                 </div>
-                {% ifequal profile.role 1 %}
+                {% if profile.role == 1 %}
                     {% if employer.Status == 0 or employer.Status == 1 %}
-                        {% ifequal profile.id employer.Owner.id %}
+                        {% if profile.id == employer.Owner.id %}
                             <br />
                             <a class="btn btn-primary" href="{% url 'employer_edit' employer.id %}" role="button">Редактировать</a>
                             <br />
-                        {% endifequal %}
+                        {% endif %}
                     {% endif %}
-                {% endifequal %}
-                {% ifequal profile.role 2 %}
-                    {% ifequal employer.Status 2 %}
+                {% endif %}
+                {% if profile.role == 2 %}
+                    {% if employer.Status == 2 %}
                         <br />
                         <form class="form" method="post" action="{% url 'employer_audit' employer.id %}">
                             {% csrf_token %}
@@ -141,10 +137,10 @@
                                 {{ form_return.return_comment }}
                             </div>
                         </form>
-                    {% endifequal %}
-                {% endifequal %}
-                {% ifequal profile.role 3 %}
-                    {% ifequal employer.Status 3 %}
+                    {% endif %}
+                {% endif %}
+                {% if profile.role == 3 %}
+                    {% if employer.Status == 3 %}
                         <br />
                         <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
                             {% csrf_token %}
@@ -155,8 +151,8 @@
                                 <button type="submit" class="btn btn-primary">Добавить уведомление о вызове на составление протокола об административном нарушении</button>
                             </div>
                         </form>
-                    {% endifequal %}
-                    {% ifequal employer.Status 4 %}
+                    {% endif %}
+                    {% if employer.Status == 4 %}
                         <br />
                         <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
                             {% csrf_token %}
@@ -167,8 +163,8 @@
                                 <button type="submit" class="btn btn-primary">Отправить</button>
                             </div>
                         </form>
-                    {% endifequal %}
-                    {% ifequal employer.Status 5 %}
+                    {% endif %}
+                    {% if employer.Status == 5 %}
                         <br />
                         <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
                             {% csrf_token %}
@@ -179,8 +175,8 @@
                                 <button type="submit" class="btn btn-primary">Добавить протокол об административном правонарушении</button>
                             </div>
                         </form>
-                    {% endifequal %}
-                    {% ifequal employer.Status 10 %}
+                    {% endif %}
+                    {% if employer.Status == 10 %}
                         <br />
                         <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
                             {% csrf_token %}
@@ -191,8 +187,8 @@
                                 <button type="submit" class="btn btn-primary">Добавить уведомление о направлении протокола об административном правонарушении работодателю</button>
                             </div>
                         </form>
-                    {% endifequal %}
-                    {% ifequal employer.Status 6 %}
+                    {% endif %}
+                    {% if employer.Status == 6 %}
                         <br />
                         <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
                             {% csrf_token %}
@@ -203,8 +199,8 @@
                                 <button type="submit" class="btn btn-primary">Добавить заявление Мировому судье о рассмотрении протокола</button>
                             </div>
                         </form>
-                    {% endifequal %}
-                    {% ifequal employer.Status 7 %}
+                    {% endif %}
+                    {% if employer.Status == 7 %}
                         <br />
                         <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
                             {% csrf_token %}
@@ -218,8 +214,8 @@
                                 <button type="submit" class="btn btn-primary">Добавить результат рассмотрения протокола Мирововым судьей</button>
                             </div>
                         </form>
-                    {% endifequal %}
-                    {% ifequal employer.Status 11 %}
+                    {% endif %}
+                    {% if employer.Status == 11 %}
                         <br />
                         <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
                             {% csrf_token %}
@@ -230,13 +226,13 @@
                                 <button type="submit" class="btn btn-primary">Добавить результат исполнения постановления об административном нарушении</button>
                             </div>
                         </form>
-                    {% endifequal %}
-                {% endifequal %}
+                    {% endif %}
+                {% endif %}
                 <br />
                 {% for i in list_existing_employer %}
-                    {% ifnotequal i.id employer.id %}
+                    {% if i.id != employer.id %}
                         <div class="alert {% if i.Status == 9 %}alert-success{% else %}alert-danger{% endif %} small" role="alert">Карточка предприятия с таким же ИНН существует. <a href="{% url 'employer_view' i.id %}" class="alert-link">{{ i.Title }}</a> {{ i.get_Status_display }}</div>
-                    {% endifnotequal %}
+                    {% endif %}
                 {% endfor %}
                 {% for event in list_event %}
                     <div class="alert alert-dark small" role="alert">
@@ -293,8 +289,5 @@
             </div>
         </div>
         <!-- /Окно запроса подтверждения на удаление карточки -->
-    {% endif %}
-    {% if profile.role == 4 and employer.Respons == None %}
-        {% include 'response/modal.html' %}
     {% endif %}
 {% endblock %}

@@ -6,7 +6,8 @@ from django.contrib.auth.models import auth
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, reverse
 from django.conf import settings
-from Main.tools import get_list_widget, get_profile
+from Main.tools import get_profile
+from Main.employer.tools import get_list_widget
 
 ######################################################################################################################
 

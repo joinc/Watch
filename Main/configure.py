@@ -7,8 +7,7 @@ from django.contrib import messages
 from django.conf import settings
 from datetime import datetime
 from openpyxl import load_workbook
-from Main.models import UserProfile, Configure, TempEmployer, UpdateEmployer, Widget, Status, WidgetStatus, Employer, \
-    StatusEmployer
+from Main.models import UserProfile, Configure, TempEmployer, UpdateEmployer, Widget, StatusEmployer, WidgetStatus, Employer
 from Main.decorators import superuser_only
 import os
 
@@ -42,12 +41,10 @@ def employer_status_sync(request):
     """
     list_employer = Employer.objects.all()
     for employer in list_employer:
-        old_status = Status.objects.filter(status=employer.Status).first()
+        old_status = StatusEmployer.objects.filter(status=employer.Status).first()
         if old_status:
-            status_employer, created = StatusEmployer.objects.get_or_create(employer=employer)
-            if created:
-                status_employer.status = old_status
-                status_employer.save()
+            employer.status_new = old_status
+            employer.save(update_fields=['status_new'])
     return redirect(reverse('configure_list'))
 
 
@@ -195,7 +192,7 @@ def widget_list(request):
             return redirect(reverse('widget_list'))
         else:
             list_widget = []
-            list_status = Status.objects.all()
+            list_status = StatusEmployer.objects.all()
             for widget in Widget.objects.all():
                 for status in list_status:
                     widget_filter, created = WidgetStatus.objects.get_or_create(widget=widget, status=status)

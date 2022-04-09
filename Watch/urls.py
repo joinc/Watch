@@ -15,8 +15,9 @@ Including another URLconf
 """
 from django.urls import path
 from django.contrib import admin
-from Main import views, employer, message, response, report, information, notify, configure
+from Main import views, message, report, information, notify, configure
 from Main.profile import views as profile
+from Main.employer import views as employer
 # from django.conf.urls.static import static
 # from django.conf import settings
 
@@ -27,6 +28,7 @@ urlpatterns = [
     path('logout/', views.logout, name='logout', ),
     path('configure/list/', configure.configure_list, name='configure_list', ),
     path('configure/employer/load/', configure.employer_load, name='employer_load', ),
+    path('configure/employer/status_check', configure.employer_status_sync, name='employer_status_check', ),
     path('configure/widget/list/', configure.widget_list, name='widget_list', ),
     path('configure/email/send/', configure.send_email, name='send_email', ),
     path('profile/list/', profile.profile_list, name='profile_list', ),
@@ -34,9 +36,9 @@ urlpatterns = [
     path('profile/<int:profile_id>/show/', profile.profile_show, name='profile_show', ),
     path('profile/<int:profile_id>/edit/', profile.profile_edit, name='profile_edit', ),
     path('profile/<int:profile_id>/blocked/', profile.profile_blocked, name='profile_blocked', ),
-    path('configure/employer/status_check', configure.employer_status_sync, name='employer_status_check', ),
     path('employer/temp/list/', employer.employer_temp_list, name='employer_temp_list', ),
     path('employer/create/', employer.employer_create, name='employer_create', ),
+    path('employer/search/', employer.employer_search, name='employer_search', ),
     path('employer/widget/<int:widget_id>/show/', employer.employer_widget_show, name='employer_widget_show', ),
     path('employer/export/', employer.export_to_spreadsheet, name='employer_export', ),
     path('employer/find/', employer.employer_find, name='employer_find', ),
@@ -62,8 +64,6 @@ urlpatterns = [
     path('report/list/', report.report_list, name='report_list', ),
     path('report/month/', report.report_month, name='report_month', ),
     path('report/date/', report.report_date, name='report_date', ),
-    path('response/list/', response.response_list, name='response_list', ),
-    path('response/set/', response.response_set, name='response_set', ),
 ]
 
 # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

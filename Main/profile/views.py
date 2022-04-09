@@ -79,7 +79,9 @@ def profile_create(request):
     context = {
         'current_profile': get_profile(user=request.user),
         'title': 'Добавление нового пользователя',
-        'list_breadcrumb': ((reverse('profile_list'), 'Список пользователей'),),
+        'list_breadcrumb': (
+            (reverse('profile_list'), 'Список пользователей'),
+        ),
         'form_profile': form_profile,
         'form_department': form_department,
         'form_password': FormPassword(),
@@ -116,7 +118,9 @@ def profile_show(request, profile_id):
     context = {
         'current_profile': current_profile,
         'title': 'Пользователь ' + profile.__str__(),
-        'list_breadcrumb': ((reverse('profile_list'), 'Список пользователей'),),
+        'list_breadcrumb': (
+            (reverse('profile_list'), 'Список пользователей'),
+        ),
         'form_password': FormPassword(),
         'profile_edit': current_profile.user.is_superuser,
         'profile': profile,
@@ -150,7 +154,10 @@ def profile_edit(request, profile_id):
     context = {
         'current_profile': get_profile(user=request.user),
         'title': 'Редактирование пользователя {0}'.format(profile),
-        'list_breadcrumb': ((reverse('profile_list'), 'Список пользователей'),),
+        'list_breadcrumb': (
+            (reverse('profile_list'), 'Список пользователей'),
+            (reverse('profile_show', args=(profile.id, )), 'Пользователь ' + profile.__str__()),
+        ),
         'form_profile': form_profile,
         'form_department': form_department,
     }

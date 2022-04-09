@@ -7,7 +7,7 @@ from django.utils.html import format_html
 ######################################################################################################################
 
 
-class Status(models.Model):
+class StatusEmployer(models.Model):
     id = models.AutoField(
         primary_key=True,
     )
@@ -25,9 +25,14 @@ class Status(models.Model):
         default=False,
     )
     status = models.SmallIntegerField(
-        verbose_name='Старый статус',
+        verbose_name='Статус старый',
         choices=STATUS_CHOICES,
         blank=True,
+    )
+    color = models.CharField(
+        verbose_name='Цвет заголовка карточки',
+        max_length=32,
+        default='',
     )
 
     def __str__(self):
@@ -240,6 +245,13 @@ class Employer(models.Model):
         choices=STATUS_CHOICES,
         default=0,
     )
+    status_new = models.ForeignKey(
+        StatusEmployer,
+        verbose_name='Статус новый',
+        null=True,
+        related_name='Status',
+        on_delete=models.SET_NULL,
+    )
     Result = models.SmallIntegerField(
         verbose_name='Результат',
         choices=RESULT_CHOICES,
@@ -287,51 +299,19 @@ class Employer(models.Model):
 ######################################################################################################################
 
 
-class StatusEmployer(models.Model):
-    id = models.AutoField(
-        primary_key=True,
-    )
-    status = models.ForeignKey(
-        Status,
-        verbose_name='Статус карточки нарушителя',
-        null=True,
-        related_name='StatusEmployer',
-        on_delete=models.SET_NULL,
-    )
-    employer = models.ForeignKey(
-        Employer,
-        verbose_name='Карточка нарушителя',
-        null=True,
-        related_name='EmployerStatus',
-        on_delete=models.CASCADE,
-    )
-
-    def __str__(self):
-        return '{0} - {1}'.format(self.employer, self.status)
-
-    class Meta:
-        ordering = 'employer',
-        verbose_name = 'Статус нарушителя'
-        verbose_name_plural = 'Статусы нарушителей'
-        managed = True
-
-
-######################################################################################################################
-
-
 class StatusRoute(models.Model):
     id = models.AutoField(
         primary_key=True,
     )
     current_status = models.ForeignKey(
-        Status,
+        StatusEmployer,
         verbose_name='Текущий статус',
         null=True,
         related_name='CurrentStatus',
         on_delete=models.SET_NULL,
     )
     next_status = models.ForeignKey(
-        Status,
+        StatusEmployer,
         verbose_name='Следующий статус',
         null=True,
         related_name='NextStatus',
@@ -710,12 +690,6 @@ class Widget(models.Model):
         max_length=124,
         default='',
     )
-    url = models.CharField(
-        verbose_name='Ссылка виджета',
-        max_length=128,
-        default='',
-        blank=True,
-    )
 
     def __str__(self):
         return '{0}'.format(self.title)
@@ -742,7 +716,7 @@ class WidgetStatus(models.Model):
         on_delete=models.CASCADE,
     )
     status = models.ForeignKey(
-        Status,
+        StatusEmployer,
         verbose_name='Статус фильтра',
         null=True,
         related_name='StatusWidget',

@@ -1,8 +1,8 @@
             {% for employer in list_employer %}
-                <tr{% ifequal employer.Status 9 %} class="table-success"{% endifequal %}{% ifequal employer.Status 12 %} class="table-success"{% endifequal %}{% ifequal employer.Status 1 %} class="table-danger"{% endifequal %}>
-                    <td title="{{ employer.Title }}">{{ employer.Title|truncatechars:40 }}</td>
-                    <td>{{ employer.Owner }}</td>
-                    <td title="{{ employer.get_Status_display }}">{{ employer.get_Status_display|truncatechars:40 }}</td>
+                <tr>
+                    <td class="align-middle" title="{{ employer.Title }}">{{ employer.Title|truncatechars:40 }}</td>
+                    <td class="align-middle">{{ employer.Owner }}</td>
+                    <td class="align-middle" title="{{ employer.get_Status_display }}">{{ employer.get_Status_display|truncatechars:40 }}</td>
                     <td class="text-right"><a href="{% url 'employer_view' employer.id %}" class="btn btn-info btn-sm" title="Перейти в карточку" role="button">Перейти в карточку</a></td>
                 </tr>
             {% endfor %}

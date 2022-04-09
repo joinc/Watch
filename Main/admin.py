@@ -1,10 +1,9 @@
 from django.contrib import admin
-from Main.models import Status, UserProfile, TempEmployer, Employer, StatusEmployer, Event, Info, Notify, \
-    Message, UpdateEmployer, StatusRoute, Configure, Widget, WidgetStatus, Department
+from Main.models import StatusEmployer, UserProfile, TempEmployer, Employer, Event, Info, Notify, Message, \
+    UpdateEmployer, StatusRoute, Configure, Widget, WidgetStatus, Department
 
-admin.site.register(Status)
-admin.site.register(Employer)
 admin.site.register(StatusEmployer)
+admin.site.register(Employer)
 admin.site.register(UserProfile)
 admin.site.register(TempEmployer)
 admin.site.register(Event)
