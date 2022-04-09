@@ -7,7 +7,7 @@ from datetime import datetime
 from Main.decorators import permission_required
 from Main.models import UserProfile, Employer, Event, Info, Notify, TempEmployer, UpdateEmployer, Widget, WidgetStatus
 from Main.forms import FormReturn, FormResult, FormEmployer, FormNotice, FormProtocol, FormClose, \
-    FormSearch, FormFilterCzn, FormFilterStatus, FormInformation, FormNotify, FormEmployerNew
+    FormSearch, FormFilterCzn, FormInformation, FormNotify, FormEmployerNew
 from Main.tools import create_event, e_date, get_profile
 from Main.message import message_create
 from Main.choices import RETURN_CHOICES, RESULT_CHOICES
@@ -35,56 +35,8 @@ def employer_create(request):
 ######################################################################################################################
 
 
-# @permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
-# def employer_list(request, list_status, title):
-#     """
-#     Отображение списка карточек нарушителей в зависимости от статуса
-#     :param request:
-#     :param list_status:
-#     :param title:
-#     :return:
-#     """
-#     current_profile = get_object_or_404(UserProfile, user=request.user)
-#     czn = current_profile.id if current_profile.is_allowed(['czn']) else '0'
-#     if request.GET:
-#         number_page = int(request.GET.get('page', 1))
-#         start_count = (number_page - 1) * settings.COUNT_LIST
-#         stop_count = start_count + settings.COUNT_LIST
-#         list_employer = get_list_search_employer(
-#             search='',
-#             czn=czn,
-#             list_status=list_status,
-#             start=start_count,
-#             stop=stop_count,
-#         )
-#         context = {
-#             'list_employer': list_employer,
-#         }
-#         return render(request=request, template_name='employer/slice.html', context=context, )
-#     else:
-#         count_employer = get_count_employer(
-#             search='',
-#             czn=czn,
-#             list_status=list_status,
-#         )
-#         context = {
-#             'current_profile': current_profile,
-#             'title': title,
-#             'per_page': settings.COUNT_LIST,
-#             'form_search': FormSearch(),
-#             'form_filter_czn': FormFilterCzn({'czn': czn}),
-#             'form_filter_status': FormFilterStatus({'status': list_status[0]}),
-#             'count_employer': count_employer,
-#             'count_page': get_count_page(count_employer=count_employer),
-#         }
-#         return render(request=request, template_name='employer/list.html', context=context, )
-
-
-######################################################################################################################
-
-
 @permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
-def employer_search(request):
+def employer_find(request):
     """
     Отображение результата поиска карточек нарушителей
     :param request:
@@ -112,13 +64,10 @@ def employer_search(request):
         number_page = int(request.GET.get('page', 1))
         start_count = (number_page - 1) * settings.COUNT_LIST
         stop_count = start_count + settings.COUNT_LIST
-        search = request.GET.get('emp_find', None)
-        czn = request.GET.get('emp_czn', None)
-        status = request.GET.get('emp_status', None)
         list_employer = get_list_employer(
-            find=search,
-            czn=czn,
-            list_status=status,
+            find=request.GET.get('emp_find', None),
+            czn=request.GET.get('emp_czn', None),
+            list_status=request.GET.get('emp_status', None),
             start=start_count,
             stop=stop_count,
         )
@@ -127,111 +76,6 @@ def employer_search(request):
         }
         return render(request=request, template_name='employer/slice.html', context=context, )
     return redirect(reverse('index'))
-
-    # if request.GET:
-    #     search = request.GET.get('emp_find', '')
-    #     czn = request.GET.get('emp_czn', False)
-    #     status = request.GET.get('emp_status', '20')
-    #     page_number = int(request.GET.get('page', 1))
-    #     start = (page_number - 1) * settings.COUNT_LIST
-    #     stop = start + settings.COUNT_LIST
-    #     list_employer = get_list_search_employer(search=search, czn=czn, list_status=[status], start=start, stop=stop)
-    #     context = {
-    #         'list_employer': list_employer,
-    #     }
-    #     return render(request=request, template_name='employer/slice.html', context=context, )
-    # else:
-    #     context = {
-    #         'current_profile': get_object_or_404(UserProfile, user=request.user),
-    #         'title': 'Поиск карточек',
-    #         'per_page': settings.COUNT_LIST,
-    #     }
-    #     if request.POST:
-    #         search_form = FormSearch(request.POST)
-    #         if search_form.is_valid():
-    #             search = request.POST.get('find', '')
-    #             czn = request.POST.get('czn', '0')
-    #             status = request.POST.get('status', '20')
-    #             context['form_search'] = search_form
-    #             count_employer = get_count_employer(search=search, czn=czn, list_status=[status])
-    #             context['employer_count'] = count_employer
-    #             context['page_count'] = get_count_page(count_employer=count_employer)
-    #             context['emp_find'] = search
-    #             context['emp_czn'] = czn
-    #             context['emp_status'] = status
-    #             context['form_filter_czn'] = FormFilterCzn(request.POST)
-    #             context['form_filter_status'] = FormFilterStatus(request.POST)
-    #         else:
-    #             return redirect(reverse('all'))
-    #     else:
-    #         count_employer = Employer.objects.all().count()
-    #         context['form_search'] = FormSearch()
-    #         context['form_filter_czn'] = FormFilterCzn()
-    #         context['form_filter_status'] = FormFilterStatus()
-    #         context['employer_count'] = count_employer
-    #         context['page_count'] = get_count_page(count_employer=count_employer)
-    #         context['emp_find'] = ''
-    #         context['emp_czn'] = '0'
-    #         context['emp_status'] = '20'
-    #     return render(request=request, template_name='employer/list.html', context=context, )
-
-
-######################################################################################################################
-
-
-@permission_required(['control', 'assist', 'job', 'admin', 'czn', ])
-def employer_find(request):
-    """
-    Отображение результата поиска карточек нарушителей
-    :param request:
-    :return:
-    """
-    if request.GET:
-        search = request.GET.get('emp_find', '')
-        czn = request.GET.get('emp_czn', False)
-        status = request.GET.get('emp_status', '20')
-        page_number = int(request.GET.get('page', 1))
-        start = (page_number - 1) * settings.COUNT_LIST
-        stop = start + settings.COUNT_LIST
-        list_employer = get_list_employer(find=search, czn=czn, list_status=[status], start=start, stop=stop)
-        context = {
-            'list_employer': list_employer,
-        }
-        return render(request=request, template_name='employer/slice.html', context=context, )
-    else:
-        context = {
-            'current_profile': get_object_or_404(UserProfile, user=request.user),
-            'title': 'Поиск карточек',
-            'per_page': settings.COUNT_LIST,
-        }
-        if request.POST:
-            search_form = FormSearch(request.POST)
-            if search_form.is_valid():
-                search = request.POST.get('find', '')
-                czn = request.POST.get('czn', '0')
-                status = request.POST.get('status', '20')
-                context['form_search'] = search_form
-                count_employer = get_count_find_employer(find=search, czn=czn, list_status=[status])
-                context['employer_count'] = count_employer
-                context['page_count'] = get_count_page(count_employer=count_employer)
-                context['emp_find'] = search
-                context['emp_czn'] = czn
-                context['emp_status'] = status
-                context['form_filter_czn'] = FormFilterCzn(request.POST)
-                context['form_filter_status'] = FormFilterStatus(request.POST)
-            else:
-                return redirect(reverse('all'))
-        else:
-            count_employer = Employer.objects.all().count()
-            context['form_search'] = FormSearch()
-            context['form_filter_czn'] = FormFilterCzn()
-            context['form_filter_status'] = FormFilterStatus()
-            context['employer_count'] = count_employer
-            context['page_count'] = get_count_page(count_employer=count_employer)
-            context['emp_find'] = ''
-            context['emp_czn'] = '0'
-            context['emp_status'] = '20'
-        return render(request=request, template_name='employer/list.html', context=context, )
 
 
 ######################################################################################################################

@@ -8,7 +8,7 @@
 {% endblock %}
 {% block html_body %}
     <main role="main" class="container-fluid">
-        <form method='post' action='{% url 'employer_search' %}'>
+        <form method='post' action='{% url 'employer_find' %}'>
             {% csrf_token %}
             <div class="input-group">
                 <div class="input-group-prepend">
