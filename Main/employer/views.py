@@ -675,7 +675,7 @@ def employer_widget_show(request, widget_id):
         context = {
             'list_employer': get_list_employer(
                 find='',
-                czn=current_profile.id if current_profile.is_allowed(['czn']) else None,
+                czn=current_profile.department.id if current_profile.is_allowed(['czn']) else None,
                 list_status=WidgetStatus.objects.filter(widget__id=widget_id, checked=True, ),
                 start=start_count,
                 stop=stop_count,
