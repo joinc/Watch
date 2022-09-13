@@ -28,6 +28,7 @@ class StatusEmployer(models.Model):
         verbose_name='Статус старый',
         choices=STATUS_CHOICES,
         blank=True,
+        null=True,
     )
     color = models.CharField(
         verbose_name='Цвет заголовка карточки',

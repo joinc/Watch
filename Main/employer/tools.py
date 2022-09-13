@@ -35,20 +35,18 @@ def get_count_employer(profile, widget_id):
     карточек нарушителей в выбранном виджете.
     :param profile:
     :param widget_id:
-    :return:
+    :return: Количество карточек в определенном виджете для пользователя
     """
     list_status = WidgetStatus.objects.filter(widget__id=widget_id, checked=True, )
-    czn = profile.id if profile.is_allowed(['czn']) else None
-    if czn:
-        count = Employer.objects.filter(
+    if profile.department.role == 'czn':
+        return Employer.objects.filter(
             status_new__StatusWidget__in=list_status,
-            Owner__id=czn,
+            Owner__department=profile.department,
         ).count()
     else:
-        count = Employer.objects.filter(
+        return Employer.objects.filter(
             status_new__StatusWidget__in=list_status,
         ).count()
-    return count
 
 
 ######################################################################################################################
