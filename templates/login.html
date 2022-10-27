@@ -7,20 +7,12 @@
         <meta http-equiv="REFRESH" content="0;url={% url 'index' %}">
     {% else %}
         <form class="form-signin" method="post" action="./">
+            {% csrf_token %}
             <input type="hidden" name="next" value="{{ next }}">
             <div class="text-center mb-4">
                 <h1 class="h3 mb-3 font-weight-normal">Реестр работодателей по нарушению ст. 25 Закона РФ от 19.04.1991 №1032-1 "О занятости населения в Российской Федерации"</h1>
                 <h4>Пожалуйста войдите:</h4>
-                {% for message in messages %}
-                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                {% endfor %}
             </div>
-            {% csrf_token %}
             <div class="form-label-group">
                 <input type="text" id="id_username" name="username" class="form-control" placeholder="Логин" required autofocus>
                 <label for="id_username">Логин</label>
@@ -29,7 +21,17 @@
                 <input type="password" id="id_password" name="password" class="form-control" placeholder="Пароль" required>
                 <label for="id_password">Пароль</label>
             </div>
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Войти</button>
+            <div class="form-label-group">
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Войти</button>
+            </div>
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
             <p class="mt-5 mb-3 text-muted text-center">Министерство труда и социального развития Омской области</p>
         </form>
     {% endif %}

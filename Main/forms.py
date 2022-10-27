@@ -3,7 +3,7 @@
 from django import forms
 from django.conf import settings
 from datetime import date, datetime, timedelta
-from Main.models import User, UserProfile, Info, Notify, Employer, StatusEmployer
+from Main.models import User, UserProfile, Info, Notify, Employer, TypeStatus
 from Main.choices import EMPLOYER_CHOICES, PROTOCOL_CHOICES, RETURN_CHOICES, RESULT_CHOICES
 import locale
 import calendar
@@ -333,19 +333,19 @@ class FormNotify(forms.ModelForm):
     class Meta:
         model = Notify
         fields = [
-            'Method',
+            'type_notify',
             'NotifyDate',
             'Comment',
             'Attache',
         ]
         labels = {
-            'Method': 'Способ направления информирования',
+            'type_notify': 'Способ направления информирования',
             'NotifyDate': 'Дата направления информирования',
             'Comment': 'Комментарий',
             'Attache': 'Прикрепленный файл',
         }
         widgets = {
-            'Method': forms.Select(
+            'type_notify': forms.Select(
                 attrs={
                     'class': 'form-control',
                 }
@@ -373,17 +373,17 @@ class FormInformation(forms.ModelForm):
     class Meta:
         model = Info
         fields = [
-            'Name',
+            'type_violations',
             'Comment',
             'Attache',
         ]
         labels = {
-            'Name': 'Наименование непредставленной информации',
+            'type_violations': 'Правонарушение',
             'Comment': 'Комментарий',
             'Attache': 'Прикрепленный файл',
         }
         widgets = {
-            'Name': forms.Select(
+            'type_violations': forms.Select(
                 attrs={
                     'class': 'form-control',
                 }
@@ -496,7 +496,7 @@ class FormFilterCzn(forms.Form):
 
 class FormFilterStatus(forms.Form):
     list_status = [(0, 'Все статусы')]
-    list_status.extend(list(StatusEmployer.objects.filter(is_filtered=True).values_list('id', 'title')))
+    list_status.extend(list(TypeStatus.objects.filter(is_filtered=True).values_list('id', 'title')))
     status = forms.ChoiceField(
         choices=list_status,
         label='',

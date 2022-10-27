@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from django.shortcuts import get_object_or_404, redirect, reverse
-from django.contrib.auth.decorators import login_required
-from Main.models import UserProfile, Employer, Info
+from Main.decorators import permission_required
+from Main.models import Employer, Info
 from Main.forms import FormInformation
+from Main.tools import get_profile
 
 ######################################################################################################################
 
 
-@login_required
+@permission_required(['czn'])
 def information_create(request, employer_id):
     if request.POST:
         information = Info(
@@ -23,7 +24,7 @@ def information_create(request, employer_id):
 ######################################################################################################################
 
 
-@login_required
+@permission_required(['czn'])
 def information_delete(request, information_id):
     """
     Удаление записи о непредставленной информации
@@ -31,10 +32,10 @@ def information_delete(request, information_id):
     :param information_id:
     :return:
     """
-    profile = get_object_or_404(UserProfile, user=request.user)
+    current_profile = get_profile(user=request.user)
     information = get_object_or_404(Info, id=information_id)
     employer_id = information.EmpInfoID_id
-    if information.EmpInfoID.Owner == profile:
+    if information.EmpInfoID.owner_department == current_profile.department:
         information.Attache.delete()
         information.delete()
     return redirect(reverse('employer_edit', args=(employer_id,)))

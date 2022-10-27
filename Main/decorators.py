@@ -21,7 +21,7 @@ def permission_required(list_permission):
                 profile = get_object_or_404(UserProfile, user=request.user)
                 if profile.blocked:
                     auth.logout(request)
-                    messages.info(request, 'Выша учетная запись заблокирована, обратитесь к администратору.')
+                    messages.error(request, 'Выша учетная запись заблокирована, обратитесь к администратору.')
                     return redirect(reverse('login'))
                 if profile.is_allowed(list_permission=list_permission):
                     return function(request, *args, **kwargs)

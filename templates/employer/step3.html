@@ -1,0 +1,9 @@
+                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                {{ form_protocol }}
+                                <input type="hidden" name="comment" value="Получение уведомления">
+                                <input type="hidden" name="status" value=5>
+                                <button type="submit" class="btn btn-primary">Отправить</button>
+                            </div>
+                        </form>

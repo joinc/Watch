@@ -26,14 +26,18 @@
                         <dt class="col-sm-3">Дата последнего взаимодействия:</dt>
                         <dd class="col-sm-9">{{ temp_employer.EventDate }}</dd>
                     </dl>
-                    {% for employer in list_existent_employer %}
-                        <div class="alert {% if employer.Status == 9 %}alert-success{% else %}alert-danger{% endif %} small" role="alert">
-                            Карточка предприятия с таким же ИНН существует. <a href="{% url 'employer_view' employer.id %}" class="alert-link">{{ employer.Title }}</a> - {{ employer.get_Status_display }}
-                        </div>
-                    {% endfor %}
+                    {% if list_existent_employer %}
+                        <hr class="my-3">
+                        <h6><strong>Карточки предприятия нарушителя с таким же ИНН:</strong></h6>
+                        {% for employer in list_existent_employer %}
+                            <div class="alert {% if employer.Status == 9 %}alert-success{% else %}alert-danger{% endif %} small" role="alert">
+                                <a href="{% url 'employer_view' employer.id %}" class="alert-link">{{ employer.Title }}</a> - {{ employer.get_Status_display }} - Создана {{ employer.CreateDate|date }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
                 </div>
                 <div class="modal-footer bg-light">
-                    <a class="btn btn-primary" href="{% url 'create' temp_employer.id %}" role="button">Создать карточку предприятия</a>
+                    <a class="btn btn-primary" href="{% url 'create' temp_employer.id %}" role="button">Создать карточку предприятия нарушителя</a>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
                 </div>
 

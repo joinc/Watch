@@ -2,7 +2,6 @@
 
 {% block html_body %}
     <main role="main" class="container-fluid">
-        {% include "messages.html" %}
         <div class="shadow card border-dark mb-3">
             <div class="card-header">
                 <div class="row">
@@ -11,7 +10,7 @@
                     </div>
                     <div class="col-auto mr-0 text-right small">
                         Всего работодателей из Катарсиса - <strong>{{ count_total_employer }}</strong>
-                        <span class="d-block">Загружены {{ upload_date }}</span>
+                        <span class="d-block">Загружены {{ upload_date|date }}</span>
                     </div>
                 </div>
             </div>
@@ -25,6 +24,7 @@
                         </div>
                     </div>
                 </form>
+                {% include "messages.html" %}
                 <div class="list-group list-group-flush">
                     {% for employer in list_employer %}
                         <div class="list-group-item">

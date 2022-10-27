@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
-from Main.models import StatusEmployer, Department
+from Main.models import TypeStatus, Department
 
 ######################################################################################################################
 
@@ -10,7 +10,7 @@ class FormSearchEmployer(forms.Form):
     list_czn = [('', 'Выберите центр занятости')]
     list_czn.extend(list(Department.objects.filter(role='czn').values_list('id', 'title')))
     list_status = [('', 'Выбарите статус')]
-    list_status.extend(list(StatusEmployer.objects.filter(is_filtered=True).values_list('id', 'title')))
+    list_status.extend(list(TypeStatus.objects.filter(is_filtered=True).values_list('id', 'title')))
 
     find = forms.CharField(
         label='',
@@ -53,7 +53,7 @@ class FormSearchEmployer(forms.Form):
 
 class FormFilterStatus(forms.Form):
     list_status = [(0, 'Все статусы')]
-    list_status.extend(list(StatusEmployer.objects.filter(is_filtered=True).values_list('id', 'title')))
+    list_status.extend(list(TypeStatus.objects.filter(is_filtered=True).values_list('id', 'title')))
     status = forms.ChoiceField(
         choices=list_status,
         label='',

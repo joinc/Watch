@@ -6,7 +6,7 @@ from django.conf import settings
 from pyexcel_ods3 import save_data
 from collections import OrderedDict
 from Main.choices import STATUS_CHOICES
-from Main.models import UserProfile, Employer, WidgetStatus, Widget
+from Main.models import UserProfile, Employer, WidgetStatus, Widget, StatusEmployer
 import mimetypes
 import os
 
@@ -28,25 +28,112 @@ def get_count_page(count_employer) -> int:
 ######################################################################################################################
 
 
-def get_count_employer(profile, widget_id):
+def get_search_employer(find, department, list_status) -> list:
     """
-    Получение количества карточек нарушителя для выбранного виджета, по его id, и с фильтрацие по роли отдела профиля,
+    Возвращает список карточек нарушителей по заданным критериям
+    :param find:
+    :param department:
+    :param list_status:
+    :return:
+    """
+    if find and department and list_status:
+        list_id_employer = list(
+            set(
+                list(
+                    StatusEmployer.objects.filter(employer__INN__icontains=find,
+                                                  employer__owner_department=department,
+                                                  type_status__in=list_status,
+                                                  ).values_list('employer_id', flat=True)
+                ) + list(
+                    StatusEmployer.objects.filter(employer__Title__contains=find,
+                                                  employer__owner_department=department,
+                                                  type_status__in=list_status,
+                                                  ).values_list('employer_id', flat=True)
+                )
+            )
+        )
+    elif find and department and not list_status:
+        list_id_employer = list(
+            set(
+                list(
+                    StatusEmployer.objects.filter(employer__INN__icontains=find,
+                                                  employer__owner_department=department,
+                                                  ).values_list('employer_id', flat=True)
+                ) + list(
+                    StatusEmployer.objects.filter(employer__Title__contains=find,
+                                                  employer__owner_department=department,
+                                                  ).values_list('employer_id', flat=True)
+                )
+            )
+        )
+    elif find and not department and list_status:
+        list_id_employer = list(
+            set(
+                list(
+                    StatusEmployer.objects.filter(employer__INN__icontains=find,
+                                                  type_status__in=list_status,
+                                                  ).values_list('employer_id', flat=True)
+                ) + list(
+                    StatusEmployer.objects.filter(employer__Title__contains=find,
+                                                  type_status__in=list_status,
+                                                  ).values_list('employer_id', flat=True)
+                )
+            )
+        )
+    elif find and not department and not list_status:
+        list_id_employer = list(
+            set(
+                list(
+                    StatusEmployer.objects.filter(employer__INN__icontains=find,
+                                                  ).values_list('employer_id', flat=True)
+                ) + list(
+                    StatusEmployer.objects.filter(employer__Title__contains=find,
+                                                  ).values_list('employer_id', flat=True)
+                )
+            )
+        )
+    elif not find and department and list_status:
+        list_id_employer = list(
+            StatusEmployer.objects.filter(employer__owner_department=department,
+                                          type_status__in=list_status,
+                                          ).values_list('employer_id', flat=True)
+        )
+    elif not find and department and not list_status:
+        list_id_employer = list(
+            StatusEmployer.objects.filter(employer__owner_department=department,
+                                          ).values_list('employer_id', flat=True)
+        )
+    elif not find and not department and list_status:
+        list_id_employer = list(
+            StatusEmployer.objects.filter(type_status__in=list_status,
+                                          ).values_list('employer_id', flat=True)
+        )
+    else:
+        list_id_employer = list(
+            StatusEmployer.objects.all().values_list('employer_id', flat=True)
+        )
+    return Employer.objects.filter(id__in=list_id_employer)
+
+
+######################################################################################################################
+
+
+def get_count_employer(widget_id, profile) -> int:
+    """
+    Получение количества карточек нарушителя для выбранного виджета, по его id, и с фильтрацие по отделу профиля,
     если роль ЦЗН, то считаются только карточки принадлежащие данному ЦЗН, остальным отправляется общее количество
     карточек нарушителей в выбранном виджете.
-    :param profile:
-    :param widget_id:
+    :param widget_id: Виджет
+    :param profile: Профиль пользователя которому нужно вычисления количества карточек для конкретного виджета
     :return: Количество карточек в определенном виджете для пользователя
     """
-    list_status = WidgetStatus.objects.filter(widget__id=widget_id, checked=True, )
-    if profile.department.role == 'czn':
-        return Employer.objects.filter(
-            status_new__StatusWidget__in=list_status,
-            Owner__department=profile.department,
-        ).count()
+    list_status = list(
+        WidgetStatus.objects.filter(widget__id=widget_id, checked=True, ).values_list('status', flat=True)
+    )
+    if profile.department.is_czn:
+        return len(get_search_employer(find=False, department=profile.department, list_status=list_status))
     else:
-        return Employer.objects.filter(
-            status_new__StatusWidget__in=list_status,
-        ).count()
+        return len(get_search_employer(find=False, department=False, list_status=list_status))
 
 
 ######################################################################################################################
@@ -60,74 +147,7 @@ def get_count_find_employer(find, czn, list_status) -> int:
     :param list_status:
     :return:
     """
-    if find and czn and list_status:
-        return len(
-            set(
-                list(
-                    Employer.objects.filter(
-                        INN__icontains=find,
-                        Owner__department__id=czn,
-                        status_new__StatusWidget__in=list_status,
-                    ).values_list('id', flat=True)
-                ) + list(
-                    Employer.objects.filter(
-                        Title__icontains=find,
-                        Owner__department__id=czn,
-                        status_new__StatusWidget__in=list_status,
-                    ).values_list('id', flat=True)
-                )
-            )
-        )
-    elif find and czn and not list_status:
-        return len(
-            set(
-                list(
-                    Employer.objects.filter(
-                        INN__icontains=find,
-                        Owner__department__id=czn,
-                    ).values_list('id', flat=True)
-                ) + list(
-                    Employer.objects.filter(
-                        Title__icontains=find,
-                        Owner__department__id=czn,
-                    ).values_list('id', flat=True)
-                )
-            )
-        )
-    elif find and not czn and list_status:
-        return len(
-            set(
-                list(
-                    Employer.objects.filter(
-                        INN__icontains=find,
-                        status_new__StatusWidget__in=list_status,
-                    ).values_list('id', flat=True)
-                ) + list(
-                    Employer.objects.filter(
-                        Title__icontains=find,
-                        status_new__StatusWidget__in=list_status,
-                    ).values_list('id', flat=True)
-                )
-            )
-        )
-    elif find and not czn and not list_status:
-        return len(
-            set(
-                list(
-                    Employer.objects.filter(INN__icontains=find, ).values_list('id', flat=True)
-                ) + list(
-                    Employer.objects.filter(Title__icontains=find, ).values_list('id', flat=True)
-                )
-            )
-        )
-    elif not find and czn and list_status:
-        return Employer.objects.filter(Owner__department__id=czn, status_new__StatusWidget__in=list_status, ).count()
-    elif not find and czn and not list_status:
-        return Employer.objects.filter(Owner__department__id=czn, ).count()
-    elif not find and not czn and list_status:
-        return Employer.objects.filter(status_new__StatusWidget__in=list_status, ).count()
-    else:
-        return Employer.objects.all().count()
+    return len(get_search_employer(find=find, department=czn, list_status=list_status))
 
 
 ######################################################################################################################
@@ -143,93 +163,8 @@ def get_list_employer(find, czn, list_status, start, stop) -> list:
     :param stop:
     :return:
     """
-    if find and czn and list_status:
-        list_search_id_employer = list(
-            set(
-                list(
-                    Employer.objects.filter(
-                        INN__icontains=find,
-                        Owner__department__id=czn,
-                        status_new__StatusWidget__in=list_status,
-                    ).values_list('id', flat=True)
-                ) + list(
-                    Employer.objects.filter(
-                        Title__icontains=find,
-                        Owner__department__id=czn,
-                        status_new__StatusWidget__in=list_status,
-                    ).values_list('id', flat=True)
-                )
-            )
-        )
-    elif find and czn and not list_status:
-        list_search_id_employer = list(
-            set(
-                list(
-                    Employer.objects.filter(
-                        INN__icontains=find,
-                        Owner__department__id=czn,
-                    ).values_list('id', flat=True)
-                ) + list(
-                    Employer.objects.filter(
-                        Title__icontains=find,
-                        Owner__department__id=czn,
-                    ).values_list('id', flat=True)
-                )
-            )
-        )
-    elif find and not czn and list_status:
-        list_search_id_employer = list(
-            set(
-                list(
-                    Employer.objects.filter(
-                        INN__icontains=find,
-                        status_new__StatusWidget__in=list_status,
-                    ).values_list('id', flat=True)
-                ) + list(
-                    Employer.objects.filter(
-                        Title__icontains=find,
-                        status_new__StatusWidget__in=list_status,
-                    ).values_list('id', flat=True)
-                )
-            )
-        )
-    elif find and not czn and not list_status:
-        list_search_id_employer = list(
-            set(
-                list(
-                    Employer.objects.filter(
-                        INN__icontains=find,
-                    ).values_list('id', flat=True)
-                ) + list(
-                    Employer.objects.filter(
-                        Title__icontains=find,
-                    ).values_list('id', flat=True)
-                )
-            )
-        )
-    elif not find and czn and list_status:
-        list_search_id_employer = list(
-            Employer.objects.filter(
-                Owner__department__id=czn,
-                status_new__StatusWidget__in=list_status,
-            ).values_list('id', flat=True)
-        )
-    elif not find and czn and not list_status:
-        list_search_id_employer = list(
-            Employer.objects.filter(
-                Owner__department__id=czn,
-            ).values_list('id', flat=True)
-        )
-    elif not find and not czn and list_status:
-        list_search_id_employer = list(
-            Employer.objects.filter(
-                status_new__StatusWidget__in=list_status,
-            ).values_list('id', flat=True)
-        )
-    else:
-        list_search_id_employer = list(Employer.objects.all().values_list('id', flat=True))
-    list_search_employer = Employer.objects.filter(id__in=list_search_id_employer)[start:stop]
-    return list_search_employer
+    list_id_employer = get_search_employer(find=find, department=czn, list_status=list_status)
+    return Employer.objects.filter(id__in=list_id_employer)[start:stop]
 
 
 ######################################################################################################################
@@ -243,7 +178,7 @@ def get_list_widget(profile):
     """
     list_widget = []
     for widget in Widget.objects.all():
-        count = get_count_employer(profile=profile, widget_id=widget.id)
+        count = get_count_employer(widget_id=widget.id, profile=profile)
         list_widget.append((widget, count))
     return list_widget
 
@@ -253,12 +188,11 @@ def get_list_widget(profile):
 
 def get_list_existing_employer(employer):
     """
-
+    Функция возвращает список карточек нарушителя, с тем же ИНН. За исключением из списка начальной карточки.
     :param employer:
     :return:
     """
-    result = list(Employer.objects.filter(INN__exact=employer.INN).exclude(id=employer.id))
-    return result
+    return list(Employer.objects.filter(INN__exact=employer.INN).exclude(id=employer.id))
 
 
 ######################################################################################################################

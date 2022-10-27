@@ -10,130 +10,134 @@
     <main role="main" class="container-fluid">
         <div class="shadow card border-dark mb-3">
             <div class="card-header">
-                <h4>{{ title }}:</h4>
+                <h4>{{ title }}</h4>
             </div>
             <div class="card-body">
-{#                <form method='post' action='{% url 'employer_save' employer.id %}' enctype="multipart/form-data">#}
                 <form method='post' action=''>
                     {% csrf_token %}
-                    <table class="table table-borderless table-sm table-condensed table-striped">
-                        <tbody>
-                        <tr>
-                            <th class="w-25">{{ form_employer.Title.label }}</th>
-                            <td>{{ form_employer.Title }}</td>
-                        </tr>
-                        <tr>
-                            <th>{{ form_employer.JurAddress.label }}</th>
-                            <td>{{ form_employer.JurAddress }}</td>
-                        </tr>
-                        <tr>
-                            <th>{{ form_employer.FactAddress.label }}</th>
-                            <td>{{ form_employer.FactAddress }}</td>
-                        </tr>
-                        <tr>
-                            <th>{{ form_employer.INN.label }}</th>
-                            <td>{{ form_employer.INN }}</td>
-                        </tr>
-                        <tr>
-                            <td>{{ form_employer.OGRN.label }}</td>
-                            <td>{{ form_employer.OGRN }}</td>
-                        </tr>
-                        <tr>
-                            <td title='Указывается для работодателей, разместивших сведения о вакансиях в информационно-телекоммуникационой сети "Интернет", включая информационно-аналитическую систему Общероссийская база вакансий "Работа в России", а также на сайтах организаций, предоставляющих услуги по подбору работников, в средствах массовой информации Омской области, в том числе периодических печатных изданиях'>{{ form_employer.VacancyDate.label }}*</td>
-                            <td>
-                                <div class="card card-body">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">{{ form_employer.VacancyDate }}</li>
-                                        <li class="list-group-item">{{ form_employer.VacancyComment }}</li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>{{ form_employer.EventDate.label }}</td>
-                            <td>
-                                <div class="card card-body">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">{{ form_employer.EventDate }}</li>
-                                        <li class="list-group-item">{{ form_employer.EventComment }}</li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                Вид административного правонарушения:
-                            </th>
-                            <td>
-                                {% for information in list_information %}
-                                    <div class="alert alert-warning small" role="alert">
-                                        <div class="row">
-                                            <div class="col mr-auto">
-                                                {{ information.get_Name_display }}
-                                                {% if information.Comment %}<br />Комментарий: {{ information.Comment }}{% endif %}
-                                                {% if information.Attache %}<br />Вложение: <a href="{{ information.Attache.url }}">Скачать файл</a> {% endif %}
-                                            </div>
-                                            <div class="col-1 mr-0 text-right">
-                                                <button type="button" class="btn btn-outline-danger" onclick="DeleteModal('Удаление записи о непредставленной информации', '{{ information.get_Name_display }}', '{% url 'information_delete' information.id %}')" title="Удалить запись о непредставленной информации"><i class="fas fa-times"></i></button>
-                                            </div>
+                    <div class="card">
+                        <div class="card-header alert-info">
+                            <h4>Сведения о работодателе нарушившим статью 25 Закона Российской Федерации "О занятости населения в Российской Федерации":</h4>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless table-sm table-condensed table-striped">
+                                <tbody>
+                                <tr>
+                                    <th class="w-25">{{ form_employer.Title.label }}</th>
+                                    <td>{{ form_employer.Title }}</td>
+                                </tr>
+                                <tr>
+                                    <th>{{ form_employer.JurAddress.label }}</th>
+                                    <td>{{ form_employer.JurAddress }}</td>
+                                </tr>
+                                <tr>
+                                    <th>{{ form_employer.FactAddress.label }}</th>
+                                    <td>{{ form_employer.FactAddress }}</td>
+                                </tr>
+                                <tr>
+                                    <th>{{ form_employer.INN.label }}</th>
+                                    <td>{{ form_employer.INN }}</td>
+                                </tr>
+                                <tr>
+                                    <td>{{ form_employer.OGRN.label }}</td>
+                                    <td>{{ form_employer.OGRN }}</td>
+                                </tr>
+                                <tr>
+                                    <td title='Указывается для работодателей, разместивших сведения о вакансиях в информационно-телекоммуникационой сети "Интернет", включая информационно-аналитическую систему Общероссийская база вакансий "Работа в России", а также на сайтах организаций, предоставляющих услуги по подбору работников, в средствах массовой информации Омской области, в том числе периодических печатных изданиях'>{{ form_employer.VacancyDate.label }}*</td>
+                                    <td>
+                                        <div class="card card-body">
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item">{{ form_employer.VacancyDate }}</li>
+                                                <li class="list-group-item">{{ form_employer.VacancyComment }}</li>
+                                            </ul>
                                         </div>
-                                    </div>
-                                {% endfor %}
-                                <button type="button" class="btn btn-primary" onclick="ShowModalInformation()">Добавить</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                Информирования работодателя центром занятости о необходимости предоставления информации о наличии свободных рабочих мест и вакантных должностей:
-                            </th>
-                            <td>
-                                {% for notify in list_notify %}
-                                    <div class="alert alert-info small" role="alert">
-                                        <div class="row">
-                                            <div class="col">
-                                                {% if notify.NotifyDate %}{{ notify.NotifyDate }}{% else %}Дата не указана{% endif %}, {{ notify.get_Method_display }}
-                                                {% if notify.Comment %}<br />Комментарий: {{ notify.Comment }}{% endif %}
-                                                {% if notify.Attache %}<br />Вложение: <a href="{{ notify.Attache.url }}">Скачать файл</a>{% endif %}
-                                            </div>
-                                            <div class="col-1 mr-0 text-right">
-                                                <button type="button" class="btn btn-outline-danger" onclick="DeleteModal('Удаление записи об информировании', '{{ notify.get_Method_display }}', '{% url 'notify_delete' notify.id %}')" title="Удалить запись о непредставленной информации"><i class="fas fa-times"></i></button>
-                                            </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ form_employer.EventDate.label }}</td>
+                                    <td>
+                                        <div class="card card-body">
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item">{{ form_employer.EventDate }}</li>
+                                                <li class="list-group-item">{{ form_employer.EventComment }}</li>
+                                            </ul>
                                         </div>
-                                    </div>
-                                {% endfor %}
-                                <button type="button" class="btn btn-primary" onclick="ShowModalNotify()">Добавить</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                {{ form_employer.Contact.label }}
-                            </td>
-                            <td>
-                                {{ form_employer.Contact }}
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    {% if list_information.count == 0 or list_notify.count == 0 %}
-                        <button type="submit" class="btn btn-outline-secondary" disabled>Сохранить карточку предприятия и отправить на проверку</button>
-                    {% else %}
-                        <button type="submit" class="btn btn-success">Сохранить карточку предприятия и отправить на проверку</button>
-                    {% endif %}
-                    {% if employer.Status == 0 %}
-                        <button type="submit" class="btn btn-primary">Сохранить черновик</button>
-                        <button type="button" class="btn btn-danger" onclick="DeleteModal('Удаление черновика карточки предприятия', '{{ form.title.value }}', '{% url 'employer_delete' employer.id %}')" title="Удалить черновик">Удалить черновик</button>
-                    {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        Вид административного правонарушения:
+                                    </th>
+                                    <td>
+                                        {% for information in list_information %}
+                                            <div class="alert alert-warning" role="alert">
+                                                <div class="row">
+                                                    <div class="col mr-auto">
+                                                        {{ information.type_violations }}
+                                                        {% if information.Comment %}<br />Комментарий: {{ information.Comment }}{% endif %}
+                                                        {% if information.Attache %}<br />Вложение: <a href="{{ information.Attache.url }}">Скачать файл</a> {% endif %}
+                                                    </div>
+                                                    <div class="col-1 mr-0 text-right">
+                                                        <button type="button" class="btn btn-outline-danger" onclick="DeleteModal('Удаление записи о непредставленной информации', '{{ information.get_Name_display }}', '{% url 'information_delete' information.id %}')" title="Удалить запись о непредставленной информации"><i class="fas fa-times"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                        <button type="button" class="btn btn-outline-primary" onclick="ShowModalInformation()">
+                                            Добавить правонарушение
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        Информирования работодателя центром занятости о необходимости предоставления информации о наличии свободных рабочих мест и вакантных должностей:
+                                    </th>
+                                    <td>
+                                        {% for notify in list_notify %}
+                                            <div class="alert alert-info" role="alert">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        {% if notify.NotifyDate %}{{ notify.NotifyDate }}{% else %}Дата не указана{% endif %}, {{ notify.type_notify }}
+                                                        {% if notify.Comment %}<br />Комментарий: {{ notify.Comment }}{% endif %}
+                                                        {% if notify.Attache %}<br />Вложение: <a href="{{ notify.Attache.url }}">Скачать файл</a>{% endif %}
+                                                    </div>
+                                                    <div class="col-1 mr-0 text-right">
+                                                        <button type="button" class="btn btn-outline-danger" onclick="DeleteModal('Удаление записи об информировании', '{{ notify.get_Method_display }}', '{% url 'notify_delete' notify.id %}')" title="Удалить запись о непредставленной информации"><i class="fas fa-times"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                        <button type="button" class="btn btn-outline-primary" onclick="ShowModalNotify()">
+                                            Добавить информирование
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>{{ form_employer.Contact.label }}</td>
+                                    <td>{{ form_employer.Contact }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            {% if list_information and list_notify %}
+                                <button type="submit" class="btn btn-success" name="send">
+                                    Сохранить карточку предприятия и отправить на проверку
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn btn-outline-secondary" disabled title="Не заполнено правонарушение или информирование работодателя">
+                                    Сохранить карточку предприятия и отправить на проверку
+                                </button>
+                            {% endif %}
+                            {% if employer.Status == 0 %}
+                                <button type="submit" class="btn btn-primary">Сохранить черновик</button>
+                                <button type="button" class="btn btn-danger" onclick="DeleteModal('Удаление черновика карточки предприятия', '{{ form.title.value }}', '{% url 'employer_delete' employer.id %}')" title="Удалить черновик">Удалить черновик</button>
+                            {% endif %}
+                        </div>
+                    </div>
                 </form>
-                {% for ex_employer in list_existing_employer %}
-                    <div class="alert {% if ex_employer.Status == 9 %}alert-success{% else %}alert-danger{% endif %} small" role="alert">
-                        Карточка предприятия с таким же ИНН существует. <a href="{% url 'employer_view' ex_employer.id %}" class="alert-link">{{ ex_employer.Title }}</a> - {{ ex_employer.get_Status_display }}
-                    </div>
-                {% endfor %}
-                {% for event in list_event %}
-                    <div class="alert alert-dark small" role="alert">
-                        {{ event.Comment }} ({{ event.CreateDate }}, {% firstof event.Owner.user.get_full_name event.Owner.user %})
-                    </div>
-                {% endfor %}
+                {% include "employer/list_existing_employer.html" %}
+                {% include "employer/list_event.html" %}
             </div>
         </div>
     </main>
@@ -141,22 +145,24 @@
     <div class="modal fade" id="ModalInformation" tabindex="-1" role="dialog" aria-labelledby="ModalInformationTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
             <div class="modal-content">
-                <form method='post' action='{% url 'information_create' employer.id %}' enctype="multipart/form-data">
+                <form method='post' class="mb-0" action='{% url 'information_create' employer.id %}' enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="modal-header table-warning">
                         <h5 class="modal-title text-center" id="ModalInformationTitle">Добавление непредставленной, представленной с нарушением сроков или не в полном объеме информации в центре занятости в соответствии с законодательством о занятости</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
-                        {% for field in form_information %}
-                            <div class="form-group">
-                                <strong>{{ field.label }}</strong>:
-                                {{ field }}
-                            </div>
-                        {% endfor %}
+                        <div class="form-group">
+                            {% for field in form_information %}
+                                <dl class="row">
+                                    <dt class="col-sm-3">{{ field.label }}</dt>
+                                    <dd class="col-sm-9">{{ field }}</dd>
+                                </dl>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary" type="submit">Добавить информацию</button>
+                    <div class="modal-footer bg-light">
+                        <button class="btn btn-primary" type="submit">Добавить правонарушение</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Не добавлять</button>
                     </div>
                 </form>
@@ -168,21 +174,23 @@
     <div class="modal fade" id="ModalNotify" tabindex="-1" role="dialog" aria-labelledby="ModalNotifyTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
             <div class="modal-content">
-                <form method='post' action='{% url 'notify_create' employer.id %}' enctype="multipart/form-data">
+                <form method='post' class="mb-0" action='{% url 'notify_create' employer.id %}' enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="modal-header table-info">
                         <h5 class="modal-title text-center" id="ModalNotifyTitle">Добавление информирования работодателя центром занятости о необходимости предоставления информации о наличии свободных рабочих мест и вакантных должностей</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
-                        {% for field in form_notify %}
-                            <div class="form-group">
-                                <strong>{{ field.label }}</strong>:
-                                {{ field }}
-                            </div>
-                        {% endfor %}
+                        <div class="form-group">
+                            {% for field in form_notify %}
+                                <dl class="row">
+                                    <dt class="col-sm-3">{{ field.label }}</dt>
+                                    <dd class="col-sm-9">{{ field }}</dd>
+                                </dl>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer bg-light">
                         <button class="btn btn-primary" type="submit">Добавить информирование</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Не добавлять</button>
                     </div>
@@ -227,11 +235,11 @@
             $('[data-toggle="tooltip"]').tooltip()
         })
         $(document).ready(function() {
-            $('select[name=Method]').select2({
+            $('select[name=type_violations]').select2({
                 theme: "bootstrap4",
                 language: "ru"
             });
-            $('select[name=Name]').select2({
+            $('select[name=type_notify]').select2({
                 theme: "bootstrap4",
                 language: "ru"
             });

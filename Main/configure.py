@@ -7,9 +7,12 @@ from django.contrib import messages
 from django.conf import settings
 from datetime import datetime
 from openpyxl import load_workbook
-from Main.models import UserProfile, Configure, TempEmployer, UpdateEmployer, Widget, StatusEmployer, WidgetStatus, Employer
+from Main.models import Configure, TempEmployer, UpdateEmployer, Widget, TypeStatus, WidgetStatus, Employer, \
+    StatusEmployer, Info, TypeViolations, TypeNotify, Notify
+from Main.tools import get_profile
 from Main.decorators import superuser_only
 import os
+import re
 
 ######################################################################################################################
 
@@ -22,7 +25,7 @@ def configure_list(request) -> HttpResponse:
     :return:
     """
     context = {
-        'current_profile': get_object_or_404(UserProfile, user=request.user),
+        'current_profile': get_profile(user=request.user),
         'title': 'Список конфигураций',
         'list_configure': Configure.objects.all(),
     }
@@ -38,13 +41,102 @@ def employer_status_sync(request):
     Синхронизация статуса карточек работодателей для перевода их на новую версию информационной системы.
     :param request:
     :return:
+    TODO: Удалить после перехода на новую версию
     """
     list_employer = Employer.objects.all()
+    count = 0
     for employer in list_employer:
-        old_status = StatusEmployer.objects.filter(status=employer.Status).first()
-        if old_status:
-            employer.status_new = old_status
-            employer.save(update_fields=['status_new'])
+        if not StatusEmployer.objects.filter(employer=employer).exists():
+            old_status = TypeStatus.objects.filter(status=employer.Status).first()
+            if old_status:
+                StatusEmployer.objects.create(employer=employer, type_status=old_status)
+                count = count + 1
+    messages.info(
+        request,
+        f'Обновлено {count} статусов в карточках работодателей-нарушителей'
+    )
+    return redirect(reverse('configure_list'))
+
+
+######################################################################################################################
+
+
+@superuser_only
+def employer_violations_sync(request):
+    """
+    Синхронизация информации о правонарушении для перевода их на новую версию информационной системы.
+    :param request:
+    :return:
+    TODO: Удалить после перехода на новую версию
+    """
+    list_violations = Info.objects.filter(title=None)
+    count = 0
+    for violation in list_violations:
+        if not violation.title:
+            old_violation = TypeViolations.objects.filter(old_name=violation.Name).first()
+            if old_violation:
+                violation.title = old_violation
+                violation.save(update_fields=['title'])
+                count = count + 1
+    messages.info(
+        request,
+        f'Обновлено {count} правонарушений в карточках работодателей-нарушителей'
+    )
+    return redirect(reverse('configure_list'))
+
+
+######################################################################################################################
+
+
+@superuser_only
+def employer_notify_sync(request):
+    """
+    Синхронизация информации об информировании работодателя центром занятости для перевода их на новую версию
+    информационной системы.
+    :param request:
+    :return:
+    TODO: Удалить после перехода на новую версию
+    """
+    list_notify = Notify.objects.filter(title=None)
+    count = 0
+    for notify in list_notify:
+        if not notify.title:
+            old_notify = TypeNotify.objects.filter(old_name=notify.Method).first()
+            if old_notify:
+                notify.title = old_notify
+                notify.save(update_fields=['title'])
+                count = count + 1
+    messages.info(
+        request,
+        f'Обновлено {count} информирований в карточках работодателей-нарушителей'
+    )
+    return redirect(reverse('configure_list'))
+
+
+######################################################################################################################
+
+
+@superuser_only
+def employer_set_owner(request):
+    """
+    Назначение владельцев карточек (отделов) в зависимости от отдела пользователя, который создал карточку.
+    :param request:
+    :return:
+    TODO: Удалить после перехода на новую версию
+    """
+    list_employer = Employer.objects.all()
+    count = 0
+    for employer in list_employer:
+        department = employer.Owner.department
+        if department:
+            employer.owner_department = department
+            employer.save(update_fields=['owner_department'])
+
+    messages.info(
+        request,
+        f'Количество карточек, для которых назначены владельцы - {count}.'
+    )
+
     return redirect(reverse('configure_list'))
 
 
@@ -71,7 +163,7 @@ def send_email(request):
     send_mail('Заголовок', data, settings.DEFAULT_FROM_EMAIL, email, fail_silently=False)
     messages.info(
         request,
-        'Отправлено тестовое электронное письмо на адрес {0}.'.format(email)
+        f'Отправлено тестовое электронное письмо на адрес {email}.'
     )
 
     return redirect(reverse('configure_list'))
@@ -90,11 +182,15 @@ def employer_load(request):
 
     if request.POST:
 
-        def send_blank(value):
+        def send_blank(value, decoding=False):
             if value:
-                return value
+                if decoding:
+                    result = re.sub('_x000d_', ' ', value, flags=re.IGNORECASE)
+                else:
+                    result = value
             else:
-                return ''
+                result = ''
+            return result
 
         start_time = datetime.now()
         TempEmployer.objects.all().delete()
@@ -113,13 +209,13 @@ def employer_load(request):
                 list_temp_employer = []
                 for row in range(3, sheet.max_row + 1):
                     temp_employer = TempEmployer(
-                        Number=send_blank(sheet.cell(row=row, column=1).value),
-                        Title=send_blank(sheet.cell(row=row, column=2).value),
-                        INN=send_blank(sheet.cell(row=row, column=3).value),
-                        OGRN=send_blank(sheet.cell(row=row, column=4).value),
-                        JurAddress=send_blank(sheet.cell(row=row, column=5).value),
-                        FactAddress=send_blank(sheet.cell(row=row, column=6).value),
-                        Contact=send_blank(sheet.cell(row=row, column=7).value),
+                        Number=send_blank(value=sheet.cell(row=row, column=1).value),
+                        Title=send_blank(value=sheet.cell(row=row, column=2).value, decoding=True),
+                        INN=send_blank(value=sheet.cell(row=row, column=3).value),
+                        OGRN=send_blank(value=sheet.cell(row=row, column=4).value),
+                        JurAddress=send_blank(value=sheet.cell(row=row, column=5).value),
+                        FactAddress=send_blank(value=sheet.cell(row=row, column=6).value),
+                        Contact=send_blank(value=sheet.cell(row=row, column=7).value),
                     )
                     event_date = send_blank(sheet.cell(row=row, column=8).value)
                     if isinstance(event_date, datetime):
@@ -129,32 +225,32 @@ def employer_load(request):
 
                 messages.info(
                     request,
-                    'Файл {0} содержит записей организаций - {1}.'.format(x.name, sheet.max_row - 2)
+                    f'Файл {x.name} содержит записей организаций - {sheet.max_row - 2}.'
                 )
             else:
                 messages.error(
                     request,
-                    'Файл {0} не содержит данные.'.format(x.name)
+                    f'Файл {x.name} не содержит данные.'
                 )
             workbook.close()
             os.remove(file)
         update_employer = UpdateEmployer(
-            upload_date=datetime.now(),
             count_employer=TempEmployer.objects.all().count(),
             time_spent=(datetime.now() - start_time).seconds,
         )
         update_employer.save()
         messages.success(
             request,
-            'Успешно загружено {0} записей организаций из Катарсис за {1} секунд.'.format(
+            'Успешно загружено {0} записей организаций из Катарсис за {1} секунд(ы).'.format(
                 update_employer.count_employer,
                 update_employer.time_spent,
             )
         )
     context = {
-        'current_profile': get_object_or_404(UserProfile, user=request.user),
+        'current_profile': get_profile(user=request.user),
         'title': 'Загрузить работодателей',
         'list_breadcrumb': ((reverse('configure_list'), 'Список конфигураций'),),
+        'list_upload': UpdateEmployer.objects.all()[:10],
     }
     return render(request=request, template_name='configure/employer_load.html', context=context, )
 
@@ -192,13 +288,13 @@ def widget_list(request):
             return redirect(reverse('widget_list'))
         else:
             list_widget = []
-            list_status = StatusEmployer.objects.all()
+            list_status = TypeStatus.objects.all()
             for widget in Widget.objects.all():
                 for status in list_status:
                     widget_filter, created = WidgetStatus.objects.get_or_create(widget=widget, status=status)
                 list_widget.append([widget, WidgetStatus.objects.filter(widget=widget)])
             context = {
-                'current_profile': get_object_or_404(UserProfile, user=request.user),
+                'current_profile': get_profile(user=request.user),
                 'title': 'Список фильтров',
                 'list_breadcrumb': ((reverse('configure_list'), 'Список конфигураций'),),
                 'list_widget': list_widget,

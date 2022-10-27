@@ -20,7 +20,7 @@
                         </div>
                         <div class="card-footer text-muted">
                             <div class="btn-group mr-2" role="group">
-                                <a href="{% url 'emp' message.EmpMessageID.id %}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">Перейти</a>
+                                <a href="{% url 'employer_view' message.EmpMessageID.id %}" class="btn btn-outline-success btn-sm" role="button" aria-pressed="true">Перейти</a>
                             </div>
                             <div class="btn-group" role="group">
                                 {% if not message.Reading %}<a href="{% url 'message_read' message.id %}" class="btn btn-primary btn-sm">Прочитано</a>{% endif %}

@@ -2,12 +2,55 @@ from django.db import models
 from django.contrib.auth.models import User
 from .choices import ROLE_CHOICES, STATUS_CHOICES, INFO_CHOICES, METHOD_CHOICES, RESULT_CHOICES, ROLES_CHOICES, \
     FULL_MENU
-from django.utils.html import format_html
 
 ######################################################################################################################
 
 
-class StatusEmployer(models.Model):
+class Department(models.Model):
+    id = models.AutoField(
+        primary_key=True,
+    )
+    title = models.CharField(
+        verbose_name='Отдел',
+        max_length=124,
+        default='',
+    )
+    role = models.CharField(
+        verbose_name='Роль',
+        max_length=16,
+        choices=ROLES_CHOICES,
+        null=True,
+        blank=True,
+        default=None,
+    )
+    is_czn = models.BooleanField(
+        verbose_name='Признак того, что организация является Центром занятости',
+        default=False,
+    )
+    is_control = models.BooleanField(
+        verbose_name='Признак того, что отделя является Отделом надзора и контроля',
+        default=False,
+    )
+    create_date = models.DateTimeField(
+        verbose_name='Дата создания отдела',
+        auto_now_add=True,
+        null=True,
+    )
+
+    def __str__(self):
+        return f'{self.title}'
+
+    class Meta:
+        ordering = 'title',
+        verbose_name = 'Отдел'
+        verbose_name_plural = 'Отделы'
+        managed = True
+
+
+######################################################################################################################
+
+
+class TypeStatus(models.Model):
     id = models.AutoField(
         primary_key=True,
     )
@@ -30,6 +73,38 @@ class StatusEmployer(models.Model):
         blank=True,
         null=True,
     )
+    prev_status = models.ForeignKey(
+        'self',
+        verbose_name='Статус для возврата',
+        null=True,
+        blank=True,
+        default=None,
+        related_name='StatusPrev',
+        on_delete=models.SET_NULL,
+    )
+    next_status = models.ForeignKey(
+        'self',
+        verbose_name='Следующий статус',
+        null=True,
+        blank=True,
+        default=None,
+        related_name='StatusNext',
+        on_delete=models.SET_NULL,
+    )
+    role_access = models.CharField(
+        verbose_name='Организация или отдел которые имеют доступ к выполнению данного шага',
+        max_length=16,
+        choices=ROLES_CHOICES,
+        null=True,
+        blank=True,
+        default=None,
+    )
+    template_path = models.CharField(
+        verbose_name='Путь до шаблона с формой шага карточки',
+        max_length=124,
+        blank=True,
+        default='',
+    )
     color = models.CharField(
         verbose_name='Цвет заголовка карточки',
         max_length=32,
@@ -37,48 +112,153 @@ class StatusEmployer(models.Model):
     )
 
     def __str__(self):
-        return '{0}'.format(self.title)
+        return f'{self.title}'
 
     class Meta:
         ordering = 'order', 'title',
-        verbose_name = 'Статус'
-        verbose_name_plural = 'Статусы'
+        verbose_name = 'Вид статуса'
+        verbose_name_plural = 'Виды статусов'
         managed = True
 
 
 ######################################################################################################################
 
 
-class Department(models.Model):
+class TypeViolations(models.Model):
     id = models.AutoField(
         primary_key=True,
     )
     title = models.CharField(
-        verbose_name='Отдел',
-        max_length=124,
+        verbose_name='Название правонарушения',
+        max_length=625,
         default='',
     )
-    role = models.CharField(
-        verbose_name='Роль',
-        max_length=16,
-        choices=ROLES_CHOICES,
-        null=True,
-        blank=True,
-        default=None,
+    order = models.SmallIntegerField(
+        verbose_name='Порядок в списке правонарушений',
+        default=0,
     )
-    create_date = models.DateTimeField(
-        verbose_name='Дата создания отдела',
-        auto_now_add=True,
+    next_status = models.ForeignKey(
+        TypeStatus,
+        verbose_name='Статус карточки при отправке на проверку',
         null=True,
+        related_name='NextStatus',
+        on_delete=models.SET_NULL,
+    )
+    old_name = models.SmallIntegerField(
+        verbose_name='Старое название правонарушения',
+        choices=INFO_CHOICES,
+        default=1,
     )
 
     def __str__(self):
-        return '{0}'.format(self.title)
+        return f'{self.title}'
 
     class Meta:
-        ordering = 'title',
-        verbose_name = 'Отдел'
-        verbose_name_plural = 'Отделы'
+        ordering = 'order', 'title',
+        verbose_name = 'Вид правонарушения'
+        verbose_name_plural = 'Виды правонарушений'
+        managed = True
+
+
+######################################################################################################################
+
+
+class TypeNotify(models.Model):
+    id = models.AutoField(
+        primary_key=True,
+    )
+    title = models.CharField(
+        verbose_name='Способ направления информирования',
+        max_length=625,
+        default='',
+    )
+    order = models.SmallIntegerField(
+        verbose_name='Порядок в списке информирования',
+        default=0,
+    )
+    old_name = models.SmallIntegerField(
+        verbose_name='Старое название информирования',
+        choices=METHOD_CHOICES,
+        default=1,
+        null=False,
+        blank=False,
+    )
+
+    def __str__(self):
+        return f'{self.title}'
+
+    class Meta:
+        ordering = 'order', 'title',
+        verbose_name = 'Вид информирования'
+        verbose_name_plural = 'Виды информирований'
+        managed = True
+
+
+######################################################################################################################
+
+
+class TypeResult(models.Model):
+    id = models.AutoField(
+        primary_key=True,
+    )
+    title = models.CharField(
+        verbose_name='Название результата',
+        max_length=625,
+        default='',
+    )
+    order = models.SmallIntegerField(
+        verbose_name='Порядок в списке результатов',
+        default=0,
+    )
+    next_status = models.ForeignKey(
+        TypeStatus,
+        verbose_name='Статус карточки при выборе результата',
+        null=True,
+        related_name='NextStatusResult',
+        on_delete=models.SET_NULL,
+    )
+
+    def __str__(self):
+        return f'{self.title}'
+
+    class Meta:
+        ordering = 'order',
+        verbose_name = 'Вид результата'
+        verbose_name_plural = 'Виды результатов'
+        managed = True
+
+
+######################################################################################################################
+
+
+class TypeProtocol(models.Model):
+    id = models.AutoField(
+        primary_key=True,
+    )
+    title = models.CharField(
+        verbose_name='Название направления протокола',
+        max_length=625,
+        default='',
+    )
+    order = models.SmallIntegerField(
+        verbose_name='Порядок в списке результатов',
+        default=0,
+    )
+    next_status = models.ForeignKey(
+        TypeStatus,
+        verbose_name='Статус карточки при выборе результата',
+        null=True,
+        related_name='NextStatusProtocol',
+        on_delete=models.SET_NULL,
+    )
+
+    def __str__(self):
+        return f'{self.title}'
+
+    class Meta:
+        ordering = 'order',
+        verbose_name = 'Вид протокола'
+        verbose_name_plural = 'Виды протоколов'
         managed = True
 
 
@@ -159,7 +339,7 @@ class UserProfile(models.Model):
         return menu
 
     def __str__(self):
-        return '{0}'.format(self.user.get_full_name())
+        return f'{self.user.get_full_name()}'
 
     class Meta:
         ordering = 'blocked', 'user',
@@ -180,6 +360,13 @@ class Employer(models.Model):
         verbose_name='Автор карточки',
         null=True,
         related_name='Owner',
+        on_delete=models.SET_NULL,
+    )
+    owner_department = models.ForeignKey(
+        Department,
+        verbose_name='Владелец',
+        null=True,
+        related_name='owner_department',
         on_delete=models.SET_NULL,
     )
     Title = models.CharField(
@@ -247,7 +434,7 @@ class Employer(models.Model):
         default=0,
     )
     status_new = models.ForeignKey(
-        StatusEmployer,
+        TypeStatus,
         verbose_name='Статус новый',
         null=True,
         related_name='Status',
@@ -257,10 +444,12 @@ class Employer(models.Model):
         verbose_name='Результат',
         choices=RESULT_CHOICES,
         null=True,
+        blank=True,
     )
     SendDate = models.DateField(
         verbose_name='Дата направления в трудоустройство',
         null=True,
+        blank=True,
     )
     RegKatharsis = models.BooleanField(
         verbose_name='Зарегистрирован в ПК Катарсис',
@@ -274,6 +463,7 @@ class Employer(models.Model):
         UserProfile,
         verbose_name='Ответственное лицо',
         null=True,
+        blank=True,
         default=None,
         related_name='Response',
         on_delete=models.SET_NULL,
@@ -285,10 +475,21 @@ class Employer(models.Model):
     )
 
     def __str__(self):
-        return '{0}'.format(self.Title)
+        return f'{self.Title}'
 
-    def link(self):
-        return format_html('<a href="/emp/{0}/" class="btn btn-info btn-sm" role="button">Перейти</a>', self.id)
+    def get_list_status(self) -> list:
+        """
+        Список статусов карточки нарушителя
+        :return:
+        """
+        list_status = list(
+            TypeStatus.objects.filter(
+                id__in=list(
+                    StatusEmployer.objects.filter(employer=self).values_list('type_status', flat=True)
+                )
+            )
+        )
+        return list_status
 
     class Meta:
         ordering = 'Status', 'Title',
@@ -300,41 +501,60 @@ class Employer(models.Model):
 ######################################################################################################################
 
 
-class StatusRoute(models.Model):
+class StatusEmployer(models.Model):
     id = models.AutoField(
         primary_key=True,
     )
-    current_status = models.ForeignKey(
-        StatusEmployer,
-        verbose_name='Текущий статус',
+    employer = models.ForeignKey(
+        Employer,
+        verbose_name='Карточка работодателя-нарушителя',
         null=True,
-        related_name='CurrentStatus',
-        on_delete=models.SET_NULL,
+        related_name='Employer',
+        on_delete=models.CASCADE,
     )
-    next_status = models.ForeignKey(
-        StatusEmployer,
-        verbose_name='Следующий статус',
+    type_status = models.ForeignKey(
+        TypeStatus,
+        verbose_name='Статус карточки работодателя-нарушителя',
         null=True,
-        related_name='NextStatus',
+        related_name='TypeStatus',
         on_delete=models.SET_NULL,
-    )
-    turn = models.SmallIntegerField(
-        verbose_name='Номер выбора',
-        default=0,
-    )
-    level = models.SmallIntegerField(
-        verbose_name='Уровень выбора',
-        default=0,
     )
 
     def __str__(self):
-        return '[{0}][{1}] {2} - {3}'.format(self.level, self.turn, self.current_status, self.next_status)
+        return f'{self.employer} - {self.type_status}'
 
     class Meta:
-        ordering = 'level', 'turn',
-        verbose_name = 'Маршрут статуса'
-        verbose_name_plural = 'Маршруты статусов'
+        ordering = 'type_status', 'employer',
+        verbose_name = 'Статус карточки'
+        verbose_name_plural = 'Статусы карточек'
         managed = True
+
+
+######################################################################################################################
+
+
+# class StatusRoute(models.Model):
+#     id = models.AutoField(
+#         primary_key=True,
+#     )
+#     current_status = models.ForeignKey(
+#         TypeStatus,
+#         verbose_name='Текущий статус',
+#         null=True,
+#         blank=True,
+#         default=None,
+#         related_name='StatusCurrent',
+#         on_delete=models.SET_NULL,
+#     )
+#
+#     def __str__(self):
+#         return f'[{self.prev_status}] - {self.current_status} - [{self.next_status}]'
+#
+#     class Meta:
+#         ordering = 'current_status',
+#         verbose_name = 'Маршрут статуса'
+#         verbose_name_plural = 'Маршруты статусов'
+#         managed = True
 
 
 ######################################################################################################################
@@ -343,6 +563,13 @@ class StatusRoute(models.Model):
 class Info(models.Model):
     id = models.AutoField(
         primary_key=True,
+    )
+    type_violations = models.ForeignKey(
+        TypeViolations,
+        verbose_name='Наименование правонарушения',
+        null=True,
+        related_name='TypeViolations',
+        on_delete=models.SET_NULL,
     )
     EmpInfoID = models.ForeignKey(
         Employer,
@@ -375,7 +602,7 @@ class Info(models.Model):
     )
 
     def __str__(self):
-        return '{0} - {1}'.format(self.EmpInfoID, self.Name)
+        return f'{self.EmpInfoID} - {self.Name}'
 
     class Meta:
         ordering = 'CreateDate',
@@ -433,7 +660,7 @@ class TempEmployer(models.Model):
     )
 
     def __str__(self):
-        return '{0}'.format(self.Title)
+        return f'{self.Title}'
 
     class Meta:
         ordering = 'Title',
@@ -480,7 +707,7 @@ class Event(models.Model):
     )
 
     def __str__(self):
-        return '{0}'.format(self.Comment)
+        return f'{self.Comment}'
 
     class Meta:
         ordering = '-CreateDate',
@@ -496,10 +723,6 @@ class UpdateEmployer(models.Model):
     id = models.AutoField(
         primary_key=True,
     )
-    upload_date = models.DateField(
-        verbose_name='Дата загрузки работодателей из Катарсиса',
-        null=True,
-    )
     count_employer = models.CharField(
         verbose_name='Количество загруженных организаций из Катарсиса',
         max_length=16,
@@ -510,12 +733,17 @@ class UpdateEmployer(models.Model):
         max_length=8,
         default='',
     )
+    create_date = models.DateTimeField(
+        verbose_name='Дата создания записи',
+        auto_now_add=True,
+        null=True,
+    )
 
     def __str__(self):
-        return '{0}'.format(self.upload_date)
+        return f'{self.create_date}'
 
     class Meta:
-        ordering = '-upload_date',
+        ordering = '-create_date',
         verbose_name = 'Дата загрузки'
         verbose_name_plural = 'Даты загрузки'
         managed = True
@@ -565,7 +793,7 @@ class Message(models.Model):
     )
 
     def __str__(self):
-        return '{0} - {1}'.format(self.Recipient, self.Reading)
+        return f'{self.Recipient} - {self.Reading}'
 
     class Meta:
         ordering = 'Reading', '-CreateDate',
@@ -580,6 +808,13 @@ class Message(models.Model):
 class Notify(models.Model):
     id = models.AutoField(
         primary_key=True,
+    )
+    type_notify = models.ForeignKey(
+        TypeNotify,
+        verbose_name='Наименование информирования',
+        null=True,
+        related_name='TypeNotify',
+        on_delete=models.SET_NULL,
     )
     EmpNotifyID = models.ForeignKey(
         Employer,
@@ -625,7 +860,7 @@ class Notify(models.Model):
     )
 
     def __str__(self):
-        return '{0} - {1}'.format(self.EmpNotifyID, self.Method)
+        return f'{self.EmpNotifyID} - {self.Method}'
 
     class Meta:
         ordering = 'NotifyDate',
@@ -661,7 +896,7 @@ class Configure(models.Model):
     )
 
     def __str__(self):
-        return '{0}'.format(self.title)
+        return f'{self.title}'
 
     class Meta:
         ordering = 'title',
@@ -693,13 +928,54 @@ class Widget(models.Model):
     )
 
     def __str__(self):
-        return '{0}'.format(self.title)
+        return f'{self.title}'
 
     class Meta:
         ordering = 'order', 'title',
         verbose_name = 'Виджет'
         verbose_name_plural = 'Виджеты'
         managed = True
+
+
+######################################################################################################################
+
+
+# class ActionSteps(models.Model):
+#     id = models.AutoField(
+#         primary_key=True,
+#     )
+#     type_status = models.ForeignKey(
+#         TypeStatus,
+#         verbose_name='Тип статуса',
+#         null=True,
+#         blank=True,
+#         default=None,
+#         related_name='StepStatus',
+#         on_delete=models.CASCADE,
+#     )
+#     department = models.ForeignKey(
+#         Department,
+#         verbose_name='Организация или отдел которые имеют доступ к выполнению данного шага',
+#         null=True,
+#         blank=True,
+#         default=None,
+#         related_name='DepartmentAccess',
+#         on_delete=models.CASCADE,
+#     )
+#     template_path = models.CharField(
+#         verbose_name='Путь до шаблона с формой шага карточки',
+#         max_length=124,
+#         default='',
+#     )
+#
+#     def __str__(self):
+#         return f'{self.template_path} - {self.type_status} [{self.department}]'
+#
+#     class Meta:
+#         ordering = 'template_path', 'type_status',
+#         verbose_name = 'Шаг действия'
+#         verbose_name_plural ='Шаги действий'
+#         managed = True
 
 
 ######################################################################################################################
@@ -717,7 +993,7 @@ class WidgetStatus(models.Model):
         on_delete=models.CASCADE,
     )
     status = models.ForeignKey(
-        StatusEmployer,
+        TypeStatus,
         verbose_name='Статус фильтра',
         null=True,
         related_name='StatusWidget',
@@ -729,7 +1005,7 @@ class WidgetStatus(models.Model):
     )
 
     def __str__(self):
-        return '{0} - {1}'.format(self.widget, self.status)
+        return f'{self.widget} - {self.status}'
 
     class Meta:
         ordering = 'widget', 'status',

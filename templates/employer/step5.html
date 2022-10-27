@@ -1,0 +1,9 @@
+                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                {{ form_notice }}
+                                <input type="hidden" name="comment" value="Добавлено уведомление о направлении протокола об административном правонарушении работодателю">
+                                <input type="hidden" name="status" value=6>
+                                <button type="submit" class="btn btn-primary">Добавить уведомление о направлении протокола об административном правонарушении работодателю</button>
+                            </div>
+                        </form>

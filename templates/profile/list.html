@@ -20,6 +20,14 @@
             </div>
             <div class="card-body">
                 <table class="table table-hover table-sm table-borderless">
+                    <thead>
+                    <tr>
+                        <th scope="col">Пользователь</th>
+                        <th scope="col">Организация или отдел</th>
+                        <th scope="col" class="text-center">Статус</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
                     <tbody>
                     {% for profile in list_profile %}
                         <tr>
@@ -34,7 +42,7 @@
                                     -
                                 {% endif %}
                             </td>
-                            <td class="text-right align-middle">
+                            <td class="text-center align-middle">
                                 {% if profile.blocked %}
                                     <i class="fas fa-times" title="Заблокированный пользователь"></i>
                                 {% else %}

@@ -1,9 +1,13 @@
 from django.contrib import admin
-from Main.models import StatusEmployer, UserProfile, TempEmployer, Employer, Event, Info, Notify, Message, \
-    UpdateEmployer, StatusRoute, Configure, Widget, WidgetStatus, Department
+from Main.models import TypeStatus, UserProfile, TypeViolations, TypeNotify, TempEmployer, Employer, StatusEmployer, \
+    Event, Info, Notify, Message, UpdateEmployer, Configure, Widget, WidgetStatus, Department, TypeResult
 
-admin.site.register(StatusEmployer)
+admin.site.register(TypeStatus)
+admin.site.register(Department)
+admin.site.register(TypeViolations)
+admin.site.register(TypeNotify)
 admin.site.register(Employer)
+admin.site.register(StatusEmployer)
 admin.site.register(UserProfile)
 admin.site.register(TempEmployer)
 admin.site.register(Event)
@@ -11,8 +15,7 @@ admin.site.register(Info)
 admin.site.register(Notify)
 admin.site.register(Message)
 admin.site.register(UpdateEmployer)
-admin.site.register(StatusRoute)
 admin.site.register(Configure)
 admin.site.register(Widget)
 admin.site.register(WidgetStatus)
-admin.site.register(Department)
+admin.site.register(TypeResult)

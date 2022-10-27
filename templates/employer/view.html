@@ -18,7 +18,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <div class="card">
+                <div class="card mb-3">
                     <div class="card-header alert-{{ employer.status_new.color }}">
                         <h4>{{ employer.Title }}</h4>
                     </div>
@@ -61,39 +61,32 @@
                                     Вид административного правонарушения:
                                 </dt>
                                 <dd class="col-sm-8">
-                                    <ul class="list-group list-group-flush">
-                                        {% for inf in list_information %}
-                                            <li class="list-group-item bg-light">
-                                                {{ inf.get_Name_display }} {% if inf.Comment != '' %}(Комментарий: {{ inf.Comment }}){% endif %}{% if inf.Attache %} <a href="{{ inf.Attache.url }}">Скачать приложение</a> {% endif %}
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
+                                    {% for inf in list_information %}
+                                        <div class="alert bg-light">
+                                            {{ inf.type_violations }} {% if inf.Comment != '' %}(Комментарий: {{ inf.Comment }}){% endif %}{% if inf.Attache %} <a href="{{ inf.Attache.url }}">Скачать приложение</a> {% endif %}
+                                        </div>
+                                    {% endfor %}
                                 </dd>
                             </dl>
                             <hr class="my-2">
                             <dl class="row">
                                 <dt class="col-sm-4">
-                                    Дата информирования работодателя центром занятости о необходимости предоставления информации о наличии свободных рабочих мест и вакантных должностей:
+                                    Дата информирования работодателя центром занятости о необходимости предоставления
+                                    информации о наличии свободных рабочих мест и вакантных должностей:
                                 </dt>
                                 <dd class="col-sm-8">
-                                    <ul class="list-group list-group-flush">
-                                        {% for notify in list_notify %}
-                                            <li class="list-group-item bg-light">
-                                                {% if notify.NotifyDate %}
-                                                    {{ notify.NotifyDate }}
-                                                {% else %}
-                                                    Дата не указана
-                                                {% endif %}
-                                                , {{ notify.get_Method_display }} {% if notify.Comment != '' %}(Комментарий: {{ notify.Comment }}){% endif %}{% if notify.Attache %} <a href="{{ notify.Attache.url }}">Скачать приложение</a> {% endif %} - {{ notify.CreateDate }}, {% firstof notify.Owner.user.get_full_name notify.Owner.user %}
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
+                                    {% for notify in list_notify %}
+                                        <div class="alert bg-light">
+                                            {% if notify.NotifyDate %}{{ notify.NotifyDate }}{% else %}Дата не указана{% endif %}, {{ notify.type_notify }} {% if notify.Comment != '' %}(Комментарий: {{ notify.Comment }}){% endif %}{% if notify.Attache %} <a href="{{ notify.Attache.url }}">Скачать приложение</a> {% endif %} - {{ notify.CreateDate }}, {% firstof notify.Owner.user.get_full_name notify.Owner.user %}
+                                        </div>
+                                    {% endfor %}
                                 </dd>
                             </dl>
                             <hr class="my-2">
                             <dl class="row">
                                 <dt class="col-sm-4">
-                                    Дата направления информации в департамент занятости населения Министерства труда и социального развития Омской области:
+                                    Дата направления информации в департамент занятости населения Министерства труда и
+                                    социального развития Омской области:
                                 </dt>
                                 <dd class="col-sm-8">
                                     {% if employer.SendDate %}{{ employer.SendDate }}{% endif %}
@@ -113,136 +106,18 @@
                             <dd class="col-sm-8"><a href="https://egrul.nalog.ru/" target="_blank">Перейти</a></dd>
                         </dl>
                     </div>
+                    {% if step %}
+                        <div class="card-footer">
+                            {% include step %}
+                        </div>
+                    {% endif %}
                 </div>
-                {% if profile.role == 1 %}
-                    {% if employer.Status == 0 or employer.Status == 1 %}
-                        {% if profile.id == employer.Owner.id %}
-                            <br />
-                            <a class="btn btn-primary" href="{% url 'employer_edit' employer.id %}" role="button">Редактировать</a>
-                            <br />
-                        {% endif %}
-                    {% endif %}
-                {% endif %}
-                {% if profile.role == 2 %}
-                    {% if employer.Status == 2 %}
-                        <br />
-                        <form class="form" method="post" action="{% url 'employer_audit' employer.id %}">
-                            {% csrf_token %}
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <button type="submit" name='accept' class="btn btn-success">Принято</button>
-                                    <button type="submit" name='return' class="btn btn-warning">Возврат для доработки по причине:</button>
-                                </div>
-                                {{ form_return.return_result }}
-                                {{ form_return.return_comment }}
-                            </div>
-                        </form>
-                    {% endif %}
-                {% endif %}
-                {% if profile.role == 3 %}
-                    {% if employer.Status == 3 %}
-                        <br />
-                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="form-row">
-                                {{ form_notice }}
-                                <input type="hidden" name="comment" value="Добавлено уведомление о вызове на составление протокола об административном нарушении">
-                                <input type="hidden" name="status" value=4>
-                                <button type="submit" class="btn btn-primary">Добавить уведомление о вызове на составление протокола об административном нарушении</button>
-                            </div>
-                        </form>
-                    {% endif %}
-                    {% if employer.Status == 4 %}
-                        <br />
-                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="form-row">
-                                {{ protocol_form }}
-                                <input type="hidden" name="comment" value="Получение уведомления">
-                                <input type="hidden" name="status" value=5>
-                                <button type="submit" class="btn btn-primary">Отправить</button>
-                            </div>
-                        </form>
-                    {% endif %}
-                    {% if employer.Status == 5 %}
-                        <br />
-                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="form-row">
-                                {{ notice_form }}
-                                <input type="hidden" name="comment" value="Добавлен протокол об административном правонарушении">
-                                <input type="hidden" name="status" value=10>
-                                <button type="submit" class="btn btn-primary">Добавить протокол об административном правонарушении</button>
-                            </div>
-                        </form>
-                    {% endif %}
-                    {% if employer.Status == 10 %}
-                        <br />
-                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="form-row">
-                                {{ notice_form }}
-                                <input type="hidden" name="comment" value="Добавлено уведомление о направлении протокола об административном правонарушении работодателю">
-                                <input type="hidden" name="status" value=6>
-                                <button type="submit" class="btn btn-primary">Добавить уведомление о направлении протокола об административном правонарушении работодателю</button>
-                            </div>
-                        </form>
-                    {% endif %}
-                    {% if employer.Status == 6 %}
-                        <br />
-                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="form-row">
-                                {{ notice_form }}
-                                <input type="hidden" name="comment" value="Добавлен материал об административном нарушении для рассмотрения Мировым судьей">
-                                <input type="hidden" name="status" value=7>
-                                <button type="submit" class="btn btn-primary">Добавить заявление Мировому судье о рассмотрении протокола</button>
-                            </div>
-                        </form>
-                    {% endif %}
-                    {% if employer.Status == 7 %}
-                        <br />
-                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="form-group mb-2">
-                                {{ result_form }}
-                            </div>
-                            <div class="form-group mx-sm-3 mb-2">
-                                {{ notice_form }}
-                                <input type="hidden" name="comment" value="Добавлен результат рассмотрения протокола об административном правонарушении Мирововым судьей">
-                                <input type="hidden" name="status" value=9>
-                                <button type="submit" class="btn btn-primary">Добавить результат рассмотрения протокола Мирововым судьей</button>
-                            </div>
-                        </form>
-                    {% endif %}
-                    {% if employer.Status == 11 %}
-                        <br />
-                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
-                            {% csrf_token %}
-                            <div class="form-row">
-                                {{ notice_form }}
-                                <input type="hidden" name="comment" value="Добавлен результат исполнения постановления об административном нарушении">
-                                <input type="hidden" name="status" value=9>
-                                <button type="submit" class="btn btn-primary">Добавить результат исполнения постановления об административном нарушении</button>
-                            </div>
-                        </form>
-                    {% endif %}
-                {% endif %}
-                <br />
-                {% for i in list_existing_employer %}
-                    {% if i.id != employer.id %}
-                        <div class="alert {% if i.Status == 9 %}alert-success{% else %}alert-danger{% endif %} small" role="alert">Карточка предприятия с таким же ИНН существует. <a href="{% url 'employer_view' i.id %}" class="alert-link">{{ i.Title }}</a> {{ i.get_Status_display }}</div>
-                    {% endif %}
-                {% endfor %}
-                {% for event in list_event %}
-                    <div class="alert alert-dark small" role="alert">
-                        {{ event.Comment }} {% if event.Attache %}- <a href="{{ event.Attache.url }}">Скачать</a> {% endif %}- ({{ event.CreateDate }}, {% firstof event.Owner.user.get_full_name event.Owner.user %})
-                    </div>
-                {% endfor %}
+                {% include "employer/list_existing_employer.html" %}
+                {% include "employer/list_event.html" %}
             </div>
         </div>
     </main>
-    {% if profile.role == 3 and employer.Status != 9 and employer.Status != 12 %}
+{#    {% if profile.role == 3 and employer.Status != 9 and employer.Status != 12 %}#}
         <!-- Окно запроса подтверждения на закрытие карточки -->
         <div class="modal fade" id="ModalClose" tabindex="-1" role="dialog" aria-labelledby="ModalCloseTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -253,7 +128,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form class="form" method="post" action='{% url 'close' employer.id %}'>
+                    <form class="form" method="post" action='{% url 'employer_close' employer.id %}'>
                         {% csrf_token %}
                         <div class="modal-body">
                             Вы действительно хотите закрыть карточку предприятия {{ employer.Title }}?
@@ -283,11 +158,11 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-success" data-dismiss="modal">Не удалять</button>
-                        <a class="btn btn-danger" href="{% url 'delete' employer.id %}" role="button">Удалить</a>
+                        <a class="btn btn-danger" href="{% url 'employer_delete' employer.id %}" role="button">Удалить</a>
                     </div>
                 </div>
             </div>
         </div>
         <!-- /Окно запроса подтверждения на удаление карточки -->
-    {% endif %}
+{#    {% endif %}#}
 {% endblock %}

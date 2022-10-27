@@ -1,0 +1,14 @@
+                {% if list_existing_employer %}
+                    <div class="card mb-3">
+                        <div class="card-header alert-danger">
+                            <h5>Карточки предприятия нарушителя с таким же ИНН:</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for ex_employer in list_existing_employer %}
+                                <div class="alert alert-secondary small" role="alert">
+                                    <a href="{% url 'employer_view' ex_employer.id %}" class="alert-link">{{ ex_employer.Title }}</a> - {{ ex_employer.get_Status_display }} - Создана {{ ex_employer.CreateDate|date }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}

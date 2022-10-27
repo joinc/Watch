@@ -1,0 +1,11 @@
+                        <form class="form-inline mb-0" method="post" action="{% url 'employer_audit' employer.id %}">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <button type="submit" name='accept' class="btn btn-success">Принято</button>
+                                    <button type="submit" name='return' class="btn btn-warning">Возврат для доработки по причине:</button>
+                                </div>
+                                {{ form_return.return_result }}
+                                {{ form_return.return_comment }}
+                            </div>
+                        </form>

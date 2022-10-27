@@ -8,19 +8,25 @@ from django.conf import settings
 ######################################################################################################################
 
 
-def message_create(employer_id, group, text, sender):
+def message_create(employer, group, text, sender):
     """
     Создание сообщения
-    :param employer_id:
+    :param employer:
     :param group:
     :param text:
     :param sender:
     :return:
     """
-    employer = get_object_or_404(Employer, id=employer_id)
     if group == 0:
-        message = Message(EmpMessageID=employer, Recipient=employer.Owner, Reading=False, Text=text, Sender=sender, )
-        message.save()
+        Message.objects.create(
+            EmpMessageID=employer,
+            Recipient=employer.Owner,
+            Reading=False,
+            Text=text,
+            Sender=sender,
+        )
+        # message = Message(EmpMessageID=employer, Recipient=employer.Owner, Reading=False, Text=text, Sender=sender, )
+        # message.save()
 
 
 ######################################################################################################################

@@ -7,16 +7,16 @@ from Main.models import UserProfile, Event
 ######################################################################################################################
 
 
-def create_event(employer_id, profile, comment, attache):
+def create_event(employer, profile, comment, attache):
     """
 
-    :param employer_id:
+    :param employer:
     :param profile:
     :param comment:
     :param attache:
     :return:
     """
-    event = Event(EmpEventID=employer_id, Owner=profile, Comment=comment)
+    event = Event.objects.create(EmpEventID=employer, Owner=profile, Comment=comment)
     if attache:
         event.Attache.save(attache.name, attache)
     else:
