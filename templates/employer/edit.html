@@ -129,10 +129,8 @@
                                     Сохранить карточку предприятия и отправить на проверку
                                 </button>
                             {% endif %}
-                            {% if employer.Status == 0 %}
-                                <button type="submit" class="btn btn-primary">Сохранить черновик</button>
-                                <button type="button" class="btn btn-danger" onclick="DeleteModal('Удаление черновика карточки предприятия', '{{ form.title.value }}', '{% url 'employer_delete' employer.id %}')" title="Удалить черновик">Удалить черновик</button>
-                            {% endif %}
+                            <button type="submit" class="btn btn-primary">Сохранить черновик</button>
+                            <button type="button" class="btn btn-danger" onclick="DeleteModal('Удаление черновика карточки предприятия', '{{ employer }}', '{% url 'employer_delete' employer.id %}')" title="Удалить черновик">Удалить черновик</button>
                         </div>
                     </div>
                 </form>

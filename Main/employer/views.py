@@ -46,10 +46,12 @@ def employer_find(request):
     """
     if request.POST:
         form_search = FormSearchEmployer(request.POST)
-        find = form_search['find'].value()
-        czn = form_search['czn'].value()
-        status = form_search['status'].value()
-        count_employer = get_count_find_employer(find=find, czn=czn, list_status=status, )
+        # find = form_search['find'].value()
+        find = request.POST.get('find', None)
+        czn = request.POST.get('czn', None)
+        status = request.POST.get('status', None)
+        list_status = list(TypeStatus.objects.filter(id=status)) if status else None
+        count_employer = get_count_find_employer(find=find, czn=czn, list_status=list_status, )
         context = {
             'current_profile': get_profile(user=request.user),
             'title': 'Поиск',
@@ -66,10 +68,12 @@ def employer_find(request):
         number_page = int(request.GET.get('page', 1))
         start_count = (number_page - 1) * settings.COUNT_LIST
         stop_count = start_count + settings.COUNT_LIST
+        status = request.GET.get('emp_status', None)
+        list_status = list(TypeStatus.objects.filter(id=status)) if status else None
         list_employer = get_list_employer(
             find=request.GET.get('emp_find', None),
             czn=request.GET.get('emp_czn', None),
-            list_status=request.GET.get('emp_status', None),
+            list_status=list_status,
             start=start_count,
             stop=stop_count,
         )
@@ -253,7 +257,7 @@ def employer_audit(request, employer_id):
                 accept_message = 'Карточка предприятия согласована, направлена для составления протокола об ' \
                                  'административном правонарушении'
             else:
-                accept_message = 'Карточка предприятия согласована'
+                accept_message = f'Карточка предприятия согласована. {current_profile.department}'
             create_event(employer=employer, profile=current_profile, comment=accept_message, attache=None)
             message_create(employer=employer, group=0, text=accept_message, sender=current_profile)
         elif 'return' in request.POST:
@@ -417,9 +421,6 @@ def event_add(request, employer_id):
         if 'comment' in request.POST:
             comment = request.POST['comment']
             print(f'{comment}')
-        if 'status' in request.POST:
-            ...
-            # status = request.POST['status']
         if request.FILES:
             event_file = request.FILES['notice']
 

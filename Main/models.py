@@ -217,6 +217,11 @@ class TypeResult(models.Model):
         related_name='NextStatusResult',
         on_delete=models.SET_NULL,
     )
+    comment = models.CharField(
+        verbose_name='Комментарий пр выборе данного результата',
+        max_length=256,
+        default='',
+    )
 
     def __str__(self):
         return f'{self.title}'
@@ -237,7 +242,7 @@ class TypeProtocol(models.Model):
     )
     title = models.CharField(
         verbose_name='Название направления протокола',
-        max_length=625,
+        max_length=256,
         default='',
     )
     order = models.SmallIntegerField(
@@ -250,6 +255,11 @@ class TypeProtocol(models.Model):
         null=True,
         related_name='NextStatusProtocol',
         on_delete=models.SET_NULL,
+    )
+    comment = models.CharField(
+        verbose_name='Комментарий пр выборе данного протокола',
+        max_length=512,
+        default='',
     )
 
     def __str__(self):
@@ -492,7 +502,7 @@ class Employer(models.Model):
         return list_status
 
     class Meta:
-        ordering = 'Status', 'Title',
+        ordering = '-id',
         verbose_name = 'Карточка работодателя-нарушителя'
         verbose_name_plural = 'Карточки работодателей-нарушителей'
         managed = True

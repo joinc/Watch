@@ -1,4 +1,4 @@
-                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
+                        <form class="form-inline mb-0" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="form-row">
                                 {{ form_notice }}

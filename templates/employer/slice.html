@@ -2,7 +2,7 @@
                 <tr>
                     <td class="align-middle" title="{{ employer.Title }}">{{ employer.Title|truncatechars:40 }}</td>
                     <td class="align-middle">{{ employer.owner_department }}</td>
-                    <td class="align-middle"><ul class="my-0">{% for status in employer.list_status %}<li>{{ status }}</li>{% endfor %}</ul></td>
+                    <td class="align-middle"><ul class="my-0">{% for status in employer.get_list_status %}<li>{{ status }}</li>{% endfor %}</ul></td>
                     <td class="align-middle text-right"><a href="{% url 'employer_view' employer.id %}" class="btn btn-info btn-sm" title="Перейти в карточку" role="button">Перейти в карточку</a></td>
                 </tr>
             {% endfor %}

@@ -1,4 +1,4 @@
-                        <form class="form-inline" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
+                        <form class="form-inline mb-0" method="post" action='{% url 'event' employer.id %}' enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="form-group mb-2">
                                 {{ form_result }}
@@ -7,6 +7,6 @@
                                 {{ form_notice }}
                                 <input type="hidden" name="comment" value="Добавлен результат рассмотрения протокола об административном правонарушении Мирововым судьей">
                                 <input type="hidden" name="status" value=9>
-                                <button type="submit" class="btn btn-primary">Добавить результат рассмотрения протокола Мирововым судьей</button>
+                                <button type="submit" class="btn btn-primary">Добавить результат рассмотрения протокола Мировым судьей</button>
                             </div>
                         </form>
